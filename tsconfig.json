@@ -7,7 +7,11 @@
     "disableSolutionSearching": false,
     "disableReferencedProjectLoad": false,
     "target": "ESNext",
-    "lib": [],
+    "lib": [
+      "DOM",
+      "DOM.Iterable",
+      "ESNext"
+    ],
     "jsx": "react-jsx",
     "experimentalDecorators": false,
     "emitDecoratorMetadata": false,
@@ -29,7 +33,6 @@
     },
     "rootDirs": [],
     "typeRoots": [],
-    "types": [],
     "allowUmdGlobalAccess": false,
     "moduleSuffixes": [],
     "allowImportingTsExtensions": false,
