@@ -1,0 +1,70 @@
+{
+  "common": {
+    "home": "홈",
+    "courses": "강좌",
+    "login": "로그인",
+    "register": "회원가입",
+    "logout": "로그아웃",
+    "dashboard": "대시보드",
+    "profile": "프로필",
+    "settings": "설정",
+    "save": "저장",
+    "cancel": "취소",
+    "delete": "삭제",
+    "edit": "편집",
+    "search": "검색",
+    "filter": "필터",
+    "loading": "로딩 중...",
+    "noResults": "결과 없음"
+  },
+  "nav": {
+    "myCourses": "내 강좌",
+    "browse": "강좌 탐색",
+    "certificates": "수료증",
+    "bookmarks": "북마크",
+    "wishlist": "위시리스트",
+    "analytics": "분석",
+    "leaderboard": "순위표"
+  },
+  "auth": {
+    "loginTitle": "다시 오신 것을 환영합니다",
+    "registerTitle": "계정 만들기",
+    "forgotPassword": "비밀번호를 잊으셨나요?",
+    "rememberMe": "로그인 상태 유지",
+    "noAccount": "계정이 없으신가요?",
+    "haveAccount": "이미 계정이 있으신가요?",
+    "signUp": "회원가입",
+    "signIn": "로그인",
+    "email": "이메일",
+    "password": "비밀번호",
+    "confirmPassword": "비밀번호 확인",
+    "name": "이름",
+    "iWantTo": "나는",
+    "learnSkills": "새로운 기술 배우기 (학습자)",
+    "teachOthers": "다른 사람 가르치기 (강사)"
+  },
+  "course": {
+    "enrollNow": "지금 등록",
+    "startLearning": "학습 시작",
+    "viewDetails": "상세 보기",
+    "lessons": "강의",
+    "students": "학생",
+    "rating": "평점",
+    "duration": "기간",
+    "level": "수준",
+    "category": "카테고리",
+    "instructor": "강사",
+    "overview": "개요",
+    "curriculum": "커리큘럼",
+    "reviews": "리뷰",
+    "whatYouWillLearn": "배울 내용"
+  },
+  "payments": {
+    "price": "가격",
+    "total": "합계",
+    "checkout": "결제",
+    "payNow": "지금 결제",
+    "paymentSuccess": "결제 성공",
+    "paymentFailed": "결제 실패"
+  }
+}

@@ -1,0 +1,70 @@
+{
+  "common": {
+    "home": "Home",
+    "courses": "Courses",
+    "login": "Login",
+    "register": "Register",
+    "logout": "Logout",
+    "dashboard": "Dashboard",
+    "profile": "Profile",
+    "settings": "Settings",
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "search": "Search",
+    "filter": "Filter",
+    "loading": "Loading...",
+    "noResults": "No Results Found"
+  },
+  "nav": {
+    "myCourses": "My Courses",
+    "browse": "Browse Courses",
+    "certificates": "Certificates",
+    "bookmarks": "Bookmarks",
+    "wishlist": "Wishlist",
+    "analytics": "Analytics",
+    "leaderboard": "Leaderboard"
+  },
+  "auth": {
+    "loginTitle": "Welcome Back",
+    "registerTitle": "Create Account",
+    "forgotPassword": "Forgot Password?",
+    "rememberMe": "Remember Me",
+    "noAccount": "Don't Have An Account?",
+    "haveAccount": "Already Have An Account?",
+    "signUp": "Sign Up",
+    "signIn": "Sign In",
+    "email": "Email",
+    "password": "Password",
+    "confirmPassword": "Confirm Password",
+    "name": "Full Name",
+    "iWantTo": "I Want To",
+    "learnSkills": "Learn New Skills (Learner)",
+    "teachOthers": "Teach Others (Instructor)"
+  },
+  "course": {
+    "enrollNow": "Enroll Now",
+    "startLearning": "Start Learning",
+    "viewDetails": "View Details",
+    "lessons": "Lessons",
+    "students": "Students",
+    "rating": "Rating",
+    "duration": "Duration",
+    "level": "Level",
+    "category": "Category",
+    "instructor": "Instructor",
+    "overview": "Overview",
+    "curriculum": "Curriculum",
+    "reviews": "Reviews",
+    "whatYouWillLearn": "What You Will Learn"
+  },
+  "payments": {
+    "price": "Price",
+    "total": "Total",
+    "checkout": "Checkout",
+    "payNow": "Pay Now",
+    "paymentSuccess": "Payment Successful",
+    "paymentFailed": "Payment Failed"
+  }
+}

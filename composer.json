@@ -40,7 +40,7 @@
     }
   },
   "scripts": {
-    "setup": [
+    "setupProject": [
       "composer install",
       "@php -r \"file_exists('.env') || copy('.env.example', '.env');\"",
       "@php artisan key:generate",
@@ -48,16 +48,16 @@
       "npm install",
       "npm run build"
     ],
-    "dev": [
+    "runDev": [
       "Composer\\Config::disableProcessTimeout",
       "npx concurrently -c \"#93c5fd,#c4b5fd,#fdba74\" \"php artisan serve\" \"php artisan queue:listen --tries=1\" \"npm run dev\" --names='server,queue,vite'"
     ],
-    "devSsr": [
-      "npm run build:ssr",
+    "runDevSsr": [
+      "npm run buildSsr",
       "Composer\\Config::disableProcessTimeout",
       "npx concurrently -c \"#93c5fd,#c4b5fd,#fb7185,#fdba74\" \"php artisan serve\" \"php artisan queue:listen --tries=1\" \"php artisan pail --timeout=0\" \"php artisan inertia:start-ssr\" --names=server,queue,logs,ssr --kill-others"
     ],
-    "test": [
+    "runTest": [
       "@php artisan config:clear --ansi",
       "@php artisan test"
     ],

@@ -1,0 +1,70 @@
+{
+  "common": {
+    "home": "Startseite",
+    "courses": "Kurse",
+    "login": "Anmelden",
+    "register": "Registrieren",
+    "logout": "Abmelden",
+    "dashboard": "Dashboard",
+    "profile": "Profil",
+    "settings": "Einstellungen",
+    "save": "Speichern",
+    "cancel": "Abbrechen",
+    "delete": "Löschen",
+    "edit": "Bearbeiten",
+    "search": "Suchen",
+    "filter": "Filter",
+    "loading": "Wird Geladen...",
+    "noResults": "Keine Ergebnisse Gefunden"
+  },
+  "nav": {
+    "myCourses": "Meine Kurse",
+    "browse": "Kurse Durchsuchen",
+    "certificates": "Zertifikate",
+    "bookmarks": "Lesezeichen",
+    "wishlist": "Wunschliste",
+    "analytics": "Analytik",
+    "leaderboard": "Bestenliste"
+  },
+  "auth": {
+    "loginTitle": "Willkommen Zurück",
+    "registerTitle": "Konto Erstellen",
+    "forgotPassword": "Passwort Vergessen?",
+    "rememberMe": "Angemeldet Bleiben",
+    "noAccount": "Noch Kein Konto?",
+    "haveAccount": "Bereits Ein Konto?",
+    "signUp": "Registrieren",
+    "signIn": "Anmelden",
+    "email": "E-Mail",
+    "password": "Passwort",
+    "confirmPassword": "Passwort Bestätigen",
+    "name": "Vollständiger Name",
+    "iWantTo": "Ich Möchte",
+    "learnSkills": "Neue Fähigkeiten Lernen (Lernender)",
+    "teachOthers": "Andere Unterrichten (Dozent)"
+  },
+  "course": {
+    "enrollNow": "Jetzt Einschreiben",
+    "startLearning": "Lernen Beginnen",
+    "viewDetails": "Details Anzeigen",
+    "lessons": "Lektionen",
+    "students": "Studenten",
+    "rating": "Bewertung",
+    "duration": "Dauer",
+    "level": "Niveau",
+    "category": "Kategorie",
+    "instructor": "Dozent",
+    "overview": "Übersicht",
+    "curriculum": "Lehrplan",
+    "reviews": "Bewertungen",
+    "whatYouWillLearn": "Was Sie Lernen Werden"
+  },
+  "payments": {
+    "price": "Preis",
+    "total": "Gesamt",
+    "checkout": "Zur Kasse",
+    "payNow": "Jetzt Bezahlen",
+    "paymentSuccess": "Zahlung Erfolgreich",
+    "paymentFailed": "Zahlung Fehlgeschlagen"
+  }
+}
