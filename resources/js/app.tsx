@@ -1,3 +1,4 @@
+/// <reference types="./vite.d.ts" />
 import './bootstrap';
 import '../css/app.css';
 import { createInertiaApp } from '@inertiajs/react';
