@@ -3,7 +3,25 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api;
 use Inertia\Inertia;
 Route::get('/', function () {
-  return Inertia::render('Home', ['user' => auth()->user()]);
+  $featuredCourses = \App\Models\Course::with(['instructor', 'category'])
+    ->where('isPublished', true)
+    ->orderBy('averageRating', 'desc')
+    ->limit(6)
+    ->get()
+    ->map(function ($course) {
+      return [
+        'courseId' => $course->courseId,
+        'courseTitle' => $course->courseTitle,
+        'category' => $course->category,
+        'instructor' => $course->instructor,
+        'price' => (float) $course->simulatedPrice,
+        'rating' => (float) $course->averageRating,
+      ];
+    });
+  return Inertia::render('Home', [
+    'user' => auth()->user(),
+    'featuredCourses' => $featuredCourses
+  ]);
 });
 Route::get('/login', [Api\AuthController::class, 'showLogin'])->name('login');
 Route::post('/login', [Api\AuthController::class, 'login']);
@@ -18,12 +36,21 @@ Route::get('/password/reset/{token}', [Api\ForgotPasswordController::class, 'sho
 Route::post('/password/reset', [Api\ForgotPasswordController::class, 'reset'])->name('password.update');
 Route::get('/email/verify/{token}', [Api\EmailVerificationController::class, 'verify'])->name('verification.verify');
 Route::get('/courses', function () {
-  $courses = \App\Models\Course::with(['instructor', 'category'])->where('isPublished', true)->paginate(12);
+  $courses = \App\Models\Course::with(['instructor', 'category'])
+    ->where('isPublished', true)
+    ->paginate(12)
+    ->through(function ($course) {
+      $course->simulatedPrice = (float) $course->simulatedPrice;
+      $course->averageRating = (float) $course->averageRating;
+      return $course;
+    });
   $categories = \App\Models\Category::all();
   return Inertia::render('CourseCatalog', ['courses' => $courses, 'categories' => $categories, 'user' => auth()->user()]);
 });
 Route::get('/courses/{courseId}', function ($courseId) {
   $course = \App\Models\Course::with(['instructor', 'category', 'modules.lessons'])->findOrFail($courseId);
+  $course->simulatedPrice = (float) $course->simulatedPrice;
+  $course->averageRating = (float) $course->averageRating;
   $enrollmentCount = $course->enrollments()->where('isPaid', true)->count();
   return Inertia::render('CourseDetail', ['course' => $course, 'enrollmentCount' => $enrollmentCount, 'averageRating' => $course->averageRating, 'user' => auth()->user()]);
 });
