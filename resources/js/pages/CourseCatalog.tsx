@@ -128,7 +128,7 @@ export default function CourseCatalog({ courses, categories, user }: CourseCatal
                       </div>
                       <div className="flex items-center gap-1">
                         <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-                        {course.averageRating.toFixed(1)}
+                        {(typeof course.averageRating === 'number' ? course.averageRating : parseFloat(course.averageRating || '0')).toFixed(1)}
                       </div>
                     </div>
                     <div className="flex items-center justify-between pt-4 border-t border-slate-200 dark:border-slate-700">
