@@ -29,19 +29,10 @@ return new class extends Migration
       $table->timestamp('updatedAt')->nullable();
       $table->index('token');
     });
-    Schema::create('sessions', function (Blueprint $table) {
-      $table->string('id')->primary();
-      $table->foreignId('userId')->nullable()->index();
-      $table->string('ipAddress', 45)->nullable();
-      $table->string('userAgent')->nullable();
-      $table->longText('payload');
-      $table->integer('lastActivity')->index();
-    });
   }
   public function down(): void
   {
     Schema::dropIfExists('users');
     Schema::dropIfExists('passwordResetTokens');
-    Schema::dropIfExists('sessions');
   }
 };
