@@ -13,8 +13,10 @@ class SecurityHeadersMiddleware
     $response->headers->set('X-XSS-Protection', '1; mode=block');
     $response->headers->set('Referrer-Policy', 'strict-origin-when-cross-origin');
     $response->headers->set('Permissions-Policy', 'geolocation=(), microphone=(), camera=()');
-    $csp = "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:; connect-src 'self'";
-    $response->headers->set('Content-Security-Policy', $csp);
+    if (!config('app.debug')) {
+      $csp = "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline' https://fonts.bunny.net; img-src 'self' data: https:; font-src 'self' data: https://fonts.bunny.net; connect-src 'self'";
+      $response->headers->set('Content-Security-Policy', $csp);
+    }
     return $response;
   }
 }
