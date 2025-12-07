@@ -12,17 +12,11 @@ return new class extends Migration
       $table->boolean('showProfile')->default(true)->after('privacySettings');
       $table->boolean('showProgress')->default(true)->after('showProfile');
     });
-    Schema::table('lessons', function (Blueprint $table) {
-      $table->boolean('isFreePreview')->default(false)->after('isMandatory');
-    });
   }
   public function down(): void
   {
     Schema::table('users', function (Blueprint $table) {
       $table->dropColumn(['notificationPreferences', 'privacySettings', 'showProfile', 'showProgress']);
-    });
-    Schema::table('lessons', function (Blueprint $table) {
-      $table->dropColumn('isFreePreview');
     });
   }
 };

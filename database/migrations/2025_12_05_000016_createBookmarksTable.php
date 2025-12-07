@@ -12,7 +12,8 @@ return new class extends Migration
       $table->foreignId('lessonId')->constrained('lessons', 'lessonId')->onDelete('cascade');
       $table->text('note')->nullable();
       $table->integer('videoTimestamp')->nullable();
-      $table->timestamps();
+      $table->timestamp('createdAt')->useCurrent();
+      $table->timestamp('updatedAt')->useCurrent()->useCurrentOnUpdate();
       $table->unique(['userId', 'lessonId']);
       $table->index(['userId', 'createdAt']);
     });
