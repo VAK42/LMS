@@ -49,12 +49,54 @@ Route::get('/courses', function () {
 });
 Route::get('/courses/{courseId}', function ($courseId) {
   $course = \App\Models\Course::with(['instructor', 'category', 'modules.lessons'])->findOrFail($courseId);
-  $course->simulatedPrice = (float) $course->simulatedPrice;
-  $course->averageRating = (float) $course->averageRating;
+  $reviewsCount = $course->reviews()->count();
   $enrollmentCount = $course->enrollments()->where('isPaid', true)->count();
-  return Inertia::render('CourseDetail', ['course' => $course, 'enrollmentCount' => $enrollmentCount, 'averageRating' => $course->averageRating, 'user' => auth()->user()]);
+  $totalMinutes = 0;
+  $articlesCount = 0;
+  $videoCount = 0;
+  foreach ($course->modules as $module) {
+    foreach ($module->lessons as $lesson) {
+      $totalMinutes += $lesson->durationMinutes ?? 0;
+      if (in_array($lesson->contentType, ['pdf', 'text'])) {
+        $articlesCount++;
+      } elseif ($lesson->contentType === 'video') {
+        $videoCount++;
+      }
+    }
+  }
+  $videoDuration = round($totalMinutes / 60, 1);
+  $course->modules->transform(function ($module) {
+    $moduleDuration = $module->lessons->sum('durationMinutes');
+    $module->duration = $moduleDuration;
+    $module->lessonCount = $module->lessons->count();
+    $module->lessons->transform(function ($lesson) {
+      $lesson->duration = $lesson->durationMinutes ?? 0;
+      return $lesson;
+    });
+    return $module;
+  });
+  $hasCertificate = \App\Models\Certificate::whereHas('course', function($q) use ($courseId) {
+    $q->where('courseId', $courseId);
+  })->exists();
+  return Inertia::render('CourseDetail', [
+    'course' => array_merge($course->toArray(), [
+      'price' => (float) $course->simulatedPrice,
+      'rating' => (float) $course->averageRating,
+      'ratingsCount' => $reviewsCount,
+      'studentsCount' => $course->totalEnrollments ?? $enrollmentCount,
+      'lastUpdated' => $course->updatedAt ?? $course->createdAt,
+      'whatYouLearn' => $course->courseMeta['whatYouLearn'] ?? [],
+      'videoDuration' => $videoDuration,
+      'articlesCount' => $articlesCount,
+      'resourcesCount' => $articlesCount,
+      'hasCertificate' => $hasCertificate,
+    ]),
+    'enrollmentCount' => $enrollmentCount,
+    'averageRating' => (float) $course->averageRating,
+    'user' => auth()->user()
+  ]);
 });
-Route::middleware('auth:sanctum')->group(function () {
+Route::middleware('auth')->group(function () {
   Route::get('/dashboard', function () {
     $user = auth()->user();
     if ($user->role === 'admin') {
@@ -135,7 +177,23 @@ Route::middleware('auth:sanctum')->group(function () {
     return Inertia::render('Instructor/Students', ['enrollments' => $enrollments, 'user' => auth()->user()]);
   })->middleware('role:instructor');
   Route::get('/admin/dashboard', function () {
-    return Inertia::render('AdminDashboard', ['user' => auth()->user()]);
+    $totalUsers = \App\Models\User::count();
+    $totalCourses = \App\Models\Course::count();
+    $totalEnrollments = \App\Models\Enrollment::where('isPaid', true)->count();
+    $completedLessons = \App\Models\Progress::where('isCompleted', true)->count();
+    $totalLessons = \App\Models\Lesson::count();
+    $averageCompletion = $totalLessons > 0 ? ($completedLessons / $totalLessons) * 100 : 0;
+    $recentUsers = \App\Models\User::orderBy('createdAt', 'desc')->limit(10)->get();
+    return Inertia::render('AdminDashboard', [
+      'metrics' => [
+        'totalUsers' => $totalUsers,
+        'totalCourses' => $totalCourses,
+        'totalEnrollments' => $totalEnrollments,
+        'averageCompletion' => $averageCompletion,
+        'recentUsers' => $recentUsers,
+      ],
+      'user' => auth()->user()
+    ]);
   })->middleware('role:admin');
   Route::get('/admin/transactions', function () {
     $transactions = \App\Models\PaymentTransaction::with(['user', 'course'])->paginate(20);

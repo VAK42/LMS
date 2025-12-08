@@ -1,11 +1,11 @@
 <?php
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api;
-Route::post('/register', [Api\AuthController::class, 'register'])->middleware('throttle:auth');
-Route::post('/login', [Api\AuthController::class, 'login'])->middleware('throttle:auth');
-Route::post('/logout', [Api\AuthController::class, 'logout']);
+Route::post('/register', [Api\AuthController::class, 'register'])->middleware(['web', 'throttle:auth']);
+Route::post('/login', [Api\AuthController::class, 'login'])->middleware(['web', 'throttle:auth']);
+Route::post('/logout', [Api\AuthController::class, 'logout'])->middleware('web');
 Route::post('/password/email', [Api\ForgotPasswordController::class, 'sendResetLink'])->middleware('throttle:password-reset');
-Route::middleware('auth:sanctum')->group(function () {
+Route::middleware('auth')->group(function () {
   Route::post('/locale/change', [Api\LocaleController::class, 'change']);
   Route::get('/locale/current', [Api\LocaleController::class, 'current']);
   Route::get('/dashboard', [Api\DashboardController::class, 'index']);
