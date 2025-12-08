@@ -6,13 +6,12 @@ interface Module {
   moduleTitle: string;
   lessonCount: number;
   duration: number;
-  lessons: Lesson[];
-}
-interface Lesson {
-  lessonId: number;
-  lessonTitle: string;
-  duration: number;
-  lessonType: string;
+  lessons: {
+    lessonId: number;
+    lessonTitle: string;
+    duration: number;
+    contentType: string;
+  }[];
 }
 interface CourseDetailProps {
   course: {
@@ -28,12 +27,12 @@ interface CourseDetailProps {
     studentsCount: number;
     lastUpdated: string;
     price: number;
-    whatYouLearn: string[];
+    whatYouLearn?: string[];
     modules: Module[];
-    videoDuration: number;
-    articlesCount: number;
-    resourcesCount: number;
-    hasCertificate: boolean;
+    videoDuration?: number;
+    articlesCount?: number;
+    resourcesCount?: number;
+    hasCertificate?: boolean;
   };
   user: any;
 }
@@ -93,7 +92,7 @@ export default function CourseDetail({ course, user }: CourseDetailProps) {
                 What You'll Learn
               </h2>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {course.whatYouLearn.map((item, i) => (
+                {course.whatYouLearn?.map((item, i) => (
                   <div key={i} className="flex items-start gap-3">
                     <CheckCircle className="w-5 h-5 text-green-500 flex-shrink-0 mt-0.5" />
                     <span className="text-slate-700 dark:text-slate-300">{item}</span>
@@ -157,15 +156,15 @@ export default function CourseDetail({ course, user }: CourseDetailProps) {
                   <ul className="space-y-3 text-sm text-slate-600 dark:text-slate-400">
                     <li className="flex items-center gap-3">
                       <PlayCircle className="w-4 h-4" />
-                      {course.videoDuration} Hours On-Demand Video
+                      {course.videoDuration ?? 0} Hours On-Demand Video
                     </li>
                     <li className="flex items-center gap-3">
                       <FileText className="w-4 h-4" />
-                      {course.articlesCount} Articles
+                      {course.articlesCount ?? 0} Articles
                     </li>
                     <li className="flex items-center gap-3">
                       <Download className="w-4 h-4" />
-                      {course.resourcesCount} Downloadable Resources
+                      {course.resourcesCount ?? 0} Downloadable Resources
                     </li>
                     {course.hasCertificate && (
                       <li className="flex items-center gap-3">
