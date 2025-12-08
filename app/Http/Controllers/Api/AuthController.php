@@ -31,7 +31,7 @@ class AuthController extends Controller
       'role' => $validated['role'],
     ]);
     Auth::login($user);
-    return response()->json(['user' => $user]);
+    return redirect()->intended('/dashboard');
   }
   public function login(Request $request)
   {
@@ -41,15 +41,15 @@ class AuthController extends Controller
     ]);
     if (Auth::attempt(['userEmail' => $validated['userEmail'], 'password' => $validated['password']])) {
       $request->session()->regenerate();
-      return response()->json(['user' => Auth::user()]);
+      return redirect()->intended('/dashboard');
     }
-    return response()->json(['error' => 'Invalid Credentials!'], 401);
+    return back()->withErrors(['userEmail' => 'Invalid credentials!']);
   }
   public function logout(Request $request)
   {
     Auth::logout();
     $request->session()->invalidate();
     $request->session()->regenerateToken();
-    return response()->json(['message' => 'Logged Out!']);
+    return redirect('/');
   }
 }
