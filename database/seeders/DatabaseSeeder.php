@@ -53,7 +53,16 @@ class DatabaseSeeder extends Seeder
           'simulatedPrice' => rand(0, 1) == 0 ? 0 : rand(29, 99),
           'instructorId' => $instructor->userId,
           'categoryId' => $category->categoryId,
-          'courseMeta' => json_encode(['level' => 'Intermediate', 'language' => 'English']),
+          'courseMeta' => json_encode([
+            'level' => 'Intermediate',
+            'language' => 'English',
+            'whatYouLearn' => [
+              'Master Core Concepts And Fundamentals',
+              'Build Real-World Projects From Scratch',
+              'Learn Industry Best Practices',
+              'Get Hands-On Practical Experience'
+            ]
+          ]),
           'isPublished' => true,
           'averageRating' => rand(40, 50) / 10,
           'totalEnrollments' => rand(50, 500),
