@@ -1,5 +1,5 @@
 import { Head, Link, router } from '@inertiajs/react';
-import { Search, Users, Star } from 'lucide-react';
+import { Search, Users, Star, BookOpen, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from 'lucide-react';
 import { useState } from 'react';
 import Layout from '../components/Layout';
 interface Course {
@@ -23,15 +23,19 @@ interface Course {
 interface CourseCatalogProps {
   courses: {
     data: Course[];
-    currentPage: number;
-    lastPage: number;
+    current_page: number;
+    last_page: number;
   };
   categories: Array<{ categoryId: number; categoryName: string }>;
+  filters?: {
+    search?: string;
+    category?: string;
+  };
   user?: any;
 }
-export default function CourseCatalog({ courses, categories, user }: CourseCatalogProps) {
-  const [search, setSearch] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState('');
+export default function CourseCatalog({ courses, categories, filters, user }: CourseCatalogProps) {
+  const [search, setSearch] = useState(filters?.search || '');
+  const [selectedCategory, setSelectedCategory] = useState(filters?.category || '');
   const handleSearch = () => {
     router.get('/courses', {
       search,
@@ -39,6 +43,16 @@ export default function CourseCatalog({ courses, categories, user }: CourseCatal
     }, {
       preserveState: true,
     });
+  };
+  const buildPaginationParams = (page: number) => {
+    const params: { page: number; search?: string; category?: string } = { page };
+    if (search && search.trim()) {
+      params.search = search;
+    }
+    if (selectedCategory && selectedCategory.trim()) {
+      params.category = selectedCategory;
+    }
+    return params;
   };
   return (
     <Layout user={user}>
@@ -88,7 +102,7 @@ export default function CourseCatalog({ courses, categories, user }: CourseCatal
         {courses.data.length === 0 ? (
           <div className="text-center py-20">
             <p className="text-lg text-zinc-600 dark:text-zinc-400">
-              No Courses Found. Try Adjusting Your Filters!
+              No Courses Found! Try Adjusting Your Filters!
             </p>
           </div>
         ) : (
@@ -100,13 +114,11 @@ export default function CourseCatalog({ courses, categories, user }: CourseCatal
                 className="group block"
               >
                 <div className="overflow-hidden bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 hover:border-black dark:hover:border-white transition-colors">
-                  <div className="aspect-video bg-zinc-100 dark:bg-zinc-800 relative overflow-hidden">
+                  <div className="aspect-video bg-zinc-100 dark:bg-zinc-800 relative overflow-hidden flex items-center justify-center">
                     {course.courseImage ? (
                       <img src={course.courseImage} alt={course.courseTitle} className="w-full h-full object-cover" />
                     ) : (
-                      <div className="absolute inset-0 flex items-center justify-center text-black dark:text-white text-6xl font-serif font-bold opacity-20">
-                        {course.courseTitle[0]}
-                      </div>
+                      <BookOpen className="w-24 h-24 text-zinc-300 dark:text-zinc-600" />
                     )}
                   </div>
                   <div className="p-6 space-y-4">
@@ -135,8 +147,8 @@ export default function CourseCatalog({ courses, categories, user }: CourseCatal
                       <div className="text-sm text-zinc-600 dark:text-zinc-400">
                         By {course.instructor.userName}
                       </div>
-                      <div className="text-2xl font-serif font-bold text-black dark:text-white">
-                        ${course.simulatedPrice}
+                      <div className="text-xl font-serif font-bold text-black dark:text-white">
+                        {!course.simulatedPrice || course.simulatedPrice <= 0 ? 'Free' : `$${course.simulatedPrice}`}
                       </div>
                     </div>
                   </div>
@@ -145,20 +157,67 @@ export default function CourseCatalog({ courses, categories, user }: CourseCatal
             ))}
           </div>
         )}
-        {courses.lastPage > 1 && (
-          <div className="mt-12 flex justify-center gap-2">
-            {Array.from({ length: courses.lastPage }, (_, i) => i + 1).map((page) => (
+        {courses.last_page > 1 && (
+          <div className="mt-12 flex justify-center items-center gap-2">
+            <button
+              onClick={() => router.get('/courses', buildPaginationParams(1))}
+              disabled={courses.current_page === 1}
+              className="px-3 py-2 border border-zinc-300 dark:border-zinc-700 text-zinc-700 dark:text-zinc-300 hover:border-black dark:hover:border-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              aria-label="First Page"
+            >
+              <ChevronsLeft className="w-4 h-4" />
+            </button>
+            <button
+              onClick={() => router.get('/courses', buildPaginationParams(courses.current_page - 1))}
+              disabled={courses.current_page === 1}
+              className="px-3 py-2 border border-zinc-300 dark:border-zinc-700 text-zinc-700 dark:text-zinc-300 hover:border-black dark:hover:border-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              aria-label="Previous Page"
+            >
+              <ChevronLeft className="w-4 h-4" />
+            </button>
+            {courses.current_page > 2 && (
+              <span className="px-2 text-zinc-500 dark:text-zinc-400">...</span>
+            )}
+            {courses.current_page > 1 && (
               <button
-                key={page}
-                onClick={() => router.get(`/courses?page=${page}`)}
-                className={`px-4 py-2 font-medium transition-colors border ${page === courses.currentPage
-                  ? 'bg-black dark:bg-white text-white dark:text-black border-black dark:border-white'
-                  : 'bg-white dark:bg-zinc-900 text-zinc-700 dark:text-zinc-300 border-zinc-300 dark:border-zinc-700 hover:border-black dark:hover:border-white'
-                  }`}
+                onClick={() => router.get('/courses', buildPaginationParams(courses.current_page - 1))}
+                className="px-4 py-2 font-medium transition-colors border bg-white dark:bg-zinc-900 text-zinc-700 dark:text-zinc-300 border-zinc-300 dark:border-zinc-700 hover:border-black dark:hover:border-white"
               >
-                {page}
+                {courses.current_page - 1}
               </button>
-            ))}
+            )}
+            <button
+              className="px-4 py-2 font-medium transition-colors border bg-black dark:bg-white text-white dark:text-black border-black dark:border-white"
+            >
+              {courses.current_page}
+            </button>
+            {courses.current_page < courses.last_page && (
+              <button
+                onClick={() => router.get('/courses', buildPaginationParams(courses.current_page + 1))}
+                className="px-4 py-2 font-medium transition-colors border bg-white dark:bg-zinc-900 text-zinc-700 dark:text-zinc-300 border-zinc-300 dark:border-zinc-700 hover:border-black dark:hover:border-white"
+              >
+                {courses.current_page + 1}
+              </button>
+            )}
+            {courses.current_page < courses.last_page - 1 && (
+              <span className="px-2 text-zinc-500 dark:text-zinc-400">...</span>
+            )}
+            <button
+              onClick={() => router.get('/courses', buildPaginationParams(courses.current_page + 1))}
+              disabled={courses.current_page === courses.last_page}
+              className="px-3 py-2 border border-zinc-300 dark:border-zinc-700 text-zinc-700 dark:text-zinc-300 hover:border-black dark:hover:border-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              aria-label="Next Page"
+            >
+              <ChevronRight className="w-4 h-4" />
+            </button>
+            <button
+              onClick={() => router.get('/courses', buildPaginationParams(courses.last_page))}
+              disabled={courses.current_page === courses.last_page}
+              className="px-3 py-2 border border-zinc-300 dark:border-zinc-700 text-zinc-700 dark:text-zinc-300 hover:border-black dark:hover:border-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              aria-label="Last Page"
+            >
+              <ChevronsRight className="w-4 h-4" />
+            </button>
           </div>
         )}
       </div>

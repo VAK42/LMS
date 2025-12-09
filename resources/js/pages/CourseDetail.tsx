@@ -1,6 +1,7 @@
-import { Head, Link } from '@inertiajs/react';
+import { Head, Link, router } from '@inertiajs/react';
 import { PlayCircle, Clock, Star, CheckCircle, Users, Share2, Heart, FileText, Download, Award } from 'lucide-react';
 import Layout from '../components/Layout';
+import { useToast } from '../contexts/ToastContext';
 interface Module {
   moduleId: number;
   moduleTitle: string;
@@ -37,6 +38,7 @@ interface CourseDetailProps {
   user: any;
 }
 export default function CourseDetail({ course, user }: CourseDetailProps) {
+  const { showToast } = useToast();
   return (
     <Layout user={user}>
       <Head title={course.courseTitle} />
@@ -44,8 +46,8 @@ export default function CourseDetail({ course, user }: CourseDetailProps) {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-16">
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
             <div className="lg:col-span-2 space-y-6">
-              <div className="flex items-center gap-2 text-blue-400 text-sm font-semibold uppercase tracking-wider">
-                <Link href="/courses" className="hover:text-blue-300">{course.category.categoryName}</Link>
+              <div className="flex items-center gap-2 text-zinc-100 text-sm font-medium">
+                <Link href={`/courses?category=${course.category.categoryId}`} className="hover:text-white transition-colors">{course.category.categoryName}</Link>
               </div>
               <h1 className="text-3xl md:text-5xl font-bold leading-tight">
                 {course.courseTitle}
@@ -61,7 +63,7 @@ export default function CourseDetail({ course, user }: CourseDetailProps) {
                       <Star key={i} className={`w-4 h-4 ${i < Math.floor(course.rating) ? 'fill-current' : ''}`} />
                     ))}
                   </div>
-                  <span className="text-slate-400 ml-1">({course.ratingsCount.toLocaleString()} Ratings)</span>
+                  <span className="text-slate-400 ml-1">({course.ratingsCount > 0 ? course.ratingsCount.toLocaleString() : 0} Ratings)</span>
                 </div>
                 <div className="flex items-center gap-2 text-slate-300">
                   <Users className="w-4 h-4" />
@@ -73,10 +75,35 @@ export default function CourseDetail({ course, user }: CourseDetailProps) {
                 </div>
               </div>
               <div className="flex items-center gap-4 pt-4">
-                <button className="p-2 rounded-full bg-white/10 hover:bg-white/20 transition-colors">
+                <button
+                  onClick={() => {
+                    if (!user) {
+                      showToast('You Have To Log In As Student To Add To Wishlist', 'error');
+                      setTimeout(() => router.get('/login'), 1000);
+                    } else if (user.role !== 'learner') {
+                      showToast('Only Students Can Add Courses To Wishlist', 'error');
+                    } else {
+                      showToast('Added To Wishlist!', 'success');
+                    }
+                  }}
+                  className="p-2 rounded-full bg-white/10 hover:bg-white/20 transition-colors cursor-pointer"
+                >
                   <Heart className="w-6 h-6" />
                 </button>
-                <button className="p-2 rounded-full bg-white/10 hover:bg-white/20 transition-colors">
+                <button
+                  onClick={() => {
+                    if (navigator.share) {
+                      navigator.share({
+                        title: course.courseTitle,
+                        url: window.location.href
+                      });
+                    } else {
+                      navigator.clipboard.writeText(window.location.href);
+                      showToast('Course Link Copied To Clipboard!', 'success');
+                    }
+                  }}
+                  className="p-2 rounded-full bg-white/10 hover:bg-white/20 transition-colors cursor-pointer"
+                >
                   <Share2 className="w-6 h-6" />
                 </button>
               </div>
@@ -109,7 +136,7 @@ export default function CourseDetail({ course, user }: CourseDetailProps) {
                   <div key={module.moduleId} className="border border-slate-200 dark:border-slate-700 rounded-xl overflow-hidden">
                     <div className="bg-slate-50 dark:bg-slate-900 p-4 flex justify-between items-center cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
                       <div className="flex items-center gap-3">
-                        <span className="font-bold text-slate-900 dark:text-white">Module {i + 1}: {module.moduleTitle}</span>
+                        <span className="font-bold text-slate-900 dark:text-white">{module.moduleTitle}</span>
                       </div>
                       <span className="text-sm text-slate-500 dark:text-slate-400">{module.lessonCount} Lessons • {module.duration}m</span>
                     </div>
@@ -118,7 +145,7 @@ export default function CourseDetail({ course, user }: CourseDetailProps) {
                         <div key={lesson.lessonId} className="p-4 pl-12 flex justify-between items-center bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors">
                           <div className="flex items-center gap-3">
                             <PlayCircle className="w-4 h-4 text-slate-400" />
-                            <span className="text-slate-700 dark:text-slate-300">Lesson {j + 1}: {lesson.lessonTitle}</span>
+                            <span className="text-slate-700 dark:text-slate-300">{lesson.lessonTitle}</span>
                           </div>
                           <span className="text-sm text-slate-400">{lesson.duration}:00</span>
                         </div>
@@ -141,10 +168,34 @@ export default function CourseDetail({ course, user }: CourseDetailProps) {
                   <div className="text-3xl font-bold text-slate-900 dark:text-white mb-4">
                     ${course.price.toFixed(2)}
                   </div>
-                  <button className="w-full py-4 bg-blue-600 text-white rounded-xl font-bold hover:bg-blue-700 transition-all shadow-lg shadow-blue-500/30 mb-4">
+                  <button
+                    onClick={() => {
+                      if (!user) {
+                        showToast('You Have To Log In As Student To Purchase!', 'error');
+                        setTimeout(() => router.get('/login'), 1000);
+                      } else if (user.role !== 'learner') {
+                        showToast('Only Students Can Purchase Courses!', 'error');
+                      } else {
+                        showToast('Added To Cart!', 'success');
+                      }
+                    }}
+                    className="w-full py-4 bg-zinc-800 dark:bg-white text-white dark:text-black font-bold hover:bg-zinc-900 dark:hover:bg-zinc-100 transition-colors mb-4 cursor-pointer"
+                  >
                     Add To Cart
                   </button>
-                  <button className="w-full py-4 bg-white dark:bg-slate-700 text-slate-900 dark:text-white border border-slate-200 dark:border-slate-600 rounded-xl font-bold hover:bg-slate-50 dark:hover:bg-slate-600 transition-all">
+                  <button
+                    onClick={() => {
+                      if (!user) {
+                        showToast('You Have To Log In As Student To Purchase!', 'error');
+                        setTimeout(() => router.get('/login'), 1000);
+                      } else if (user.role !== 'learner') {
+                        showToast('Only Students Can Purchase Courses!', 'error');
+                      } else {
+                        showToast('Processing Purchase...', 'success');
+                      }
+                    }}
+                    className="w-full py-4 bg-white dark:bg-zinc-900 text-black dark:text-white border border-zinc-300 dark:border-zinc-700 font-bold hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors cursor-pointer"
+                  >
                     Buy Now
                   </button>
                   <p className="text-xs text-center text-slate-500 mt-4">
