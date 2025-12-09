@@ -44,7 +44,7 @@ Route::get('/courses', function (Illuminate\Http\Request $request) {
   if ($request->has('search')) {
     $query->where('courseTitle', 'like', '%' . $request->search . '%');
   }
-  $courses = $query->paginate(12)
+  $courses = $query->paginate(3)
     ->through(function ($course) {
       $course->simulatedPrice = (float) $course->simulatedPrice;
       $course->averageRating = (float) $course->averageRating;
