@@ -35,17 +35,28 @@ Route::post('/password/email', [Api\ForgotPasswordController::class, 'sendResetL
 Route::get('/password/reset/{token}', [Api\ForgotPasswordController::class, 'showResetForm'])->name('password.reset');
 Route::post('/password/reset', [Api\ForgotPasswordController::class, 'reset'])->name('password.update');
 Route::get('/email/verify/{token}', [Api\EmailVerificationController::class, 'verify'])->name('verification.verify');
-Route::get('/courses', function () {
-  $courses = \App\Models\Course::with(['instructor', 'category'])
-    ->where('isPublished', true)
-    ->paginate(12)
+Route::get('/courses', function (Illuminate\Http\Request $request) {
+  $query = \App\Models\Course::with(['instructor', 'category'])
+    ->where('isPublished', true);
+  if ($request->has('category')) {
+    $query->where('categoryId', $request->category);
+  }
+  if ($request->has('search')) {
+    $query->where('courseTitle', 'like', '%' . $request->search . '%');
+  }
+  $courses = $query->paginate(12)
     ->through(function ($course) {
       $course->simulatedPrice = (float) $course->simulatedPrice;
       $course->averageRating = (float) $course->averageRating;
       return $course;
     });
   $categories = \App\Models\Category::all();
-  return Inertia::render('CourseCatalog', ['courses' => $courses, 'categories' => $categories, 'user' => auth()->user()]);
+  return Inertia::render('CourseCatalog', [
+    'courses' => $courses,
+    'categories' => $categories,
+    'filters' => $request->only(['category', 'search']),
+    'user' => auth()->user()
+  ]);
 });
 Route::get('/courses/{courseId}', function ($courseId) {
   $course = \App\Models\Course::with(['instructor', 'category', 'modules.lessons'])->findOrFail($courseId);
