@@ -1,7 +1,9 @@
 import { Head, useForm } from '@inertiajs/react';
 import { LogIn, Mail, Lock } from 'lucide-react';
+import { useToast } from '../contexts/ToastContext';
 import Layout from '../components/Layout';
 export default function Login() {
+  const { showToast } = useToast();
   const { data, setData, post, processing, errors } = useForm({
     userEmail: '',
     password: '',
@@ -9,7 +11,20 @@ export default function Login() {
   });
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    post('/api/login');
+    post('/login', {
+      onError: (errors) => {
+        if (errors.userEmail) {
+          showToast(errors.userEmail, 'error');
+        } else if (Object.keys(errors).length > 0) {
+          showToast('Login Failed! Check Your Credentials!', 'error');
+        }
+      },
+      onSuccess: (response) => {
+        if (response.component === 'Login') {
+          showToast('Invalid Credentials!', 'error');
+        }
+      }
+    });
   };
   return (
     <Layout>
@@ -66,18 +81,19 @@ export default function Login() {
                 <p className="mt-1 text-sm text-zinc-600 dark:text-zinc-400">{errors.password}</p>
               )}
             </div>
-            <div className="flex items-center justify-between">
-              <label className="flex items-center gap-2">
-                <input
-                  type="checkbox"
-                  checked={data.remember}
-                  onChange={(e) => setData('remember', e.target.checked)}
-                  className="w-4 h-4 border-zinc-300 dark:border-zinc-600 text-black focus:ring-black dark:focus:ring-white"
-                />
-                <span className="text-sm text-zinc-700 dark:text-zinc-300">
-                  Remember Me
-                </span>
+            <div className="flex items-center">
+              <input
+                type="checkbox"
+                id="remember"
+                checked={data.remember}
+                onChange={(e) => setData('remember', e.target.checked)}
+                className="w-4 h-4 border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-black focus:ring-black dark:focus:ring-white cursor-pointer"
+              />
+              <label htmlFor="remember" className="ml-2 text-sm text-zinc-700 dark:text-zinc-300 cursor-pointer">
+                Remember Me
               </label>
+            </div>
+            <div className="flex items-center justify-end">
               <a href="#" className="text-sm text-black dark:text-white hover:underline">
                 Forgot Password?
               </a>
@@ -89,12 +105,12 @@ export default function Login() {
             >
               {processing ? 'Logging In...' : 'Login'}
             </button>
-            <p className="text-center text-sm text-zinc-600 dark:text-zinc-400">
+            <div className="text-center text-sm text-zinc-600 dark:text-zinc-400">
               Don't Have An Account?{' '}
-              <a href="/register" className="text-black dark:text-white font-medium hover:underline">
+              <a href="/register" className="text-black dark:text-white hover:underline font-medium">
                 Sign Up
               </a>
-            </p>
+            </div>
           </form>
         </div>
       </div>

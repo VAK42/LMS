@@ -115,13 +115,13 @@ export default function LearnerDashboard({ enrolledCourses, totalEnrollments, us
                       <div className="flex items-center justify-between text-sm">
                         <span className="text-zinc-600 dark:text-zinc-400">Progress</span>
                         <span className="font-bold text-black dark:text-white">
-                          {item.progressPercent.toFixed(0)}%
+                          {(item.progressPercent ?? 0).toFixed(0)}%
                         </span>
                       </div>
                       <div className="w-full h-2 bg-zinc-200 dark:border-zinc-700 overflow-hidden">
                         <div
                           className="h-full bg-black dark:bg-white transition-all"
-                          style={{ width: `${item.progressPercent}%` }}
+                          style={{ width: `${item.progressPercent ?? 0}%` }}
                         />
                       </div>
                       <p className="text-xs text-zinc-500 dark:text-zinc-400">
