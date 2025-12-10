@@ -1,7 +1,9 @@
 import { Head, useForm } from '@inertiajs/react';
 import { UserPlus, Mail, Lock, User } from 'lucide-react';
+import { useToast } from '../contexts/ToastContext';
 import Layout from '../components/Layout';
 export default function Register() {
+  const { showToast } = useToast();
   const { data, setData, post, processing, errors } = useForm({
     userName: '',
     userEmail: '',
@@ -11,7 +13,17 @@ export default function Register() {
   });
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    post('/api/register');
+    post('/register', {
+      onError: (errors) => {
+        if (errors.userEmail) showToast(errors.userEmail, 'error');
+        if (errors.password) showToast(errors.password, 'error');
+      },
+      onSuccess: (response) => {
+        if (response.component === 'Register') {
+          showToast('Registration Failed!', 'error');
+        }
+      }
+    });
   };
   return (
     <Layout>
