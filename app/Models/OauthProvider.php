@@ -7,8 +7,8 @@ class OauthProvider extends Model
   use HasFactory;
   protected $table = 'oauthProviders';
   protected $primaryKey = 'oauthId';
-  public const createdAt = 'createdAt';
-  public const updatedAt = 'updatedAt';
+  const CREATED_AT = 'createdAt';
+  const UPDATED_AT = 'updatedAt';
   protected $fillable = [
     'userId',
     'provider',
