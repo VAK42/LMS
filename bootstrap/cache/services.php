@@ -31,13 +31,17 @@
     27 => 'Laravel\\Pail\\PailServiceProvider',
     28 => 'Laravel\\Roster\\RosterServiceProvider',
     29 => 'Laravel\\Sail\\SailServiceProvider',
-    30 => 'Laravel\\Tinker\\TinkerServiceProvider',
-    31 => 'Laravel\\Wayfinder\\WayfinderServiceProvider',
-    32 => 'Carbon\\Laravel\\ServiceProvider',
-    33 => 'NunoMaduro\\Collision\\Adapters\\Laravel\\CollisionServiceProvider',
-    34 => 'Termwind\\Laravel\\TermwindServiceProvider',
-    35 => 'Pest\\Laravel\\PestServiceProvider',
-    36 => 'App\\Providers\\AppServiceProvider',
+    30 => 'Laravel\\Sanctum\\SanctumServiceProvider',
+    31 => 'Laravel\\Socialite\\SocialiteServiceProvider',
+    32 => 'Laravel\\Tinker\\TinkerServiceProvider',
+    33 => 'Laravel\\Wayfinder\\WayfinderServiceProvider',
+    34 => 'Carbon\\Laravel\\ServiceProvider',
+    35 => 'NunoMaduro\\Collision\\Adapters\\Laravel\\CollisionServiceProvider',
+    36 => 'Termwind\\Laravel\\TermwindServiceProvider',
+    37 => 'Pest\\Laravel\\PestServiceProvider',
+    38 => 'PragmaRX\\Google2FALaravel\\ServiceProvider',
+    39 => 'App\\Providers\\AppServiceProvider',
+    40 => 'Laravel\\Socialite\\SocialiteServiceProvider',
   ),
   'eager' => 
   array (
@@ -57,12 +61,14 @@
     13 => 'Laravel\\Mcp\\Server\\McpServiceProvider',
     14 => 'Laravel\\Pail\\PailServiceProvider',
     15 => 'Laravel\\Roster\\RosterServiceProvider',
-    16 => 'Laravel\\Wayfinder\\WayfinderServiceProvider',
-    17 => 'Carbon\\Laravel\\ServiceProvider',
-    18 => 'NunoMaduro\\Collision\\Adapters\\Laravel\\CollisionServiceProvider',
-    19 => 'Termwind\\Laravel\\TermwindServiceProvider',
-    20 => 'Pest\\Laravel\\PestServiceProvider',
-    21 => 'App\\Providers\\AppServiceProvider',
+    16 => 'Laravel\\Sanctum\\SanctumServiceProvider',
+    17 => 'Laravel\\Wayfinder\\WayfinderServiceProvider',
+    18 => 'Carbon\\Laravel\\ServiceProvider',
+    19 => 'NunoMaduro\\Collision\\Adapters\\Laravel\\CollisionServiceProvider',
+    20 => 'Termwind\\Laravel\\TermwindServiceProvider',
+    21 => 'Pest\\Laravel\\PestServiceProvider',
+    22 => 'PragmaRX\\Google2FALaravel\\ServiceProvider',
+    23 => 'App\\Providers\\AppServiceProvider',
   ),
   'deferred' => 
   array (
@@ -222,6 +228,7 @@
     'Illuminate\\Contracts\\Validation\\UncompromisedVerifier' => 'Illuminate\\Validation\\ValidationServiceProvider',
     'Laravel\\Sail\\Console\\InstallCommand' => 'Laravel\\Sail\\SailServiceProvider',
     'Laravel\\Sail\\Console\\PublishCommand' => 'Laravel\\Sail\\SailServiceProvider',
+    'Laravel\\Socialite\\Contracts\\Factory' => 'Laravel\\Socialite\\SocialiteServiceProvider',
     'command.tinker' => 'Laravel\\Tinker\\TinkerServiceProvider',
   ),
   'when' => 
@@ -266,6 +273,9 @@
     array (
     ),
     'Laravel\\Sail\\SailServiceProvider' => 
+    array (
+    ),
+    'Laravel\\Socialite\\SocialiteServiceProvider' => 
     array (
     ),
     'Laravel\\Tinker\\TinkerServiceProvider' => 

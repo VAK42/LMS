@@ -37,6 +37,8 @@ Route::get('/passwordReset', function () {
 })->name('passwordReset');
 Route::post('/passwordReset', [Api\ForgotPasswordController::class, 'reset'])->name('password.update');
 Route::get('/email/verify/{token}', [Api\EmailVerificationController::class, 'verify'])->name('verification.verify');
+Route::get('/oauth/{provider}', [Api\OAuthController::class, 'redirectToProvider'])->name('oauth.redirect');
+Route::get('/oauth/{provider}/callback', [Api\OAuthController::class, 'handleProviderCallback'])->name('oauth.callback');
 Route::get('/courses', function (Illuminate\Http\Request $request) {
   $query = \App\Models\Course::with(['instructor', 'category'])
     ->where('isPublished', true);
