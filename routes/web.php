@@ -28,12 +28,14 @@ Route::post('/login', [Api\AuthController::class, 'login']);
 Route::get('/register', [Api\AuthController::class, 'showRegister'])->name('register');
 Route::post('/register', [Api\AuthController::class, 'register']);
 Route::post('/logout', [Api\AuthController::class, 'logout'])->name('logout');
-Route::get('/password/reset', function () {
+Route::get('/forgotPassword', function () {
   return Inertia::render('ForgotPassword');
-})->name('password.request');
-Route::post('/password/email', [Api\ForgotPasswordController::class, 'sendResetLink'])->name('password.email');
-Route::get('/password/reset/{token}', [Api\ForgotPasswordController::class, 'showResetForm'])->name('password.reset');
-Route::post('/password/reset', [Api\ForgotPasswordController::class, 'reset'])->name('password.update');
+})->name('forgotPassword');
+Route::post('/forgotPassword', [Api\ForgotPasswordController::class, 'sendResetLink'])->name('sendResetLink');
+Route::get('/passwordReset', function () {
+  return Inertia::render('PasswordReset');
+})->name('passwordReset');
+Route::post('/passwordReset', [Api\ForgotPasswordController::class, 'reset'])->name('password.update');
 Route::get('/email/verify/{token}', [Api\EmailVerificationController::class, 'verify'])->name('verification.verify');
 Route::get('/courses', function (Illuminate\Http\Request $request) {
   $query = \App\Models\Course::with(['instructor', 'category'])
