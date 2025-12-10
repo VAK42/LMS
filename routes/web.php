@@ -107,6 +107,10 @@ Route::get('/courses/{courseId}', function ($courseId) {
     'user' => auth()->user()
   ]);
 });
+Route::get('/twoFactorChallenge', function () {
+  return Inertia::render('TwoFactorChallenge');
+});
+Route::post('/twoFactorChallenge', [Api\AuthController::class, 'verifyTwoFactor']);
 Route::middleware('auth')->group(function () {
   Route::get('/dashboard', function () {
     $user = auth()->user();
@@ -123,7 +127,17 @@ Route::middleware('auth')->group(function () {
     return Inertia::render('LessonDetail', ['lesson' => $lesson, 'user' => auth()->user()]);
   });
   Route::get('/settings', function () {
-    return Inertia::render('Settings', ['user' => auth()->user()]);
+    $user = auth()->user();
+    return Inertia::render('Settings', [
+      'user' => [
+        'userId' => $user->userId,
+        'userName' => $user->userName,
+        'userEmail' => $user->userEmail,
+        'role' => $user->role,
+        'twoFactorSecret' => $user->twoFactorSecret,
+        'twoFactorConfirmedAt' => $user->twoFactorConfirmedAt,
+      ]
+    ]);
   })->name('settings');
   Route::get('/profile', function () {
     return Inertia::render('Profile', ['user' => auth()->user()]);
@@ -140,6 +154,10 @@ Route::middleware('auth')->group(function () {
     $wishlistItems = \App\Models\Wishlist::where('userId', auth()->user()->userId)->with('course')->get();
     return Inertia::render('Wishlist', ['wishlistItems' => $wishlistItems, 'user' => auth()->user()]);
   })->name('wishlist');
+  Route::post('/user/twoFactorAuthentication', [Api\TwoFactorController::class, 'enable'])->name('two-factor.enable');
+  Route::post('/user/confirmedTwoFactorAuthentication', [Api\TwoFactorController::class, 'confirm'])->name('two-factor.confirm');
+  Route::delete('/user/twoFactorAuthentication', [Api\TwoFactorController::class, 'disable'])->name('two-factor.disable');
+  Route::get('/user/twoFactorRecoveryCodes', [Api\TwoFactorController::class, 'showRecoveryCodes'])->name('two-factor.recovery-codes');
   Route::get('/bundles', function () {
     $bundles = \App\Models\CourseBundle::where('isActive', true)->get();
     return Inertia::render('Bundles', ['bundles' => $bundles, 'user' => auth()->user()]);
