@@ -9,8 +9,8 @@ class User extends Authenticatable
   use HasApiTokens, HasFactory, Notifiable;
   protected $table = 'users';
   protected $primaryKey = 'userId';
-  public const createdAt = 'createdAt';
-  public const updatedAt = 'updatedAt';
+  const CREATED_AT = 'createdAt';
+  const UPDATED_AT = 'updatedAt';
   protected $fillable = [
     'userName',
     'userEmail',
@@ -114,5 +114,9 @@ class User extends Authenticatable
   public function wishlists()
   {
     return $this->hasMany(\App\Models\Wishlist::class, 'userId', 'userId');
+  }
+  public function getRememberTokenName()
+  {
+    return 'rememberToken';
   }
 }
