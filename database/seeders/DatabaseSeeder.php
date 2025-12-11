@@ -64,7 +64,6 @@ class DatabaseSeeder extends Seeder
             ]
           ]),
           'isPublished' => true,
-          'averageRating' => rand(40, 50) / 10,
           'totalEnrollments' => rand(50, 500),
           'createdAt' => $now,
           'updatedAt' => $now,
@@ -220,14 +219,25 @@ class DatabaseSeeder extends Seeder
         'createdAt' => $now,
       ]);
     }
-    foreach ($courses->random(5) as $course) {
-      DB::table('courseReviews')->insert([
-        'courseId' => $course->courseId,
-        'userId' => $learners->random()->userId,
-        'rating' => rand(4, 5),
-        'reviewText' => "Excellent Course!",
-        'createdAt' => $now,
-        'updatedAt' => $now,
+    foreach ($courses as $course) {
+      $reviewCount = rand(2, 5);
+      $reviewers = $learners->shuffle()->take($reviewCount);
+      $totalRating = 0;
+      foreach ($reviewers as $reviewer) {
+        $rating = rand(3, 5);
+        $totalRating += $rating;
+        DB::table('courseReviews')->insert([
+          'courseId' => $course->courseId,
+          'userId' => $reviewer->userId,
+          'rating' => $rating,
+          'reviewText' => "Excellent Course!",
+          'createdAt' => $now,
+          'updatedAt' => $now,
+        ]);
+      }
+      $averageRating = round($totalRating / $reviewCount);
+      DB::table('courses')->where('courseId', $course->courseId)->update([
+        'averageRating' => $averageRating
       ]);
     }
     for ($b = 1; $b <= 5; $b++) {
