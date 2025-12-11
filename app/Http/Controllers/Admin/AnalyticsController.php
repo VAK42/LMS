@@ -13,16 +13,14 @@ class AnalyticsController extends Controller
 {
   public function getDashboardData()
   {
-    $totalUsers = User::count();
+    $totalUsers = User::where('role', '!=', 'admin')->count();
     $totalCourses = Course::count();
     $totalEnrollments = Enrollment::where('isPaid', true)->count();
     $totalRevenue = PaymentTransaction::where('transactionStatus', 'completed')->sum('amount');
-    $completedLessons = Progress::where('isCompleted', true)->count();
-    $totalLessons = \App\Models\Lesson::count();
-    $averageCompletion = $totalLessons > 0 ? ($completedLessons / $totalLessons) * 100 : 0;
+    $averageCompletion = Enrollment::avg('completionPercent') ?? 0;
     $averageRating = CourseReview::avg('rating') ?? 0;
-    $lastMonthUsers = User::where('createdAt', '>=', Carbon::now()->subMonth())->count();
-    $previousMonthUsers = User::whereBetween('createdAt', [Carbon::now()->subMonths(2), Carbon::now()->subMonth()])->count();
+    $lastMonthUsers = User::where('role', '!=', 'admin')->where('createdAt', '>=', Carbon::now()->subMonth())->count();
+    $previousMonthUsers = User::where('role', '!=', 'admin')->whereBetween('createdAt', [Carbon::now()->subMonths(2), Carbon::now()->subMonth()])->count();
     $userGrowth = $previousMonthUsers > 0 ? (($lastMonthUsers - $previousMonthUsers) / $previousMonthUsers) * 100 : 0;
     $lastMonthCourses = Course::where('createdAt', '>=', Carbon::now()->subMonth())->count();
     $previousMonthCourses = Course::whereBetween('createdAt', [Carbon::now()->subMonths(2), Carbon::now()->subMonth()])->count();
@@ -33,13 +31,13 @@ class AnalyticsController extends Controller
     $userRegistrations = [];
     for ($i = 29; $i >= 0; $i--) {
       $date = Carbon::now()->subDays($i)->format('Y-m-d');
-      $count = User::whereDate('createdAt', $date)->count();
+      $count = User::where('role', '!=', 'admin')->whereDate('createdAt', $date)->count();
       $userRegistrations[] = ['date' => Carbon::parse($date)->format('M d'), 'users' => $count];
     }
     $topCourses = Course::select('courses.courseId', 'courses.courseTitle', DB::raw('COUNT(*) as enrollment_count'))->leftJoin('enrollments', 'courses.courseId', '=', 'enrollments.courseId')->where('enrollments.isPaid', true)->groupBy('courses.courseId', 'courses.courseTitle')->orderBy('enrollment_count', 'desc')->limit(10)->get()->map(function ($course) {
       return ['name' => $course->courseTitle, 'enrollments' => $course->enrollment_count];
     });
-    $roleDistribution = User::select('role', DB::raw('COUNT(*) as count'))->groupBy('role')->get()->map(function ($item) {
+    $roleDistribution = User::select('role', DB::raw('COUNT(*) as count'))->where('role', '!=', 'admin')->groupBy('role')->get()->map(function ($item) {
       return ['name' => ucfirst($item->role), 'value' => $item->count];
     });
     $monthlyRevenue = [];
@@ -59,7 +57,7 @@ class AnalyticsController extends Controller
       return ['type' => 'review', 'user' => $review->user->userName, 'course' => $review->course->courseTitle, 'rating' => $review->rating, 'timestamp' => Carbon::parse($review->createdAt)->diffForHumans()];
     });
     $recentActivities = collect([$recentEnrollments, $recentCompletions, $recentReviews])->flatten(1)->sortByDesc('timestamp')->take(15)->values();
-    $recentUsers = User::orderBy('createdAt', 'desc')->limit(10)->get();
+    $recentUsers = User::where('role', '!=', 'admin')->orderBy('createdAt', 'desc')->limit(10)->get();
     return \Inertia\Inertia::render('Admin/Dashboard', [
       'metrics' => ['totalUsers' => $totalUsers, 'userGrowth' => round($userGrowth, 1), 'totalCourses' => $totalCourses, 'courseGrowth' => round($courseGrowth, 1), 'totalRevenue' => (float) $totalRevenue, 'revenueGrowth' => round($revenueGrowth, 1), 'totalEnrollments' => $totalEnrollments, 'averageCompletion' => round($averageCompletion, 1), 'averageRating' => round($averageRating, 2)],
       'charts' => ['userRegistrations' => $userRegistrations, 'topCourses' => $topCourses, 'roleDistribution' => $roleDistribution, 'monthlyRevenue' => $monthlyRevenue],
