@@ -115,12 +115,10 @@ Route::get('/twoFactorChallenge', function () {
   return Inertia::render('TwoFactorChallenge');
 });
 Route::post('/twoFactorChallenge', [Api\AuthController::class, 'verifyTwoFactor']);
-Route::middleware('auth')->group(function () {
+Route::middleware(['auth', App\Http\Middleware\AdminRouteMiddleware::class])->group(function () {
   Route::get('/dashboard', function () {
     $user = auth()->user();
-    if ($user->role === 'admin') {
-      return redirect('/admin/dashboard');
-    } elseif ($user->role === 'instructor') {
+    if ($user->role === 'instructor') {
       return redirect('/instructor/dashboard');
     }
     $enrollments = \App\Models\Enrollment::with(['course.instructor', 'course.modules.lessons'])->where('userId', $user->userId)->where('isPaid', true)->get();
