@@ -33,6 +33,9 @@ class AuthController extends Controller
       'role' => $validated['role'],
     ]);
     Auth::login($user);
+    if ($user->role === 'admin') {
+      return redirect()->intended('/admin/dashboard');
+    }
     return redirect()->intended('/dashboard');
   }
   public function login(Request $request)
@@ -51,6 +54,9 @@ class AuthController extends Controller
         return redirect('/twoFactorChallenge');
       }
       $request->session()->regenerate();
+      if ($user->role === 'admin') {
+        return redirect()->intended('/admin/dashboard');
+      }
       return redirect()->intended('/dashboard');
     }
     return back()->withErrors(['userEmail' => 'Invalid Credentials!']);
@@ -94,6 +100,9 @@ class AuthController extends Controller
     Auth::login($user);
     $request->session()->forget('2fa:user:id');
     $request->session()->regenerate();
+    if ($user->role === 'admin') {
+      return redirect()->intended('/admin/dashboard');
+    }
     return redirect()->intended('/dashboard');
   }
 }
