@@ -158,10 +158,10 @@ Route::middleware('auth')->group(function () {
     $wishlistItems = \App\Models\Wishlist::where('userId', auth()->user()->userId)->with('course')->get();
     return Inertia::render('Wishlist', ['wishlistItems' => $wishlistItems, 'user' => auth()->user()]);
   })->name('wishlist');
-  Route::post('/user/twoFactorAuthentication', [Api\TwoFactorController::class, 'enable'])->name('two-factor.enable');
-  Route::post('/user/confirmedTwoFactorAuthentication', [Api\TwoFactorController::class, 'confirm'])->name('two-factor.confirm');
-  Route::delete('/user/twoFactorAuthentication', [Api\TwoFactorController::class, 'disable'])->name('two-factor.disable');
-  Route::get('/user/twoFactorRecoveryCodes', [Api\TwoFactorController::class, 'showRecoveryCodes'])->name('two-factor.recovery-codes');
+  Route::post('/user/twoFactorAuthentication', [Api\TwoFactorController::class, 'enable'])->name('twoFactor.enable');
+  Route::post('/user/confirmedTwoFactorAuthentication', [Api\TwoFactorController::class, 'confirm'])->name('twoFactor.confirm');
+  Route::delete('/user/twoFactorAuthentication', [Api\TwoFactorController::class, 'disable'])->name('twoFactor.disable');
+  Route::get('/user/twoFactorRecoveryCodes', [Api\TwoFactorController::class, 'showRecoveryCodes'])->name('twoFactor.recoveryCodes');
   Route::get('/bundles', function () {
     $bundles = \App\Models\CourseBundle::where('isActive', true)->get();
     return Inertia::render('Bundles', ['bundles' => $bundles, 'user' => auth()->user()]);
@@ -209,27 +209,35 @@ Route::middleware('auth')->group(function () {
     })->paginate(50);
     return Inertia::render('Instructor/Students', ['enrollments' => $enrollments, 'user' => auth()->user()]);
   })->middleware('role:instructor');
-  Route::get('/admin/dashboard', function () {
-    $totalUsers = \App\Models\User::count();
-    $totalCourses = \App\Models\Course::count();
-    $totalEnrollments = \App\Models\Enrollment::where('isPaid', true)->count();
-    $completedLessons = \App\Models\Progress::where('isCompleted', true)->count();
-    $totalLessons = \App\Models\Lesson::count();
-    $averageCompletion = $totalLessons > 0 ? ($completedLessons / $totalLessons) * 100 : 0;
-    $recentUsers = \App\Models\User::orderBy('createdAt', 'desc')->limit(10)->get();
-    return Inertia::render('AdminDashboard', [
-      'metrics' => [
-        'totalUsers' => $totalUsers,
-        'totalCourses' => $totalCourses,
-        'totalEnrollments' => $totalEnrollments,
-        'averageCompletion' => $averageCompletion,
-        'recentUsers' => $recentUsers,
-      ],
-      'user' => auth()->user()
-    ]);
-  })->middleware('role:admin');
-  Route::get('/admin/transactions', function () {
-    $transactions = \App\Models\PaymentTransaction::with(['user', 'course'])->paginate(20);
-    return Inertia::render('Admin/TransactionManagement', ['transactions' => $transactions, 'filters' => [], 'user' => auth()->user()]);
-  })->middleware('role:admin');
+  Route::get('/admin/dashboard', [App\Http\Controllers\Admin\AnalyticsController::class, 'getDashboardData'])->middleware('role:admin');
+  Route::get('/admin/users', [App\Http\Controllers\Admin\UserController::class, 'index'])->middleware('role:admin');
+  Route::post('/admin/users', [App\Http\Controllers\Admin\UserController::class, 'store'])->middleware('role:admin');
+  Route::put('/admin/users/{userId}', [App\Http\Controllers\Admin\UserController::class, 'update'])->middleware('role:admin');
+  Route::delete('/admin/users/{userId}', [App\Http\Controllers\Admin\UserController::class, 'destroy'])->middleware('role:admin');
+  Route::get('/admin/courses', [App\Http\Controllers\Admin\CourseController::class, 'index'])->middleware('role:admin');
+  Route::put('/admin/courses/{courseId}', [App\Http\Controllers\Admin\CourseController::class, 'update'])->middleware('role:admin');
+  Route::delete('/admin/courses/{courseId}', [App\Http\Controllers\Admin\CourseController::class, 'destroy'])->middleware('role:admin');
+  Route::get('/admin/categories', [App\Http\Controllers\Admin\CategoryController::class, 'index'])->middleware('role:admin');
+  Route::post('/admin/categories', [App\Http\Controllers\Admin\CategoryController::class, 'store'])->middleware('role:admin');
+  Route::put('/admin/categories/{categoryId}', [App\Http\Controllers\Admin\CategoryController::class, 'update'])->middleware('role:admin');
+  Route::delete('/admin/categories/{categoryId}', [App\Http\Controllers\Admin\CategoryController::class, 'destroy'])->middleware('role:admin');
+  Route::get('/admin/reviews', [App\Http\Controllers\Admin\ReviewController::class, 'index'])->middleware('role:admin');
+  Route::delete('/admin/reviews/{reviewId}', [App\Http\Controllers\Admin\ReviewController::class, 'destroy'])->middleware('role:admin');
+  Route::get('/admin/enrollments', [App\Http\Controllers\Admin\EnrollmentController::class, 'index'])->middleware('role:admin');
+  Route::post('/admin/enrollments', [App\Http\Controllers\Admin\EnrollmentController::class, 'store'])->middleware('role:admin');
+  Route::put('/admin/enrollments/{enrollmentId}', [App\Http\Controllers\Admin\EnrollmentController::class, 'update'])->middleware('role:admin');
+  Route::delete('/admin/enrollments/{enrollmentId}', [App\Http\Controllers\Admin\EnrollmentController::class, 'destroy'])->middleware('role:admin');
+  Route::get('/admin/coupons', [App\Http\Controllers\Admin\CouponController::class, 'index'])->middleware('role:admin');
+  Route::post('/admin/coupons', [App\Http\Controllers\Admin\CouponController::class, 'store'])->middleware('role:admin');
+  Route::put('/admin/coupons/{couponId}', [App\Http\Controllers\Admin\CouponController::class, 'update'])->middleware('role:admin');
+  Route::delete('/admin/coupons/{couponId}', [App\Http\Controllers\Admin\CouponController::class, 'destroy'])->middleware('role:admin');
+  Route::get('/admin/support', [App\Http\Controllers\Admin\SupportTicketController::class, 'index'])->middleware('role:admin');
+  Route::put('/admin/support/{ticketId}', [App\Http\Controllers\Admin\SupportTicketController::class, 'update'])->middleware('role:admin');
+  Route::delete('/admin/support/{ticketId}', [App\Http\Controllers\Admin\SupportTicketController::class, 'destroy'])->middleware('role:admin');
+  Route::get('/admin/certificates', [App\Http\Controllers\Admin\CertificateController::class, 'index'])->middleware('role:admin');
+  Route::delete('/admin/certificates/{certificateId}', [App\Http\Controllers\Admin\CertificateController::class, 'destroy'])->middleware('role:admin');
+  Route::get('/admin/notifications', [App\Http\Controllers\Admin\NotificationController::class, 'index'])->middleware('role:admin');
+  Route::post('/admin/notifications', [App\Http\Controllers\Admin\NotificationController::class, 'store'])->middleware('role:admin');
+  Route::delete('/admin/notifications/{notificationId}', [App\Http\Controllers\Admin\NotificationController::class, 'destroy'])->middleware('role:admin');
+  Route::get('/admin/transactions', [App\Http\Controllers\Admin\TransactionController::class, 'index'])->middleware('role:admin');
 });
