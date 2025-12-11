@@ -61,7 +61,7 @@ export default function Dashboard({ metrics, charts, recentActivities, recentUse
                       <span className={`text-sm font-medium ${metrics.userGrowth >= 0 ? 'text-green-500' : 'text-red-500'}`}>
                         {metrics.userGrowth >= 0 ? '+' : ''}{metrics.userGrowth}%
                       </span>
-                      <span className="text-sm text-zinc-500 dark:text-zinc-500 ml-1">Vs Last Month</span>
+                      <span className="text-sm text-zinc-500 dark:text-zinc-500 ml-1">VS Last Month</span>
                     </div>
                   </div>
                   <div className="bg-blue-100 dark:bg-blue-900/30 p-3 rounded-lg">
@@ -79,7 +79,7 @@ export default function Dashboard({ metrics, charts, recentActivities, recentUse
                       <span className={`text-sm font-medium ${metrics.courseGrowth >= 0 ? 'text-green-500' : 'text-red-500'}`}>
                         {metrics.courseGrowth >= 0 ? '+' : ''}{metrics.courseGrowth}%
                       </span>
-                      <span className="text-sm text-zinc-500 dark:text-zinc-500 ml-1">Vs Last Month</span>
+                      <span className="text-sm text-zinc-500 dark:text-zinc-500 ml-1">VS Last Month</span>
                     </div>
                   </div>
                   <div className="bg-purple-100 dark:bg-purple-900/30 p-3 rounded-lg">
@@ -97,7 +97,7 @@ export default function Dashboard({ metrics, charts, recentActivities, recentUse
                       <span className={`text-sm font-medium ${metrics.revenueGrowth >= 0 ? 'text-green-500' : 'text-red-500'}`}>
                         {metrics.revenueGrowth >= 0 ? '+' : ''}{metrics.revenueGrowth}%
                       </span>
-                      <span className="text-sm text-zinc-500 dark:text-zinc-500 ml-1">Vs Last Month</span>
+                      <span className="text-sm text-zinc-500 dark:text-zinc-500 ml-1">VS Last Month</span>
                     </div>
                   </div>
                   <div className="bg-green-100 dark:bg-green-900/30 p-3 rounded-lg">
@@ -147,25 +147,25 @@ export default function Dashboard({ metrics, charts, recentActivities, recentUse
             </div>
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
               <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 p-6">
-                <h3 className="text-lg font-bold text-black dark:text-white mb-4">User Registrations (30 Days)</h3>
+                <h3 className="text-lg font-bold text-black dark:text-white mb-4">User Registrations</h3>
                 <ResponsiveContainer width="100%" height={300}>
                   <LineChart data={charts.userRegistrations}>
                     <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
                     <XAxis dataKey="date" stroke="#9ca3af" />
                     <YAxis stroke="#9ca3af" />
-                    <Tooltip contentStyle={{ backgroundColor: '#18181b', border: '1px solid #27272a' }} />
+                    <Tooltip contentStyle={{ backgroundColor: '#18181b', border: '1px solid #27272a', color: 'white' }} />
                     <Line type="monotone" dataKey="users" stroke="#3b82f6" strokeWidth={2} dot={{ fill: '#3b82f6' }} />
                   </LineChart>
                 </ResponsiveContainer>
               </div>
               <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 p-6">
-                <h3 className="text-lg font-bold text-black dark:text-white mb-4">Monthly Revenue (6 Months)</h3>
+                <h3 className="text-lg font-bold text-black dark:text-white mb-4">Monthly Revenue</h3>
                 <ResponsiveContainer width="100%" height={300}>
                   <LineChart data={charts.monthlyRevenue}>
                     <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
                     <XAxis dataKey="month" stroke="#9ca3af" />
                     <YAxis stroke="#9ca3af" />
-                    <Tooltip contentStyle={{ backgroundColor: '#18181b', border: '1px solid #27272a' }} />
+                    <Tooltip contentStyle={{ backgroundColor: '#18181b', border: '1px solid #27272a', color: 'white' }} />
                     <Line type="monotone" dataKey="revenue" stroke="#10b981" strokeWidth={2} dot={{ fill: '#10b981' }} />
                   </LineChart>
                 </ResponsiveContainer>
@@ -177,7 +177,7 @@ export default function Dashboard({ metrics, charts, recentActivities, recentUse
                     <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
                     <XAxis dataKey="name" stroke="#9ca3af" angle={-45} textAnchor="end" height={100} />
                     <YAxis stroke="#9ca3af" />
-                    <Tooltip contentStyle={{ backgroundColor: '#18181b', border: '1px solid #27272a' }} />
+                    <Tooltip contentStyle={{ backgroundColor: '#18181b', border: '1px solid #27272a', color: 'white' }} />
                     <Bar dataKey="enrollments" fill="#8b5cf6" />
                   </BarChart>
                 </ResponsiveContainer>
@@ -186,12 +186,12 @@ export default function Dashboard({ metrics, charts, recentActivities, recentUse
                 <h3 className="text-lg font-bold text-black dark:text-white mb-4">User Distribution By Role</h3>
                 <ResponsiveContainer width="100%" height={300}>
                   <PieChart>
-                    <Pie data={charts.roleDistribution} cx="50%" cy="50%" labelLine={false} label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`} outerRadius={100} fill="#8884d8" dataKey="value">
+                    <Pie data={charts.roleDistribution} cx="50%" cy="50%" outerRadius={100} fill="#8884d8" dataKey="value">
                       {charts.roleDistribution.map((entry, index) => (
                         <Cell key={`cell-${index}`} fill={colors[index % colors.length]} />
                       ))}
                     </Pie>
-                    <Tooltip contentStyle={{ backgroundColor: '#18181b', border: '1px solid #27272a' }} />
+                    <Tooltip contentStyle={{ backgroundColor: '#18181b', border: '1px solid #27272a', color: 'white' }} labelStyle={{ color: 'white' }} itemStyle={{ color: 'white' }} />
                   </PieChart>
                 </ResponsiveContainer>
               </div>
