@@ -9,6 +9,7 @@ import ModalForm from '../../components/Admin/ModalForm';
 interface Course {
   courseId: number;
   courseTitle: string;
+  courseDescription: string;
   instructor: { userId: number; userName: string };
   category: { categoryId: number; categoryName: string };
   simulatedPrice: number;
@@ -129,6 +130,41 @@ export default function CourseManagement({ courses, categories, instructors, fil
     setSelectedCourse(course);
     setIsEditModalOpen(true);
   };
+  const handleExportAllCourses = async () => {
+    try {
+      const response = await fetch('/admin/courses/export');
+      if (!response.ok) throw new Error('Export Failed');
+      const allCourses = await response.json();
+      const exportColumns = columns.filter(col => col.key !== 'actions');
+      const headers = exportColumns.map(col => col.label).join(',');
+      const rows = allCourses.map((course: any) => exportColumns.map(col => {
+        let value = course[col.key];
+        if (col.key === 'createdAt' && value) {
+          value = new Date(value).toLocaleDateString();
+        } else if (col.key === 'simulatedPrice') {
+          value = course.simulatedPrice === 0 ? 'Free' : `$${course.simulatedPrice.toFixed(2)}`;
+        } else if (col.key === 'isPublished') {
+          value = value ? 'Published' : 'Draft';
+        } else if (col.key === 'instructor') {
+          value = course.instructor?.userName || '';
+        } else if (col.key === 'category') {
+          value = course.category?.categoryName || '';
+        }
+        return typeof value === 'string' && value.includes(',') ? `"${value}"` : (value ?? '');
+      }).join(',')).join('\n');
+      const csv = `${headers}\n${rows}`;
+      const blob = new Blob([csv], { type: 'text/csv' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = 'Course.csv';
+      link.click();
+      URL.revokeObjectURL(url);
+      showToast('Courses Exported Successfully!', 'success');
+    } catch (error) {
+      showToast('Failed To Export Courses!', 'error');
+    }
+  };
   const columns = [
     { key: 'courseTitle', label: 'Course Title', sortable: true },
     {
@@ -145,7 +181,7 @@ export default function CourseManagement({ courses, categories, instructors, fil
       key: 'simulatedPrice',
       label: 'Price',
       sortable: true,
-      render: (value: number) => value != null ? `$${Number(value).toFixed(2)}` : '$0.00'
+      render: (value: number | string) => Number(value) === 0 ? 'Free' : (value != null ? `$${Number(value).toFixed(2)}` : '$0.00')
     },
     {
       key: 'isPublished',
@@ -181,6 +217,7 @@ export default function CourseManagement({ courses, categories, instructors, fil
   ];
   const formFields = [
     { name: 'courseTitle', label: 'Course Title', type: 'text' as const, required: true },
+    { name: 'courseDescription', label: 'Description', type: 'textarea' as const, required: true },
     {
       name: 'categoryId',
       label: 'Category',
@@ -217,7 +254,7 @@ export default function CourseManagement({ courses, categories, instructors, fil
             <div className="flex items-center justify-between mb-8">
               <div>
                 <h1 className="text-4xl font-bold text-black dark:text-white mb-2">Course Management</h1>
-                <p className="text-zinc-600 dark:text-zinc-400">Manage All Courses And Publishing Status</p>
+                <p className="text-zinc-600 dark:text-zinc-400">Manage All Courses & Publishing Status</p>
               </div>
               <button onClick={() => setIsCreateModalOpen(true)} className="flex items-center gap-2 px-6 py-3 bg-black dark:bg-white text-white dark:text-black font-medium hover:bg-zinc-800 dark:hover:bg-zinc-200 cursor-pointer">
                 <span className="text-xl">+</span>
@@ -244,7 +281,7 @@ export default function CourseManagement({ courses, categories, instructors, fil
                 </button>
               </div>
             </div>
-            <DataTable columns={columns} data={courses.data} exportable={true} keyField="courseId" />
+            <DataTable columns={columns} data={courses.data} exportable={true} keyField="courseId" onExport={handleExportAllCourses} />
             {courses.last_page > 1 && (
               <div className="mt-6 flex justify-center items-center gap-2">
                 <button onClick={() => router.get('/admin/courses', buildPaginationParams(1), { preserveState: true, only: ['courses'] })} disabled={courses.current_page === 1} className="px-3 py-2 border border-zinc-300 dark:border-zinc-700 text-zinc-700 dark:text-zinc-300 hover:border-black dark:hover:border-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer" aria-label="First Page">
@@ -253,7 +290,25 @@ export default function CourseManagement({ courses, categories, instructors, fil
                 <button onClick={() => router.get('/admin/courses', buildPaginationParams(courses.current_page - 1), { preserveState: true, only: ['courses'] })} disabled={courses.current_page === 1} className="px-3 py-2 border border-zinc-300 dark:border-zinc-700 text-zinc-700 dark:text-zinc-300 hover:border-black dark:hover:border-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer" aria-label="Previous">
                   <ChevronLeft className="w-4 h-4" />
                 </button>
-                <button className="px-4 py-2 font-medium border bg-black dark:bg-white text-white dark:text-black">{courses.current_page}</button>
+                {courses.current_page > 2 && (
+                  <span className="px-2 text-zinc-500 dark:text-zinc-400">...</span>
+                )}
+                {courses.current_page > 1 && (
+                  <button onClick={() => router.get('/admin/courses', buildPaginationParams(courses.current_page - 1), { preserveState: true, only: ['courses'] })} className="px-4 py-2 font-medium transition-colors border bg-white dark:bg-zinc-900 text-zinc-700 dark:text-zinc-300 border-zinc-300 dark:border-zinc-700 hover:border-black dark:hover:border-white cursor-pointer">
+                    {courses.current_page - 1}
+                  </button>
+                )}
+                <button className="px-4 py-2 font-medium transition-colors border bg-black dark:bg-white text-white dark:text-black border-black dark:border-white">
+                  {courses.current_page}
+                </button>
+                {courses.current_page < courses.last_page && (
+                  <button onClick={() => router.get('/admin/courses', buildPaginationParams(courses.current_page + 1), { preserveState: true, only: ['courses'] })} className="px-4 py-2 font-medium transition-colors border bg-white dark:bg-zinc-900 text-zinc-700 dark:text-zinc-300 border-zinc-300 dark:border-zinc-700 hover:border-black dark:hover:border-white cursor-pointer">
+                    {courses.current_page + 1}
+                  </button>
+                )}
+                {courses.current_page < courses.last_page - 1 && (
+                  <span className="px-2 text-zinc-500 dark:text-zinc-400">...</span>
+                )}
                 <button onClick={() => router.get('/admin/courses', buildPaginationParams(courses.current_page + 1), { preserveState: true, only: ['courses'] })} disabled={courses.current_page === courses.last_page} className="px-3 py-2 border border-zinc-300 dark:border-zinc-700 text-zinc-700 dark:text-zinc-300 hover:border-black dark:hover:border-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer" aria-label="Next">
                   <ChevronRight className="w-4 h-4" />
                 </button>
@@ -263,7 +318,7 @@ export default function CourseManagement({ courses, categories, instructors, fil
               </div>
             )}
             <ModalForm isOpen={isCreateModalOpen} onClose={() => setIsCreateModalOpen(false)} onSubmit={handleCreate} title="Create New Course" fields={formFields} submitLabel="Create Course" />
-            <ModalForm isOpen={isEditModalOpen} onClose={() => { setIsEditModalOpen(false); setSelectedCourse(null); }} onSubmit={handleEdit} title="Edit Course" fields={formFields} initialData={selectedCourse ? { courseTitle: selectedCourse.courseTitle, categoryId: selectedCourse.category.categoryId, instructorId: selectedCourse.instructor.userId, simulatedPrice: selectedCourse.simulatedPrice, isPublished: selectedCourse.isPublished } : {}} submitLabel="Update Course" />
+            <ModalForm isOpen={isEditModalOpen} onClose={() => { setIsEditModalOpen(false); setSelectedCourse(null); }} onSubmit={handleEdit} title="Edit Course" fields={formFields} initialData={selectedCourse ? { courseTitle: selectedCourse.courseTitle, courseDescription: selectedCourse.courseDescription, categoryId: selectedCourse.category.categoryId, instructorId: selectedCourse.instructor.userId, simulatedPrice: selectedCourse.simulatedPrice, isPublished: selectedCourse.isPublished } : {}} submitLabel="Update Course" />
           </div>
         </div>
       </div>

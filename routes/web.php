@@ -231,6 +231,7 @@ Route::middleware(['auth', App\Http\Middleware\AdminRouteMiddleware::class])->gr
     Route::delete('/users/{userId}', [App\Http\Controllers\Admin\UserController::class, 'destroy']);
     Route::get('/courses/export', [App\Http\Controllers\Admin\CourseController::class, 'export']);
     Route::get('/courses', [App\Http\Controllers\Admin\CourseController::class, 'index']);
+    Route::post('/courses', [App\Http\Controllers\Admin\CourseController::class, 'store']);
     Route::put('/courses/{courseId}', [App\Http\Controllers\Admin\CourseController::class, 'update']);
     Route::delete('/courses/{courseId}', [App\Http\Controllers\Admin\CourseController::class, 'destroy']);
     Route::get('/categories/export', [App\Http\Controllers\Admin\CategoryController::class, 'export']);

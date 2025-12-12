@@ -32,11 +32,26 @@ class CourseController extends Controller
       'user' => auth()->user()
     ]);
   }
+  public function store(Request $request)
+  {
+    $validated = $request->validate([
+      'courseTitle' => 'required|string|max:255',
+      'courseDescription' => 'required|string',
+      'categoryId' => 'required|exists:categories,categoryId',
+      'instructorId' => 'required|exists:users,userId',
+      'simulatedPrice' => 'required|numeric|min:0',
+      'isPublished' => 'required|boolean',
+      'courseMeta' => 'nullable|json',
+    ]);
+    Course::create($validated);
+    return redirect()->back()->with('success', 'Course Created Successfully!');
+  }
   public function update(Request $request, $courseId)
   {
     $course = Course::findOrFail($courseId);
     $validated = $request->validate([
       'courseTitle' => 'required|string|max:255',
+      'courseDescription' => 'required|string',
       'categoryId' => 'required|exists:categories,categoryId',
       'instructorId' => 'required|exists:users,userId',
       'simulatedPrice' => 'required|numeric|min:0',

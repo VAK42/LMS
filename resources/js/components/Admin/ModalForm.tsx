@@ -52,7 +52,7 @@ export default function ModalForm({ isOpen, onClose, onSubmit, title, fields, in
                   {field.required && <span className="text-red-600">*</span>}
                 </label>
                 {field.type === 'select' ? (
-                  <select value={formData[field.name] || ''} onChange={(e) => handleChange(field.name, e.target.value)} required={field.required} className="w-full px-4 py-2 border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 focus:outline-none focus:border-black dark:focus:border-white">
+                  <select value={formData[field.name] || ''} onChange={(e) => handleChange(field.name, e.target.value)} required={field.required} className="w-full px-4 py-2 border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 focus:outline-none focus:border-black dark:focus:border-white cursor-pointer">
                     <option value="" disabled>Select {field.label}</option>
                     {field.options?.map((opt) => (
                       <option key={opt.value} value={opt.value}>
@@ -72,10 +72,12 @@ export default function ModalForm({ isOpen, onClose, onSubmit, title, fields, in
                 ) : (
                   <input
                     type={field.type}
-                    value={formData[field.name] || ''}
-                    onChange={(e) => handleChange(field.name, field.type === 'number' ? parseFloat(e.target.value) : e.target.value)}
+                    value={formData[field.name] !== undefined && formData[field.name] !== null ? formData[field.name] : ''}
+                    onChange={(e) => handleChange(field.name, field.type === 'number' ? (e.target.value === '' ? '' : parseFloat(e.target.value)) : e.target.value)}
                     required={field.required}
                     placeholder={field.placeholder}
+                    min={field.type === 'number' && field.name === 'simulatedPrice' ? 0 : undefined}
+                    step={field.type === 'number' && field.name === 'simulatedPrice' ? '0.01' : undefined}
                     className="w-full px-4 py-2 border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 focus:outline-none focus:border-black dark:focus:border-white"
                   />
                 )}
