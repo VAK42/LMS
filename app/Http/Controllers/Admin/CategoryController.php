@@ -13,7 +13,7 @@ class CategoryController extends Controller
       $search = $request->search;
       $query->where('categoryName', 'like', "%{$search}%");
     }
-    $categories = $query->orderBy('categoryName', 'asc')->paginate(2);
+    $categories = $query->orderBy('categoryName', 'asc')->orderBy('categoryId', 'desc')->paginate(2);
     return Inertia::render('Admin/CategoryManagement', [
       'categories' => $categories,
       'filters' => $request->only(['search']),

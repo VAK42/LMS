@@ -1,10 +1,9 @@
 import { Head, router } from '@inertiajs/react';
 import { useState } from 'react';
-import { DollarSign, CreditCard, CheckCircle, XCircle, Clock } from 'lucide-react';
+import { DollarSign, CreditCard, CheckCircle, XCircle, Clock, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, Filter } from 'lucide-react';
 import Layout from '../../components/Layout';
 import AdminSidebar from '../../components/Admin/Sidebar';
 import DataTable from '../../components/Admin/DataTable';
-import FilterPanel from '../../components/Admin/FilterPanel';
 interface Transaction {
   transactionId: number;
   user: { userId: number; userName: string; userEmail: string };
@@ -32,12 +31,20 @@ export default function TransactionManagement({ transactions, filters, user }: P
   const [searchTerm, setSearchTerm] = useState(filters.search || '');
   const [statusFilter, setStatusFilter] = useState(filters.status || '');
   const handleSearch = () => {
-    router.get('/admin/transactions', { search: searchTerm, status: statusFilter }, { preserveState: true });
+    const params: { search?: string; status?: string } = {};
+    if (searchTerm && searchTerm.trim()) {
+      params.search = searchTerm;
+    }
+    if (statusFilter && statusFilter.trim()) {
+      params.status = statusFilter;
+    }
+    router.get('/admin/transactions', params, { preserveState: true });
   };
-  const handleClearFilters = () => {
-    setSearchTerm('');
-    setStatusFilter('');
-    router.get('/admin/transactions', {}, { preserveState: true });
+  const buildPaginationParams = (page: number) => {
+    const params: any = { page };
+    if (searchTerm && searchTerm.trim()) params.search = searchTerm;
+    if (statusFilter && statusFilter.trim()) params.status = statusFilter;
+    return params;
   };
   const getStatusIcon = (status: string) => {
     switch (status) {
@@ -87,9 +94,9 @@ export default function TransactionManagement({ transactions, filters, user }: P
       key: 'amount',
       label: 'Amount',
       sortable: true,
-      render: (value: number) => (
-        <span className="font-semibold text-black dark:text-white">${value.toFixed(2)}</span>
-      )
+      render: (value: number) => value != null ? (
+        <span className="font-semibold text-black dark:text-white">${Number(value).toFixed(2)}</span>
+      ) : '$0.00'
     },
     {
       key: 'paymentMethod',
@@ -120,9 +127,9 @@ export default function TransactionManagement({ transactions, filters, user }: P
       render: (value: string) => new Date(value).toLocaleDateString()
     }
   ];
-  const totalRevenue = transactions.data
+  const totalRevenue = (transactions.data || [])
     .filter(t => t.transactionStatus === 'completed')
-    .reduce((sum, t) => sum + t.amount, 0);
+    .reduce((sum, t) => sum + (parseFloat(String(t.amount || 0))), 0);
   return (
     <Layout user={user}>
       <Head title="Transaction Management" />
@@ -139,7 +146,7 @@ export default function TransactionManagement({ transactions, filters, user }: P
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm font-medium text-zinc-600 dark:text-zinc-400">Total Revenue</p>
-                    <p className="text-3xl font-bold text-black dark:text-white mt-2">${totalRevenue.toFixed(2)}</p>
+                    <p className="text-3xl font-bold text-black dark:text-white mt-2">${Number(totalRevenue || 0).toFixed(2)}</p>
                   </div>
                   <div className="p-3 bg-green-50 dark:bg-green-900/20 rounded-lg">
                     <DollarSign className="w-6 h-6 text-green-600 dark:text-green-400" />
@@ -150,7 +157,7 @@ export default function TransactionManagement({ transactions, filters, user }: P
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm font-medium text-zinc-600 dark:text-zinc-400">Total Transactions</p>
-                    <p className="text-3xl font-bold text-black dark:text-white mt-2">{transactions.data.length}</p>
+                    <p className="text-3xl font-bold text-black dark:text-white mt-2">{(transactions.data || []).length}</p>
                   </div>
                   <div className="p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
                     <CreditCard className="w-6 h-6 text-blue-600 dark:text-blue-400" />
@@ -162,7 +169,7 @@ export default function TransactionManagement({ transactions, filters, user }: P
                   <div>
                     <p className="text-sm font-medium text-zinc-600 dark:text-zinc-400">Completed</p>
                     <p className="text-3xl font-bold text-black dark:text-white mt-2">
-                      {transactions.data.filter(t => t.transactionStatus === 'completed').length}
+                      {(transactions.data || []).filter(t => t.transactionStatus === 'completed').length}
                     </p>
                   </div>
                   <div className="p-3 bg-green-50 dark:bg-green-900/20 rounded-lg">
@@ -171,7 +178,7 @@ export default function TransactionManagement({ transactions, filters, user }: P
                 </div>
               </div>
             </div>
-            <FilterPanel onClear={handleClearFilters}>
+            <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 p-6 mb-6">
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div className="flex-1">
                   <input type="text" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} onKeyPress={(e) => e.key === 'Enter' && handleSearch()} placeholder="Search By User Or Course..." className="w-full px-4 py-2 border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 focus:outline-none focus:border-black dark:focus:border-white" />
@@ -182,12 +189,32 @@ export default function TransactionManagement({ transactions, filters, user }: P
                   <option value="pending">Pending</option>
                   <option value="failed">Failed</option>
                 </select>
-                <button onClick={handleSearch} className="px-6 py-2 bg-black dark:bg-white text-white dark:text-black hover:bg-zinc-800 dark:hover:bg-zinc-200">
-                  Apply Filters
+                <button onClick={handleSearch} className="flex items-center gap-2 px-6 py-2 bg-black dark:bg-white text-white dark:text-black hover:bg-zinc-800 dark:hover:bg-zinc-200 cursor-pointer">
+                  <Filter className="w-4 h-4" />
+                  Filter
                 </button>
               </div>
-            </FilterPanel>
-            <DataTable columns={columns} data={transactions.data} searchable={false} exportable={true} />
+            </div>
+            <DataTable columns={columns} data={transactions.data} exportable={true} keyField="transactionId" />
+            {transactions.last_page > 1 && (
+              <div className="mt-6 flex justify-center items-center gap-2">
+                <button onClick={() => router.get('/admin/transactions', buildPaginationParams(1), { preserveState: true, only: ['transactions'] })} disabled={transactions.current_page === 1} className="px-3 py-2 border border-zinc-300 dark:border-zinc-700 text-zinc-700 dark:text-zinc-300 hover:border-black dark:hover:border-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer" aria-label="First Page">
+                  <ChevronsLeft className="w-4 h-4" />
+                </button>
+                <button onClick={() => router.get('/admin/transactions', buildPaginationParams(transactions.current_page - 1), { preserveState: true, only: ['transactions'] })} disabled={transactions.current_page === 1} className="px-3 py-2 border border-zinc-300 dark:border-zinc-700 text-zinc-700 dark:text-zinc-300 hover:border-black dark:hover:border-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer" aria-label="Previous Page">
+                  <ChevronLeft className="w-4 h-4" />
+                </button>
+                <button className="px-4 py-2 font-medium transition-colors border bg-black dark:bg-white text-white dark:text-black border-black dark:border-white">
+                  {transactions.current_page}
+                </button>
+                <button onClick={() => router.get('/admin/transactions', buildPaginationParams(transactions.current_page + 1), { preserveState: true, only: ['transactions'] })} disabled={transactions.current_page === transactions.last_page} className="px-3 py-2 border border-zinc-300 dark:border-zinc-700 text-zinc-700 dark:text-zinc-300 hover:border-black dark:hover:border-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer" aria-label="Next Page">
+                  <ChevronRight className="w-4 h-4" />
+                </button>
+                <button onClick={() => router.get('/admin/transactions', buildPaginationParams(transactions.last_page), { preserveState: true, only: ['transactions'] })} disabled={transactions.current_page === transactions.last_page} className="px-3 py-2 border border-zinc-300 dark:border-zinc-700 text-zinc-700 dark:text-zinc-300 hover:border-black dark:hover:border-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer" aria-label="Last Page">
+                  <ChevronsRight className="w-4 h-4" />
+                </button>
+              </div>
+            )}
           </div>
         </div>
       </div>

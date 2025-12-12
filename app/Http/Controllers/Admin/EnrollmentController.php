@@ -24,10 +24,7 @@ class EnrollmentController extends Controller
         });
       });
     }
-    if ($request->has('status') && $request->status !== '') {
-      $query->where('enrollmentStatus', $request->status);
-    }
-    $enrollments = $query->orderBy('enrolledAt', 'desc')->paginate(2);
+    $enrollments = $query->orderBy('createdAt', 'desc')->paginate(2);
     $users = User::where('role', 'learner')->where('userId', '!=', auth()->id())->get();
     $courses = Course::where('isPublished', true)->get();
     return Inertia::render('Admin/EnrollmentManagement', [

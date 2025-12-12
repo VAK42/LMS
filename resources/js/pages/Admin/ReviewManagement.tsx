@@ -1,6 +1,7 @@
 import { Head, router } from '@inertiajs/react';
 import { useState } from 'react';
-import { Trash2, Star } from 'lucide-react';
+import { Trash2, Star, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, Filter } from 'lucide-react';
+import { useToast } from '../../contexts/ToastContext';
 import Layout from '../../components/Layout';
 import AdminSidebar from '../../components/Admin/Sidebar';
 import DataTable from '../../components/Admin/DataTable';
@@ -27,14 +28,27 @@ interface Props {
   user: any;
 }
 export default function ReviewManagement({ reviews, filters, user }: Props) {
+  const { showToast } = useToast();
   const [searchTerm, setSearchTerm] = useState(filters.search || '');
   const [ratingFilter, setRatingFilter] = useState(filters.rating || '');
   const handleSearch = () => {
-    router.get('/admin/reviews', { search: searchTerm, rating: ratingFilter }, { preserveState: true });
+    const params: { search?: string; rating?: string } = {};
+    if (searchTerm && searchTerm.trim()) params.search = searchTerm;
+    if (ratingFilter && ratingFilter.trim()) params.rating = ratingFilter;
+    router.get('/admin/reviews', params, { preserveState: true });
+  };
+  const buildPaginationParams = (page: number) => {
+    const params: any = { page };
+    if (searchTerm && searchTerm.trim()) params.search = searchTerm;
+    if (ratingFilter && ratingFilter.trim()) params.rating = ratingFilter;
+    return params;
   };
   const handleDelete = (reviewId: number) => {
     if (confirm('Are You Sure You Want To Delete This Review?')) {
-      router.delete(`/admin/reviews/${reviewId}`);
+      router.post(`/admin/reviews/${reviewId}`, { _method: 'DELETE' }, {
+        onSuccess: () => showToast('Review Deleted Successfully!', 'success'),
+        onError: () => showToast('Failed To Delete Review! Please Try Again!', 'error')
+      });
     }
   };
   const renderStars = (rating: number) => {
@@ -82,7 +96,7 @@ export default function ReviewManagement({ reviews, filters, user }: Props) {
       key: 'actions',
       label: 'Actions',
       render: (_: any, row: Review) => (
-        <button onClick={() => handleDelete(row.reviewId)} className="p-2 hover:bg-zinc-100 dark:hover:bg-zinc-800 text-red-600">
+        <button onClick={() => handleDelete(row.reviewId)} className="p-2 hover:bg-zinc-100 dark:hover:bg-zinc-800 text-red-600 cursor-pointer">
           <Trash2 className="w-4 h-4" />
         </button>
       )
@@ -112,12 +126,30 @@ export default function ReviewManagement({ reviews, filters, user }: Props) {
                   <option value="2">2 Stars</option>
                   <option value="1">1 Star</option>
                 </select>
-                <button onClick={handleSearch} className="px-6 py-2 bg-black dark:bg-white text-white dark:text-black hover:bg-zinc-800 dark:hover:bg-zinc-200">
-                  Search
+                <button onClick={handleSearch} className="flex items-center gap-2 px-6 py-2 bg-black dark:bg-white text-white dark:text-black hover:bg-zinc-800 dark:hover:bg-zinc-200 cursor-pointer">
+                  <Filter className="w-4 h-4" />
+                  Filter
                 </button>
               </div>
             </div>
-            <DataTable columns={columns} data={reviews.data} searchable={false} exportable={true} />
+            <DataTable columns={columns} data={reviews.data} exportable={true} keyField="reviewId" />
+            {reviews.last_page > 1 && (
+              <div className="mt-6 flex justify-center items-center gap-2">
+                <button onClick={() => router.get('/admin/reviews', buildPaginationParams(1), { preserveState: true, only: ['reviews'] })} disabled={reviews.current_page === 1} className="px-3 py-2 border border-zinc-300 dark:border-zinc-700 text-zinc-700 dark:text-zinc-300 hover:border-black dark:hover:border-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer" aria-label="First Page">
+                  <ChevronsLeft className="w-4 h-4" />
+                </button>
+                <button onClick={() => router.get('/admin/reviews', buildPaginationParams(reviews.current_page - 1), { preserveState: true, only: ['reviews'] })} disabled={reviews.current_page === 1} className="px-3 py-2 border border-zinc-300 dark:border-zinc-700 text-zinc-700 dark:text-zinc-300 hover:border-black dark:hover:border-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer" aria-label="Previous">
+                  <ChevronLeft className="w-4 h-4" />
+                </button>
+                <button className="px-4 py-2 font-medium border bg-black dark:bg-white text-white dark:text-black">{reviews.current_page}</button>
+                <button onClick={() => router.get('/admin/reviews', buildPaginationParams(reviews.current_page + 1), { preserveState: true, only: ['reviews'] })} disabled={reviews.current_page === reviews.last_page} className="px-3 py-2 border border-zinc-300 dark:border-zinc-700 text-zinc-700 dark:text-zinc-300 hover:border-black dark:hover:border-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer" aria-label="Next">
+                  <ChevronRight className="w-4 h-4" />
+                </button>
+                <button onClick={() => router.get('/admin/reviews', buildPaginationParams(reviews.last_page), { preserveState: true, only: ['reviews'] })} disabled={reviews.current_page === reviews.last_page} className="px-3 py-2 border border-zinc-300 dark:border-zinc-700 text-zinc-700 dark:text-zinc-300 hover:border-black dark:hover:border-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer" aria-label="Last">
+                  <ChevronsRight className="w-4 h-4" />
+                </button>
+              </div>
+            )}
           </div>
         </div>
       </div>

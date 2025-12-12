@@ -25,7 +25,7 @@ class NotificationController extends Controller
     if ($request->has('type') && $request->type !== '') {
       $query->where('notificationType', $request->type);
     }
-    $notifications = $query->orderBy('createdAt', 'desc')->paginate(2);
+    $notifications = $query->orderBy('createdAt', 'desc')->orderBy('notificationId', 'desc')->paginate(2);
     $users = User::where('userId', '!=', auth()->id())->get();
     return Inertia::render('Admin/NotificationManagement', [
       'notifications' => $notifications,

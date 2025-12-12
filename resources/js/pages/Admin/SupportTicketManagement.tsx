@@ -1,11 +1,11 @@
 import { Head, router } from '@inertiajs/react';
 import { useState } from 'react';
-import { Edit, Trash2, AlertCircle, Clock, CheckCircle } from 'lucide-react';
+import { Edit, Trash2, AlertCircle, Clock, CheckCircle, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, Filter } from 'lucide-react';
+import { useToast } from '../../contexts/ToastContext';
 import Layout from '../../components/Layout';
 import AdminSidebar from '../../components/Admin/Sidebar';
 import DataTable from '../../components/Admin/DataTable';
 import ModalForm from '../../components/Admin/ModalForm';
-import FilterPanel from '../../components/Admin/FilterPanel';
 interface Ticket {
   ticketId: number;
   user: { userId: number; userName: string; userEmail: string };
@@ -33,32 +33,55 @@ interface Props {
   user: any;
 }
 export default function SupportTicketManagement({ tickets, filters, user }: Props) {
+  const { showToast } = useToast();
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [selectedTicket, setSelectedTicket] = useState<Ticket | null>(null);
   const [searchTerm, setSearchTerm] = useState(filters.search || '');
   const [statusFilter, setStatusFilter] = useState(filters.status || '');
   const [priorityFilter, setPriorityFilter] = useState(filters.priority || '');
   const handleSearch = () => {
-    router.get('/admin/support', { search: searchTerm, status: statusFilter, priority: priorityFilter }, { preserveState: true });
+    const params: { search?: string; status?: string; priority?: string } = {};
+    if (searchTerm && searchTerm.trim()) params.search = searchTerm;
+    if (statusFilter && statusFilter.trim()) params.status = statusFilter;
+    if (priorityFilter && priorityFilter.trim()) params.priority = priorityFilter;
+    router.get('/admin/support', params, { preserveState: true });
   };
-  const handleClearFilters = () => {
-    setSearchTerm('');
-    setStatusFilter('');
-    setPriorityFilter('');
-    router.get('/admin/support', {}, { preserveState: true });
+  const buildPaginationParams = (page: number) => {
+    const params: any = { page };
+    if (searchTerm && searchTerm.trim()) params.search = searchTerm;
+    if (statusFilter && statusFilter.trim()) params.status = statusFilter;
+    if (priorityFilter && priorityFilter.trim()) params.priority = priorityFilter;
+    return params;
+  };
+  const handleCreate = (data: Record<string, any>) => {
+    router.post('/admin/support', data, {
+      onSuccess: () => {
+        setIsCreateModalOpen(false);
+        showToast('Support Ticket Created Successfully!', 'success');
+      },
+      onError: () => {
+        showToast('Failed To Create Ticket! Please Try Again!', 'error');
+      }
+    });
   };
   const handleEdit = (data: Record<string, any>) => {
     if (!selectedTicket) return;
-    router.put(`/admin/support/${selectedTicket.ticketId}`, data, {
+    router.post(`/admin/support/${selectedTicket.ticketId}`, { ...data, _method: 'PUT' }, {
       onSuccess: () => {
         setIsEditModalOpen(false);
         setSelectedTicket(null);
-      }
+        showToast('Ticket Updated Successfully!', 'success');
+      },
+      onError: () => showToast('Failed To Update Ticket! Please Try Again!', 'error')
     });
   };
   const handleDelete = (ticketId: number) => {
     if (confirm('Are You Sure You Want To Delete This Support Ticket?')) {
-      router.delete(`/admin/support/${ticketId}`);
+      router.post(`/admin/support/${ticketId}`, { _method: 'DELETE' }, {
+        onSuccess: () => showToast('Ticket Deleted Successfully!', 'success'),
+        onError: () => showToast('Failed To Delete Ticket! Please Try Again!', 'error')
+      });
     }
   };
   const openEditModal = (ticket: Ticket) => {
@@ -126,7 +149,7 @@ export default function SupportTicketManagement({ tickets, filters, user }: Prop
         <div className="flex items-center gap-2">
           {value === 'resolved' ? <CheckCircle className="w-4 h-4 text-green-600" /> : value === 'in_progress' ? <Clock className="w-4 h-4 text-blue-600" /> : <AlertCircle className="w-4 h-4 text-yellow-600" />}
           <span className={`px-2 py-1 rounded text-xs font-medium ${getStatusColor(value)}`}>
-            {value.replace('_', ' ').split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')}
+            {value ? value.replace('_', ' ').split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ') : 'N/A'}
           </span>
         </div>
       )
@@ -142,10 +165,10 @@ export default function SupportTicketManagement({ tickets, filters, user }: Prop
       label: 'Actions',
       render: (_: any, row: Ticket) => (
         <div className="flex items-center gap-2">
-          <button onClick={() => openEditModal(row)} className="p-2 hover:bg-zinc-100 dark:hover:bg-zinc-800">
+          <button onClick={() => openEditModal(row)} className="p-2 hover:bg-zinc-100 dark:hover:bg-zinc-800 cursor-pointer">
             <Edit className="w-4 h-4" />
           </button>
-          <button onClick={() => handleDelete(row.ticketId)} className="p-2 hover:bg-zinc-100 dark:hover:bg-zinc-800 text-red-600">
+          <button onClick={() => handleDelete(row.ticketId)} className="p-2 hover:bg-zinc-100 dark:hover:bg-zinc-800 text-red-600 cursor-pointer">
             <Trash2 className="w-4 h-4" />
           </button>
         </div>
@@ -192,11 +215,17 @@ export default function SupportTicketManagement({ tickets, filters, user }: Prop
         <AdminSidebar currentPath="/admin/support" />
         <div className="flex-1">
           <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 py-8">
-            <div className="mb-8">
-              <h1 className="text-4xl font-bold text-black dark:text-white mb-2">Support Tickets</h1>
-              <p className="text-zinc-600 dark:text-zinc-400">Manage User Support Requests & Inquiries</p>
+            <div className="flex items-center justify-between mb-8">
+              <div>
+                <h1 className="text-4xl font-bold text-black dark:text-white mb-2">Support Tickets</h1>
+                <p className="text-zinc-600 dark:text-zinc-400">Manage User Support Requests & Inquiries</p>
+              </div>
+              <button onClick={() => setIsCreateModalOpen(true)} className="flex items-center gap-2 px-6 py-3 bg-black dark:bg-white text-white dark:text-black font-medium hover:bg-zinc-800 dark:hover:bg-zinc-200 cursor-pointer">
+                <span className="text-xl">+</span>
+                Create Ticket
+              </button>
             </div>
-            <FilterPanel onClear={handleClearFilters}>
+            <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 p-6 mb-6">
               <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                 <input type="text" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} onKeyPress={(e) => e.key === 'Enter' && handleSearch()} placeholder="Search By Subject Or User..." className="px-4 py-2 border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 focus:outline-none focus:border-black dark:focus:border-white" />
                 <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)} className="px-4 py-2 border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 focus:outline-none focus:border-black dark:focus:border-white">
@@ -213,12 +242,31 @@ export default function SupportTicketManagement({ tickets, filters, user }: Prop
                   <option value="high">High</option>
                   <option value="urgent">Urgent</option>
                 </select>
-                <button onClick={handleSearch} className="px-6 py-2 bg-black dark:bg-white text-white dark:text-black hover:bg-zinc-800 dark:hover:bg-zinc-200">
-                  Apply Filters
+                <button onClick={handleSearch} className="flex items-center gap-2 px-6 py-2 bg-black dark:bg-white text-white dark:text-black hover:bg-zinc-800 dark:hover:bg-zinc-200 cursor-pointer">
+                  <Filter className="w-4 h-4" />
+                  Filter
                 </button>
               </div>
-            </FilterPanel>
-            <DataTable columns={columns} data={tickets.data} searchable={false} exportable={true} />
+            </div>
+            <DataTable columns={columns} data={tickets.data} exportable={true} keyField="ticketId" />
+            {tickets.last_page > 1 && (
+              <div className="mt-6 flex justify-center items-center gap-2">
+                <button onClick={() => router.get('/admin/support', buildPaginationParams(1), { preserveState: true, only: ['tickets'] })} disabled={tickets.current_page === 1} className="px-3 py-2 border border-zinc-300 dark:border-zinc-700 text-zinc-700 dark:text-zinc-300 hover:border-black dark:hover:border-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer" aria-label="First Page">
+                  <ChevronsLeft className="w-4 h-4" />
+                </button>
+                <button onClick={() => router.get('/admin/support', buildPaginationParams(tickets.current_page - 1), { preserveState: true, only: ['tickets'] })} disabled={tickets.current_page === 1} className="px-3 py-2 border border-zinc-300 dark:border-zinc-700 text-zinc-700 dark:text-zinc-300 hover:border-black dark:hover:border-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer" aria-label="Previous">
+                  <ChevronLeft className="w-4 h-4" />
+                </button>
+                <button className="px-4 py-2 font-medium border bg-black dark:bg-white text-white dark:text-black">{tickets.current_page}</button>
+                <button onClick={() => router.get('/admin/support', buildPaginationParams(tickets.current_page + 1), { preserveState: true, only: ['tickets'] })} disabled={tickets.current_page === tickets.last_page} className="px-3 py-2 border border-zinc-300 dark:border-zinc-700 text-zinc-700 dark:text-zinc-300 hover:border-black dark:hover:border-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer" aria-label="Next">
+                  <ChevronRight className="w-4 h-4" />
+                </button>
+                <button onClick={() => router.get('/admin/support', buildPaginationParams(tickets.last_page), { preserveState: true, only: ['tickets'] })} disabled={tickets.current_page === tickets.last_page} className="px-3 py-2 border border-zinc-300 dark:border-zinc-700 text-zinc-700 dark:text-zinc-300 hover:border-black dark:hover:border-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer" aria-label="Last">
+                  <ChevronsRight className="w-4 h-4" />
+                </button>
+              </div>
+            )}
+            <ModalForm isOpen={isCreateModalOpen} onClose={() => setIsCreateModalOpen(false)} onSubmit={handleCreate} title="Create Support Ticket" fields={formFields.filter(f => f.name !== 'ticketStatus' && f.name !== 'adminResponse')} submitLabel="Create Ticket" />
             <ModalForm isOpen={isEditModalOpen} onClose={() => { setIsEditModalOpen(false); setSelectedTicket(null); }} onSubmit={handleEdit} title={`Ticket #${selectedTicket?.ticketId || ''} - ${selectedTicket?.subject || ''}`} fields={formFields} initialData={selectedTicket ? { ticketStatus: selectedTicket.ticketStatus, priority: selectedTicket.priority, adminResponse: selectedTicket.adminResponse || '' } : {}} submitLabel="Update Ticket" />
           </div>
         </div>

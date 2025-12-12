@@ -23,7 +23,7 @@ class CouponController extends Controller
           }
         });
     }
-    $coupons = $query->orderBy('createdAt', 'desc')->paginate(2);
+    $coupons = $query->orderBy('createdAt', 'desc')->orderBy('couponId', 'desc')->paginate(2);
     return Inertia::render('Admin/CouponManagement', [
       'coupons' => $coupons,
       'filters' => $request->only(['search', 'status']),

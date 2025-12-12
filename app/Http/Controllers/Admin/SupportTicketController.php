@@ -24,7 +24,7 @@ class SupportTicketController extends Controller
     if ($request->has('priority') && $request->priority !== '') {
       $query->where('priority', $request->priority);
     }
-    $tickets = $query->orderBy('createdAt', 'desc')->paginate(2);
+    $tickets = $query->orderBy('createdAt', 'desc')->orderBy('ticketId', 'desc')->paginate(2);
     return Inertia::render('Admin/SupportTicketManagement', [
       'tickets' => $tickets,
       'filters' => $request->only(['search', 'status', 'priority']),

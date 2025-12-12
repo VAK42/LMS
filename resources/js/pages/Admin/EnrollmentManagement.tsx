@@ -1,17 +1,19 @@
 import { Head, router } from '@inertiajs/react';
 import { useState } from 'react';
-import { Plus, Edit, Trash2 } from 'lucide-react';
+import { Plus, Edit, Trash2, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, Filter } from 'lucide-react';
+import { useToast } from '../../contexts/ToastContext';
 import Layout from '../../components/Layout';
 import AdminSidebar from '../../components/Admin/Sidebar';
 import DataTable from '../../components/Admin/DataTable';
 import ModalForm from '../../components/Admin/ModalForm';
 interface Enrollment {
-  enrollmentId: number;
+  userId: number;
+  courseId: number;
   user: { userId: number; userName: string };
   course: { courseId: number; courseTitle: string };
-  enrollmentStatus: string;
-  progressPercentage: number;
-  enrolledAt: string;
+  completionPercent: number;
+  enrollmentDate: string;
+  isPaid: boolean;
 }
 interface User {
   userId: number;
@@ -38,31 +40,67 @@ interface Props {
   user: any;
 }
 export default function EnrollmentManagement({ enrollments, users, courses, filters, user }: Props) {
+  const { showToast } = useToast();
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [selectedEnrollment, setSelectedEnrollment] = useState<Enrollment | null>(null);
   const [searchTerm, setSearchTerm] = useState(filters.search || '');
   const [statusFilter, setStatusFilter] = useState(filters.status || '');
   const handleSearch = () => {
-    router.get('/admin/enrollments', { search: searchTerm, status: statusFilter }, { preserveState: true });
+    const params: { search?: string; status?: string } = {};
+    if (searchTerm && searchTerm.trim()) {
+      params.search = searchTerm;
+    }
+    if (statusFilter && statusFilter.trim()) {
+      params.status = statusFilter;
+    }
+    router.get('/admin/enrollments', params, { preserveState: true });
+  };
+  const buildPaginationParams = (page: number) => {
+    const params: any = { page };
+    if (searchTerm && searchTerm.trim()) params.search = searchTerm;
+    if (statusFilter && statusFilter.trim()) params.status = statusFilter;
+    return params;
   };
   const handleCreate = (data: Record<string, any>) => {
     router.post('/admin/enrollments', data, {
-      onSuccess: () => setIsCreateModalOpen(false)
+      onSuccess: () => {
+        setIsCreateModalOpen(false);
+        showToast('Enrollment Created Successfully!', 'success');
+      },
+      onError: () => {
+        showToast('Failed To Create Enrollment! Please Try Again!', 'error');
+      }
     });
   };
   const handleEdit = (data: Record<string, any>) => {
     if (!selectedEnrollment) return;
-    router.put(`/admin/enrollments/${selectedEnrollment.enrollmentId}`, data, {
+    router.post(`/admin/enrollments/${selectedEnrollment.userId}/${selectedEnrollment.courseId}`, {
+      ...data,
+      _method: 'PUT'
+    }, {
       onSuccess: () => {
         setIsEditModalOpen(false);
         setSelectedEnrollment(null);
+        showToast('Enrollment Updated Successfully!', 'success');
+      },
+      onError: () => {
+        showToast('Failed To Update Enrollment! Please Try Again!', 'error');
       }
     });
   };
-  const handleDelete = (enrollmentId: number) => {
+  const handleDelete = (userId: number, courseId: number) => {
     if (confirm('Are You Sure You Want To Delete This Enrollment?')) {
-      router.delete(`/admin/enrollments/${enrollmentId}`);
+      router.post(`/admin/enrollments/${userId}/${courseId}`, {
+        _method: 'DELETE'
+      }, {
+        onSuccess: () => {
+          showToast('Enrollment Deleted Successfully!', 'success');
+        },
+        onError: () => {
+          showToast('Failed To Delete Enrollment! Please Try Again!', 'error');
+        }
+      });
     }
   };
   const openEditModal = (enrollment: Enrollment) => {
@@ -91,45 +129,45 @@ export default function EnrollmentManagement({ enrollments, users, courses, filt
       )
     },
     {
-      key: 'enrollmentStatus',
+      key: 'isPaid',
       label: 'Status',
       sortable: true,
-      render: (value: string) => (
-        <span className={`px-2 py-1 rounded text-xs font-medium ${getStatusColor(value)}`}>
-          {value.charAt(0).toUpperCase() + value.slice(1)}
+      render: (value: boolean) => (
+        <span className={`px-2 py-1 rounded text-xs font-medium ${value ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' : 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400'}`}>
+          {value ? 'Paid' : 'Unpaid'}
         </span>
       )
     },
     {
-      key: 'progressPercentage',
+      key: 'completionPercent',
       label: 'Progress',
       sortable: true,
       render: (value: number) => (
         <div className="w-full">
           <div className="flex items-center justify-between mb-1">
-            <span className="text-sm font-medium text-zinc-900 dark:text-zinc-100">{value}%</span>
+            <span className="text-sm font-medium text-zinc-900 dark:text-zinc-100">{value || 0}%</span>
           </div>
           <div className="w-full bg-zinc-200 dark:bg-zinc-700 rounded-full h-2">
-            <div className="bg-blue-600 h-2 rounded-full" style={{ width: `${value}%` }}></div>
+            <div className="bg-blue-600 h-2 rounded-full" style={{ width: `${value || 0}%` }}></div>
           </div>
         </div>
       )
     },
     {
-      key: 'enrolledAt',
+      key: 'enrollmentDate',
       label: 'Enrolled',
       sortable: true,
-      render: (value: string) => new Date(value).toLocaleDateString()
+      render: (value: string) => value ? new Date(value).toLocaleDateString() : 'N/A'
     },
     {
       key: 'actions',
       label: 'Actions',
       render: (_: any, row: Enrollment) => (
         <div className="flex items-center gap-2">
-          <button onClick={() => openEditModal(row)} className="p-2 hover:bg-zinc-100 dark:hover:bg-zinc-800">
+          <button onClick={() => openEditModal(row)} className="p-2 hover:bg-zinc-100 dark:hover:bg-zinc-800 cursor-pointer">
             <Edit className="w-4 h-4" />
           </button>
-          <button onClick={() => handleDelete(row.enrollmentId)} className="p-2 hover:bg-zinc-100 dark:hover:bg-zinc-800 text-red-600">
+          <button onClick={() => handleDelete(row.userId, row.courseId)} className="p-2 hover:bg-zinc-100 dark:hover:bg-zinc-800 text-red-600 cursor-pointer">
             <Trash2 className="w-4 h-4" />
           </button>
         </div>
@@ -199,14 +237,32 @@ export default function EnrollmentManagement({ enrollments, users, courses, filt
                   <option value="completed">Completed</option>
                   <option value="dropped">Dropped</option>
                 </select>
-                <button onClick={handleSearch} className="px-6 py-2 bg-black dark:bg-white text-white dark:text-black hover:bg-zinc-800 dark:hover:bg-zinc-200">
-                  Search
+                <button onClick={handleSearch} className="flex items-center gap-2 px-6 py-2 bg-black dark:bg-white text-white dark:text-black hover:bg-zinc-800 dark:hover:bg-zinc-200 cursor-pointer">
+                  <Filter className="w-4 h-4" />
+                  Filter
                 </button>
               </div>
             </div>
-            <DataTable columns={columns} data={enrollments.data} searchable={false} exportable={true} />
+            <DataTable columns={columns} data={enrollments.data} exportable={true} />
+            {enrollments.last_page > 1 && (
+              <div className="mt-6 flex justify-center items-center gap-2">
+                <button onClick={() => router.get('/admin/enrollments', buildPaginationParams(1), { preserveState: true, only: ['enrollments'] })} disabled={enrollments.current_page === 1} className="px-3 py-2 border border-zinc-300 dark:border-zinc-700 text-zinc-700 dark:text-zinc-300 hover:border-black dark:hover:border-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer" aria-label="First Page">
+                  <ChevronsLeft className="w-4 h-4" />
+                </button>
+                <button onClick={() => router.get('/admin/enrollments', buildPaginationParams(enrollments.current_page - 1), { preserveState: true, only: ['enrollments'] })} disabled={enrollments.current_page === 1} className="px-3 py-2 border border-zinc-300 dark:border-zinc-700 text-zinc-700 dark:text-zinc-300 hover:border-black dark:hover:border-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer" aria-label="Previous">
+                  <ChevronLeft className="w-4 h-4" />
+                </button>
+                <button className="px-4 py-2 font-medium border bg-black dark:bg-white text-white dark:text-black">{enrollments.current_page}</button>
+                <button onClick={() => router.get('/admin/enrollments', buildPaginationParams(enrollments.current_page + 1), { preserveState: true, only: ['enrollments'] })} disabled={enrollments.current_page === enrollments.last_page} className="px-3 py-2 border border-zinc-300 dark:border-zinc-700 text-zinc-700 dark:text-zinc-300 hover:border-black dark:hover:border-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer" aria-label="Next">
+                  <ChevronRight className="w-4 h-4" />
+                </button>
+                <button onClick={() => router.get('/admin/enrollments', buildPaginationParams(enrollments.last_page), { preserveState: true, only: ['enrollments'] })} disabled={enrollments.current_page === enrollments.last_page} className="px-3 py-2 border border-zinc-300 dark:border-zinc-700 text-zinc-700 dark:text-zinc-300 hover:border-black dark:hover:border-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer" aria-label="Last">
+                  <ChevronsRight className="w-4 h-4" />
+                </button>
+              </div>
+            )}
             <ModalForm isOpen={isCreateModalOpen} onClose={() => setIsCreateModalOpen(false)} onSubmit={handleCreate} title="Create Manual Enrollment" fields={createFormFields} submitLabel="Create Enrollment" />
-            <ModalForm isOpen={isEditModalOpen} onClose={() => { setIsEditModalOpen(false); setSelectedEnrollment(null); }} onSubmit={handleEdit} title="Edit Enrollment" fields={editFormFields} initialData={selectedEnrollment ? { enrollmentStatus: selectedEnrollment.enrollmentStatus, progressPercentage: selectedEnrollment.progressPercentage } : {}} submitLabel="Update Enrollment" />
+            <ModalForm isOpen={isEditModalOpen} onClose={() => { setIsEditModalOpen(false); setSelectedEnrollment(null); }} onSubmit={handleEdit} title="Edit Enrollment" fields={editFormFields} initialData={selectedEnrollment ? { completionPercent: selectedEnrollment.completionPercent } : {}} submitLabel="Update Enrollment" />
           </div>
         </div>
       </div>

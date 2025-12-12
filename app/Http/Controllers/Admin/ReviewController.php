@@ -18,7 +18,7 @@ class ReviewController extends Controller
     if ($request->has('rating') && $request->rating !== '') {
       $query->where('rating', $request->rating);
     }
-    $reviews = $query->orderBy('createdAt', 'desc')->paginate(2);
+    $reviews = $query->orderBy('createdAt', 'desc')->orderBy('reviewId', 'desc')->paginate(2);
     return Inertia::render('Admin/ReviewManagement', [
       'reviews' => $reviews,
       'filters' => $request->only(['search', 'rating']),

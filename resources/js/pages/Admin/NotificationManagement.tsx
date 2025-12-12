@@ -1,6 +1,7 @@
 import { Head, router } from '@inertiajs/react';
 import { useState } from 'react';
-import { Plus, Trash2, User, AlertCircle, CheckCircle, Info, AlertTriangle } from 'lucide-react';
+import { Plus, Trash2, User, AlertCircle, CheckCircle, Info, AlertTriangle, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, Filter } from 'lucide-react';
+import { useToast } from '../../contexts/ToastContext';
 import Layout from '../../components/Layout';
 import AdminSidebar from '../../components/Admin/Sidebar';
 import DataTable from '../../components/Admin/DataTable';
@@ -35,20 +36,49 @@ interface Props {
   user: any;
 }
 export default function NotificationManagement({ notifications, filters, user }: Props) {
+  const { showToast } = useToast();
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState(filters.search || '');
   const [typeFilter, setTypeFilter] = useState(filters.type || '');
   const handleSearch = () => {
-    router.get('/admin/notifications', { search: searchTerm, type: typeFilter }, { preserveState: true });
+    const params: { search?: string; type?: string } = {};
+    if (searchTerm && searchTerm.trim()) {
+      params.search = searchTerm;
+    }
+    if (typeFilter && typeFilter.trim()) {
+      params.type = typeFilter;
+    }
+    router.get('/admin/notifications', params, { preserveState: true });
+  };
+  const buildPaginationParams = (page: number) => {
+    const params: any = { page };
+    if (searchTerm && searchTerm.trim()) params.search = searchTerm;
+    if (typeFilter && typeFilter.trim()) params.type = typeFilter;
+    return params;
   };
   const handleCreate = (data: Record<string, any>) => {
     router.post('/admin/notifications', data, {
-      onSuccess: () => setIsCreateModalOpen(false)
+      onSuccess: () => {
+        setIsCreateModalOpen(false);
+        showToast('Notification Sent Successfully!', 'success');
+      },
+      onError: () => {
+        showToast('Failed To Send Notification! Please Try Again!', 'error');
+      }
     });
   };
   const handleDelete = (notificationId: number) => {
     if (confirm('Are You Sure You Want To Delete This Notification?')) {
-      router.delete(`/admin/notifications/${notificationId}`);
+      router.post(`/admin/notifications/${notificationId}`, {
+        _method: 'DELETE'
+      }, {
+        onSuccess: () => {
+          showToast('Notification Deleted Successfully!', 'success');
+        },
+        onError: () => {
+          showToast('Failed To Delete Notification! Please Try Again!', 'error');
+        }
+      });
     }
   };
   const getTypeIcon = (type: string) => {
@@ -115,7 +145,7 @@ export default function NotificationManagement({ notifications, filters, user }:
       key: 'actions',
       label: 'Actions',
       render: (_: any, row: Notification) => (
-        <button onClick={() => handleDelete(row.notificationId)} className="p-2 hover:bg-zinc-100 dark:hover:bg-zinc-800 text-red-600">
+        <button onClick={() => handleDelete(row.notificationId)} className="p-2 hover:bg-zinc-100 dark:hover:bg-zinc-800 text-red-600 cursor-pointer">
           <Trash2 className="w-4 h-4" />
         </button>
       )
@@ -200,12 +230,30 @@ export default function NotificationManagement({ notifications, filters, user }:
                   <option value="warning">Warning</option>
                   <option value="error">Error</option>
                 </select>
-                <button onClick={handleSearch} className="px-6 py-2 bg-black dark:bg-white text-white dark:text-black hover:bg-zinc-800 dark:hover:bg-zinc-200">
-                  Search
+                <button onClick={handleSearch} className="flex items-center gap-2 px-6 py-2 bg-black dark:bg-white text-white dark:text-black hover:bg-zinc-800 dark:hover:bg-zinc-200 cursor-pointer">
+                  <Filter className="w-4 h-4" />
+                  Filter
                 </button>
               </div>
             </div>
-            <DataTable columns={columns} data={notifications.data} searchable={false} exportable={true} />
+            <DataTable columns={columns} data={notifications.data} exportable={true} keyField="notificationId" />
+            {notifications.last_page > 1 && (
+              <div className="mt-6 flex justify-center items-center gap-2">
+                <button onClick={() => router.get('/admin/notifications', buildPaginationParams(1), { preserveState: true, only: ['notifications'] })} disabled={notifications.current_page === 1} className="px-3 py-2 border border-zinc-300 dark:border-zinc-700 text-zinc-700 dark:text-zinc-300 hover:border-black dark:hover:border-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer" aria-label="First Page">
+                  <ChevronsLeft className="w-4 h-4" />
+                </button>
+                <button onClick={() => router.get('/admin/notifications', buildPaginationParams(notifications.current_page - 1), { preserveState: true, only: ['notifications'] })} disabled={notifications.current_page === 1} className="px-3 py-2 border border-zinc-300 dark:border-zinc-700 text-zinc-700 dark:text-zinc-300 hover:border-black dark:hover:border-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer" aria-label="Previous">
+                  <ChevronLeft className="w-4 h-4" />
+                </button>
+                <button className="px-4 py-2 font-medium border bg-black dark:bg-white text-white dark:text-black">{notifications.current_page}</button>
+                <button onClick={() => router.get('/admin/notifications', buildPaginationParams(notifications.current_page + 1), { preserveState: true, only: ['notifications'] })} disabled={notifications.current_page === notifications.last_page} className="px-3 py-2 border border-zinc-300 dark:border-zinc-700 text-zinc-700 dark:text-zinc-300 hover:border-black dark:hover:border-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer" aria-label="Next">
+                  <ChevronRight className="w-4 h-4" />
+                </button>
+                <button onClick={() => router.get('/admin/notifications', buildPaginationParams(notifications.last_page), { preserveState: true, only: ['notifications'] })} disabled={notifications.current_page === notifications.last_page} className="px-3 py-2 border border-zinc-300 dark:border-zinc-700 text-zinc-700 dark:text-zinc-300 hover:border-black dark:hover:border-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer" aria-label="Last">
+                  <ChevronsRight className="w-4 h-4" />
+                </button>
+              </div>
+            )}
             <ModalForm isOpen={isCreateModalOpen} onClose={() => setIsCreateModalOpen(false)} onSubmit={handleCreate} title="Send Notification" fields={formFields} submitLabel="Send" />
           </div>
         </div>

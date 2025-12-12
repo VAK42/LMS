@@ -21,7 +21,7 @@ class CourseController extends Controller
     if ($request->has('status') && $request->status !== '') {
       $query->where('isPublished', $request->status === 'published');
     }
-    $courses = $query->orderBy('createdAt', 'desc')->paginate(2);
+    $courses = $query->orderBy('createdAt', 'desc')->orderBy('courseId', 'desc')->paginate(2);
     $categories = Category::all();
     $instructors = User::where('role', 'instructor')->get();
     return Inertia::render('Admin/CourseManagement', [

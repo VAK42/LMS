@@ -22,7 +22,7 @@ class CertificateController extends Controller
         });
       });
     }
-    $certificates = $query->orderBy('issuedAt', 'desc')->paginate(2);
+    $certificates = $query->orderBy('issuedAt', 'desc')->orderBy('certificateId', 'desc')->paginate(2);
     return Inertia::render('Admin/CertificateManagement', [
       'certificates' => $certificates,
       'filters' => $request->only(['search']),

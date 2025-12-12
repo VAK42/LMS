@@ -1,11 +1,11 @@
 import { Head, router } from '@inertiajs/react';
 import { useState } from 'react';
-import { Edit, Trash2, ToggleLeft, ToggleRight } from 'lucide-react';
+import { Edit, Trash2, ToggleLeft, ToggleRight, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, Filter } from 'lucide-react';
+import { useToast } from '../../contexts/ToastContext';
 import Layout from '../../components/Layout';
 import AdminSidebar from '../../components/Admin/Sidebar';
 import DataTable from '../../components/Admin/DataTable';
 import ModalForm from '../../components/Admin/ModalForm';
-import FilterPanel from '../../components/Admin/FilterPanel';
 interface Course {
   courseId: number;
   courseTitle: string;
@@ -41,40 +41,88 @@ interface Props {
   user: any;
 }
 export default function CourseManagement({ courses, categories, instructors, filters, user }: Props) {
+  const { showToast } = useToast();
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [selectedCourse, setSelectedCourse] = useState<Course | null>(null);
   const [searchTerm, setSearchTerm] = useState(filters.search || '');
   const [categoryFilter, setCategoryFilter] = useState(filters.category || '');
   const [statusFilter, setStatusFilter] = useState(filters.status || '');
   const handleSearch = () => {
-    router.get('/admin/courses', { search: searchTerm, category: categoryFilter, status: statusFilter }, { preserveState: true });
+    const params: { search?: string; category?: string; status?: string } = {};
+    if (searchTerm && searchTerm.trim()) {
+      params.search = searchTerm;
+    }
+    if (categoryFilter && categoryFilter.trim()) {
+      params.category = categoryFilter;
+    }
+    if (statusFilter && statusFilter.trim()) {
+      params.status = statusFilter;
+    }
+    router.get('/admin/courses', params, { preserveState: true });
   };
-  const handleClearFilters = () => {
-    setSearchTerm('');
-    setCategoryFilter('');
-    setStatusFilter('');
-    router.get('/admin/courses', {}, { preserveState: true });
+  const buildPaginationParams = (page: number) => {
+    const params: any = { page };
+    if (searchTerm && searchTerm.trim()) params.search = searchTerm;
+    if (categoryFilter && categoryFilter.trim()) params.category = categoryFilter;
+    if (statusFilter && statusFilter.trim()) params.status = statusFilter;
+    return params;
+  };
+  const handleCreate = (data: Record<string, any>) => {
+    router.post('/admin/courses', data, {
+      onSuccess: () => {
+        setIsCreateModalOpen(false);
+        showToast('Course Created Successfully!', 'success');
+      },
+      onError: () => {
+        showToast('Failed To Create Course! Please Try Again!', 'error');
+      }
+    });
   };
   const handleEdit = (data: Record<string, any>) => {
     if (!selectedCourse) return;
-    router.put(`/admin/courses/${selectedCourse.courseId}`, data, {
+    router.post(`/admin/courses/${selectedCourse.courseId}`, {
+      ...data,
+      _method: 'PUT'
+    }, {
       onSuccess: () => {
         setIsEditModalOpen(false);
         setSelectedCourse(null);
+        showToast('Course Updated Successfully!', 'success');
+      },
+      onError: () => {
+        showToast('Failed To Update Course! Please Try Again!', 'error');
       }
     });
   };
   const handleDelete = (courseId: number) => {
     if (confirm('Are You Sure You Want To Delete This Course?')) {
-      router.delete(`/admin/courses/${courseId}`);
+      router.post(`/admin/courses/${courseId}`, {
+        _method: 'DELETE'
+      }, {
+        onSuccess: () => {
+          showToast('Course Deleted Successfully!', 'success');
+        },
+        onError: () => {
+          showToast('Failed To Delete Course! Please Try Again!', 'error');
+        }
+      });
     }
   };
   const handleTogglePublish = (course: Course) => {
-    router.put(`/admin/courses/${course.courseId}`, {
+    router.post(`/admin/courses/${course.courseId}`, {
       ...course,
       isPublished: !course.isPublished,
       categoryId: course.category.categoryId,
-      instructorId: course.instructor.userId
+      instructorId: course.instructor.userId,
+      _method: 'PUT'
+    }, {
+      onSuccess: () => {
+        showToast(`Course ${!course.isPublished ? 'Published' : 'Unpublished'} Successfully!`, 'success');
+      },
+      onError: () => {
+        showToast('Failed To Update Course Status! Please Try Again!', 'error');
+      }
     });
   };
   const openEditModal = (course: Course) => {
@@ -97,7 +145,7 @@ export default function CourseManagement({ courses, categories, instructors, fil
       key: 'simulatedPrice',
       label: 'Price',
       sortable: true,
-      render: (value: number) => `$${value.toFixed(2)}`
+      render: (value: number) => value != null ? `$${Number(value).toFixed(2)}` : '$0.00'
     },
     {
       key: 'isPublished',
@@ -121,10 +169,10 @@ export default function CourseManagement({ courses, categories, instructors, fil
       label: 'Actions',
       render: (_: any, row: Course) => (
         <div className="flex items-center gap-2">
-          <button onClick={() => openEditModal(row)} className="p-2 hover:bg-zinc-100 dark:hover:bg-zinc-800">
+          <button onClick={() => openEditModal(row)} className="p-2 hover:bg-zinc-100 dark:hover:bg-zinc-800 cursor-pointer">
             <Edit className="w-4 h-4" />
           </button>
-          <button onClick={() => handleDelete(row.courseId)} className="p-2 hover:bg-zinc-100 dark:hover:bg-zinc-800 text-red-600">
+          <button onClick={() => handleDelete(row.courseId)} className="p-2 hover:bg-zinc-100 dark:hover:bg-zinc-800 text-red-600 cursor-pointer">
             <Trash2 className="w-4 h-4" />
           </button>
         </div>
@@ -166,11 +214,17 @@ export default function CourseManagement({ courses, categories, instructors, fil
         <AdminSidebar currentPath="/admin/courses" />
         <div className="flex-1">
           <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 py-8">
-            <div className="mb-8">
-              <h1 className="text-4xl font-bold text-black dark:text-white mb-2">Course Management</h1>
-              <p className="text-zinc-600 dark:text-zinc-400">Manage All Courses And Publishing Status</p>
+            <div className="flex items-center justify-between mb-8">
+              <div>
+                <h1 className="text-4xl font-bold text-black dark:text-white mb-2">Course Management</h1>
+                <p className="text-zinc-600 dark:text-zinc-400">Manage All Courses And Publishing Status</p>
+              </div>
+              <button onClick={() => setIsCreateModalOpen(true)} className="flex items-center gap-2 px-6 py-3 bg-black dark:bg-white text-white dark:text-black font-medium hover:bg-zinc-800 dark:hover:bg-zinc-200 cursor-pointer">
+                <span className="text-xl">+</span>
+                Add Course
+              </button>
             </div>
-            <FilterPanel onClear={handleClearFilters}>
+            <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 p-6 mb-6">
               <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                 <input type="text" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} onKeyPress={(e) => e.key === 'Enter' && handleSearch()} placeholder="Search Courses..." className="px-4 py-2 border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 focus:outline-none focus:border-black dark:focus:border-white" />
                 <select value={categoryFilter} onChange={(e) => setCategoryFilter(e.target.value)} className="px-4 py-2 border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 focus:outline-none focus:border-black dark:focus:border-white">
@@ -184,12 +238,31 @@ export default function CourseManagement({ courses, categories, instructors, fil
                   <option value="published">Published</option>
                   <option value="draft">Draft</option>
                 </select>
-                <button onClick={handleSearch} className="px-6 py-2 bg-black dark:bg-white text-white dark:text-black hover:bg-zinc-800 dark:hover:bg-zinc-200">
-                  Apply Filters
+                <button onClick={handleSearch} className="flex items-center gap-2 px-6 py-2 bg-black dark:bg-white text-white dark:text-black hover:bg-zinc-800 dark:hover:bg-zinc-200 cursor-pointer">
+                  <Filter className="w-4 h-4" />
+                  Filter
                 </button>
               </div>
-            </FilterPanel>
-            <DataTable columns={columns} data={courses.data} searchable={false} exportable={true} />
+            </div>
+            <DataTable columns={columns} data={courses.data} exportable={true} keyField="courseId" />
+            {courses.last_page > 1 && (
+              <div className="mt-6 flex justify-center items-center gap-2">
+                <button onClick={() => router.get('/admin/courses', buildPaginationParams(1), { preserveState: true, only: ['courses'] })} disabled={courses.current_page === 1} className="px-3 py-2 border border-zinc-300 dark:border-zinc-700 text-zinc-700 dark:text-zinc-300 hover:border-black dark:hover:border-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer" aria-label="First Page">
+                  <ChevronsLeft className="w-4 h-4" />
+                </button>
+                <button onClick={() => router.get('/admin/courses', buildPaginationParams(courses.current_page - 1), { preserveState: true, only: ['courses'] })} disabled={courses.current_page === 1} className="px-3 py-2 border border-zinc-300 dark:border-zinc-700 text-zinc-700 dark:text-zinc-300 hover:border-black dark:hover:border-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer" aria-label="Previous">
+                  <ChevronLeft className="w-4 h-4" />
+                </button>
+                <button className="px-4 py-2 font-medium border bg-black dark:bg-white text-white dark:text-black">{courses.current_page}</button>
+                <button onClick={() => router.get('/admin/courses', buildPaginationParams(courses.current_page + 1), { preserveState: true, only: ['courses'] })} disabled={courses.current_page === courses.last_page} className="px-3 py-2 border border-zinc-300 dark:border-zinc-700 text-zinc-700 dark:text-zinc-300 hover:border-black dark:hover:border-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer" aria-label="Next">
+                  <ChevronRight className="w-4 h-4" />
+                </button>
+                <button onClick={() => router.get('/admin/courses', buildPaginationParams(courses.last_page), { preserveState: true, only: ['courses'] })} disabled={courses.current_page === courses.last_page} className="px-3 py-2 border border-zinc-300 dark:border-zinc-700 text-zinc-700 dark:text-zinc-300 hover:border-black dark:hover:border-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer" aria-label="Last">
+                  <ChevronsRight className="w-4 h-4" />
+                </button>
+              </div>
+            )}
+            <ModalForm isOpen={isCreateModalOpen} onClose={() => setIsCreateModalOpen(false)} onSubmit={handleCreate} title="Create New Course" fields={formFields} submitLabel="Create Course" />
             <ModalForm isOpen={isEditModalOpen} onClose={() => { setIsEditModalOpen(false); setSelectedCourse(null); }} onSubmit={handleEdit} title="Edit Course" fields={formFields} initialData={selectedCourse ? { courseTitle: selectedCourse.courseTitle, categoryId: selectedCourse.category.categoryId, instructorId: selectedCourse.instructor.userId, simulatedPrice: selectedCourse.simulatedPrice, isPublished: selectedCourse.isPublished } : {}} submitLabel="Update Course" />
           </div>
         </div>
