@@ -127,7 +127,7 @@ export default function UserManagement({ users, filters, user }: Props) {
       const url = URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
-      link.download = 'usersExport.csv';
+      link.download = 'User.csv';
       link.click();
       URL.revokeObjectURL(url);
       showToast('Users Exported Successfully!', 'success');
