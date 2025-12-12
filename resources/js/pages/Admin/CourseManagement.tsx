@@ -130,41 +130,6 @@ export default function CourseManagement({ courses, categories, instructors, fil
     setSelectedCourse(course);
     setIsEditModalOpen(true);
   };
-  const handleExportAllCourses = async () => {
-    try {
-      const response = await fetch('/admin/courses/export');
-      if (!response.ok) throw new Error('Export Failed');
-      const allCourses = await response.json();
-      const exportColumns = columns.filter(col => col.key !== 'actions');
-      const headers = exportColumns.map(col => col.label).join(',');
-      const rows = allCourses.map((course: any) => exportColumns.map(col => {
-        let value = course[col.key];
-        if (col.key === 'createdAt' && value) {
-          value = new Date(value).toLocaleDateString();
-        } else if (col.key === 'simulatedPrice') {
-          value = course.simulatedPrice === 0 ? 'Free' : `$${course.simulatedPrice.toFixed(2)}`;
-        } else if (col.key === 'isPublished') {
-          value = value ? 'Published' : 'Draft';
-        } else if (col.key === 'instructor') {
-          value = course.instructor?.userName || '';
-        } else if (col.key === 'category') {
-          value = course.category?.categoryName || '';
-        }
-        return typeof value === 'string' && value.includes(',') ? `"${value}"` : (value ?? '');
-      }).join(',')).join('\n');
-      const csv = `${headers}\n${rows}`;
-      const blob = new Blob([csv], { type: 'text/csv' });
-      const url = URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = 'Course.csv';
-      link.click();
-      URL.revokeObjectURL(url);
-      showToast('Courses Exported Successfully!', 'success');
-    } catch (error) {
-      showToast('Failed To Export Courses!', 'error');
-    }
-  };
   const columns = [
     { key: 'courseTitle', label: 'Course Title', sortable: true },
     {
@@ -215,6 +180,41 @@ export default function CourseManagement({ courses, categories, instructors, fil
       )
     }
   ];
+  const handleExportAllCourses = async () => {
+    try {
+      const response = await fetch('/admin/courses/export');
+      if (!response.ok) throw new Error('Export Failed');
+      const allCourses = await response.json();
+      const exportColumns = columns.filter(col => col.key !== 'actions');
+      const headers = exportColumns.map(col => col.label).join(',');
+      const rows = allCourses.map((course: any) => exportColumns.map(col => {
+        let value = course[col.key];
+        if (col.key === 'createdAt' && value) {
+          value = new Date(value).toLocaleDateString();
+        } else if (col.key === 'simulatedPrice') {
+          value = Number(course.simulatedPrice) === 0 ? 'Free' : `$${Number(course.simulatedPrice).toFixed(2)}`;
+        } else if (col.key === 'isPublished') {
+          value = value ? 'Published' : 'Draft';
+        } else if (col.key === 'instructor') {
+          value = course.instructor?.userName || '';
+        } else if (col.key === 'category') {
+          value = course.category?.categoryName || '';
+        }
+        return typeof value === 'string' && value.includes(',') ? `"${value}"` : (value ?? '');
+      }).join(',')).join('\n');
+      const csv = `${headers}\n${rows}`;
+      const blob = new Blob([csv], { type: 'text/csv' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = 'Course.csv';
+      link.click();
+      URL.revokeObjectURL(url);
+      showToast('Courses Exported Successfully!', 'success');
+    } catch (error) {
+      showToast('Failed To Export Courses!', 'error');
+    }
+  };
   const formFields = [
     { name: 'courseTitle', label: 'Course Title', type: 'text' as const, required: true },
     { name: 'courseDescription', label: 'Description', type: 'textarea' as const, required: true },
