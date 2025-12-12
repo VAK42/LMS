@@ -9,6 +9,9 @@ class CertificateController extends Controller
   public function index(Request $request)
   {
     $query = Certificate::with(['user', 'course']);
+    $query->whereHas('user', function ($q) {
+      $q->where('userId', '!=', auth()->id());
+    });
     if ($request->has('search')) {
       $search = $request->search;
       $query->where(function ($q) use ($search) {

@@ -10,6 +10,9 @@ class NotificationController extends Controller
   public function index(Request $request)
   {
     $query = Notification::with('user');
+    $query->whereHas('user', function ($q) {
+      $q->where('userId', '!=', auth()->id());
+    });
     if ($request->has('search')) {
       $search = $request->search;
       $query->where(function ($q) use ($search) {
@@ -23,7 +26,7 @@ class NotificationController extends Controller
       $query->where('notificationType', $request->type);
     }
     $notifications = $query->orderBy('createdAt', 'desc')->paginate(2);
-    $users = User::all();
+    $users = User::where('userId', '!=', auth()->id())->get();
     return Inertia::render('Admin/NotificationManagement', [
       'notifications' => $notifications,
       'users' => $users,
@@ -43,9 +46,9 @@ class NotificationController extends Controller
     ]);
     $recipients = [];
     if ($validated['recipientType'] === 'all') {
-      $recipients = User::pluck('userId')->toArray();
+      $recipients = User::where('userId', '!=', auth()->id())->pluck('userId')->toArray();
     } elseif ($validated['recipientType'] === 'role') {
-      $recipients = User::where('role', $validated['recipientRole'])->pluck('userId')->toArray();
+      $recipients = User::where('role', $validated['recipientRole'])->where('userId', '!=', auth()->id())->pluck('userId')->toArray();
     } else {
       $recipients = $validated['recipientIds'];
     }

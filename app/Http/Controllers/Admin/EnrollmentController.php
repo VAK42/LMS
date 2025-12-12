@@ -11,6 +11,9 @@ class EnrollmentController extends Controller
   public function index(Request $request)
   {
     $query = Enrollment::with(['user', 'course']);
+    $query->whereHas('user', function ($q) {
+      $q->where('userId', '!=', auth()->id());
+    });
     if ($request->has('search')) {
       $search = $request->search;
       $query->where(function ($q) use ($search) {
@@ -25,7 +28,7 @@ class EnrollmentController extends Controller
       $query->where('enrollmentStatus', $request->status);
     }
     $enrollments = $query->orderBy('enrolledAt', 'desc')->paginate(2);
-    $users = User::where('role', 'learner')->get();
+    $users = User::where('role', 'learner')->where('userId', '!=', auth()->id())->get();
     $courses = Course::where('isPublished', true)->get();
     return Inertia::render('Admin/EnrollmentManagement', [
       'enrollments' => $enrollments,

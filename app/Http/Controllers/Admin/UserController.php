@@ -10,6 +10,7 @@ class UserController extends Controller
   public function index(Request $request)
   {
     $query = User::query();
+    $query->where('userId', '!=', auth()->id());
     if ($request->has('search')) {
       $search = $request->search;
       $query->where(function ($q) use ($search) {
@@ -20,7 +21,7 @@ class UserController extends Controller
     if ($request->has('role') && $request->role !== '') {
       $query->where('role', $request->role);
     }
-    $users = $query->orderBy('createdAt', 'desc')->paginate(2);
+    $users = $query->orderBy('createdAt', 'desc')->orderBy('userId', 'desc')->paginate(2);
     return Inertia::render('Admin/UserManagement', [
       'users' => $users,
       'filters' => $request->only(['search', 'role']),
