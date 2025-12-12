@@ -63,4 +63,9 @@ class CouponController extends Controller
     $coupon->delete();
     return redirect()->back()->with('success', 'Coupon Deleted Successfully!');
   }
+  public function export()
+  {
+    $coupons = Coupon::all();
+    return response()->json($coupons);
+  }
 }

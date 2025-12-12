@@ -35,7 +35,7 @@ class SupportTicketController extends Controller
   {
     $ticket = SupportTicket::findOrFail($ticketId);
     $validated = $request->validate([
-      'ticketStatus' => 'required|in:open,in_progress,resolved,closed',
+      'ticketStatus' => 'required|in:open,inProgress,resolved,closed',
       'priority' => 'required|in:low,medium,high,urgent',
       'adminResponse' => 'nullable|string',
     ]);
@@ -50,5 +50,10 @@ class SupportTicketController extends Controller
     $ticket = SupportTicket::findOrFail($ticketId);
     $ticket->delete();
     return redirect()->back()->with('success', 'Support Ticket Deleted Successfully!');
+  }
+  public function export()
+  {
+    $tickets = SupportTicket::with('user')->get();
+    return response()->json($tickets);
   }
 }

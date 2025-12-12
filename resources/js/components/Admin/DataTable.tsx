@@ -11,8 +11,9 @@ interface Props {
   data: any[];
   exportable?: boolean;
   keyField?: string;
+  onExport?: () => void;
 }
-export default function DataTable({ columns, data, exportable = true, keyField = 'id' }: Props) {
+export default function DataTable({ columns, data, exportable = true, keyField = 'id', onExport }: Props) {
   const [sortColumn, setSortColumn] = useState<string | null>(null);
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
   const handleSort = (columnKey: string) => {
@@ -49,7 +50,7 @@ export default function DataTable({ columns, data, exportable = true, keyField =
     <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-lg overflow-hidden">
       {exportable && (
         <div className="p-4 border-b border-zinc-200 dark:border-zinc-800 flex items-center justify-end">
-          <button onClick={exportToCSV} className="flex items-center gap-2 px-4 py-2 bg-black dark:bg-white text-white dark:text-black hover:bg-zinc-800 dark:hover:bg-zinc-200 cursor-pointer">
+          <button onClick={onExport || exportToCSV} className="flex items-center gap-2 px-4 py-2 bg-black dark:bg-white text-white dark:text-black hover:bg-zinc-800 dark:hover:bg-zinc-200 cursor-pointer">
             <Download className="w-4 h-4" />
             Export CSV
           </button>

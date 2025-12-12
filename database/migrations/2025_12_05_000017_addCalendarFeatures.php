@@ -15,7 +15,7 @@ return new class extends Migration
       $table->unsignedBigInteger('courseId');
       $table->string('eventTitle');
       $table->text('eventDescription')->nullable();
-      $table->enum('eventType', ['deadline', 'live_session', 'milestone', 'reminder'])->default('reminder');
+      $table->enum('eventType', ['deadline', 'liveSession', 'milestone', 'reminder'])->default('reminder');
       $table->timestamp('eventDate');
       $table->integer('durationMinutes')->nullable();
       $table->string('meetingLink')->nullable();

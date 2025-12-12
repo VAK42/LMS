@@ -71,7 +71,7 @@ export default function Header({ user }: HeaderProps) {
                   href="/logout"
                   method="post"
                   as="button"
-                  className="flex items-center gap-2 px-4 py-2 text-zinc-700 dark:text-zinc-300 hover:text-black dark:hover:text-white transition-colors"
+                  className="flex items-center gap-2 px-4 py-2 text-zinc-700 dark:text-zinc-300 hover:text-black dark:hover:text-white transition-colors cursor-pointer"
                 >
                   <LogOut className="w-4 h-4" />
                   Logout
@@ -79,12 +79,12 @@ export default function Header({ user }: HeaderProps) {
               </>
             ) : (
               <>
-                <Link href="/login" className="text-zinc-700 dark:text-zinc-300 hover:text-black dark:hover:text-white transition-colors">
+                <Link href="/login" className="text-zinc-700 dark:text-zinc-300 hover:text-black dark:hover:text-white transition-colors cursor-pointer">
                   Login
                 </Link>
                 <Link
                   href="/register"
-                  className="px-6 py-2 bg-black dark:bg-white text-white dark:text-black hover:bg-zinc-800 dark:hover:bg-zinc-200 transition-all"
+                  className="px-6 py-2 bg-black dark:bg-white text-white dark:text-black hover:bg-zinc-800 dark:hover:bg-zinc-200 transition-all cursor-pointer"
                 >
                   Get Started
                 </Link>
@@ -130,16 +130,16 @@ export default function Header({ user }: HeaderProps) {
                 <Link href="/dashboard" className="block px-4 py-2 text-zinc-700 dark:text-zinc-300">
                   Dashboard
                 </Link>
-                <Link href="/logout" method="post" as="button" className="block w-full text-left px-4 py-2 text-zinc-700 dark:text-zinc-300">
+                <Link href="/logout" method="post" as="button" className="block w-full text-left px-4 py-2 text-zinc-700 dark:text-zinc-300 cursor-pointer">
                   Logout
                 </Link>
               </>
             ) : (
               <>
-                <Link href="/login" className="block px-4 py-2 text-zinc-700 dark:text-zinc-300">
+                <Link href="/login" className="block px-4 py-2 text-zinc-700 dark:text-zinc-300 cursor-pointer">
                   Login
                 </Link>
-                <Link href="/register" className="block px-4 py-2 bg-black dark:bg-white text-white dark:text-black text-center">
+                <Link href="/register" className="block px-4 py-2 bg-black dark:bg-white text-white dark:text-black text-center cursor-pointer">
                   Get Started
                 </Link>
               </>

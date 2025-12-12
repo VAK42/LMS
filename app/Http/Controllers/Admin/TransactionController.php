@@ -32,4 +32,9 @@ class TransactionController extends Controller
       'user' => auth()->user()
     ]);
   }
+  public function export()
+  {
+    $transactions = PaymentTransaction::with(['user', 'course'])->get();
+    return response()->json($transactions);
+  }
 }

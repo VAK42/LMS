@@ -52,4 +52,9 @@ class CourseController extends Controller
     $course->delete();
     return redirect()->back()->with('success', 'Course Deleted Successfully!');
   }
+  public function export()
+  {
+    $courses = Course::with(['instructor', 'category'])->get();
+    return response()->json($courses);
+  }
 }

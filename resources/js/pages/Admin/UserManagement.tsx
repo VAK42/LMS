@@ -104,6 +104,37 @@ export default function UserManagement({ users, filters, user }: Props) {
     }
     return params;
   };
+  const handleExportAllUsers = async () => {
+    try {
+      const response = await fetch('/admin/users/export');
+      if (!response.ok) throw new Error('Export Failed');
+      const allUsers = await response.json();
+      const exportColumns = columns.filter(col => col.key !== 'actions');
+      const headers = exportColumns.map(col => col.label).join(',');
+      const rows = allUsers.map((user: User) => exportColumns.map(col => {
+        let value = user[col.key as keyof User];
+        if (col.key === 'createdAt' && value) {
+          value = new Date(value as string).toLocaleDateString();
+        } else if (col.key === 'emailVerifiedAt') {
+          value = value ? 'Yes' : 'No';
+        } else if (col.key === 'role' && typeof value === 'string') {
+          value = value.charAt(0).toUpperCase() + value.slice(1);
+        }
+        return typeof value === 'string' && value.includes(',') ? `"${value}"` : (value ?? '');
+      }).join(',')).join('\n');
+      const csv = `${headers}\n${rows}`;
+      const blob = new Blob([csv], { type: 'text/csv' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = 'usersExport.csv';
+      link.click();
+      URL.revokeObjectURL(url);
+      showToast('Users Exported Successfully!', 'success');
+    } catch (error) {
+      showToast('Failed To Export Users!', 'error');
+    }
+  };
   const columns = [
     { key: 'userName', label: 'Name', sortable: true },
     { key: 'userEmail', label: 'Email', sortable: true },
@@ -196,20 +227,20 @@ export default function UserManagement({ users, filters, user }: Props) {
                 </button>
               </div>
             </div>
-            <DataTable columns={columns} data={users.data} exportable={true} keyField="userId" />
+            <DataTable columns={columns} data={users.data} exportable={true} keyField="userId" onExport={handleExportAllUsers} />
             {users.last_page > 1 && (
               <div className="mt-6 flex justify-center items-center gap-2">
-                <button onClick={() => router.get('/admin/users', buildPaginationParams(1), { preserveState: true, only: ['users'] })} disabled={users.current_page === 1} className="px-3 py-2 border border-zinc-300 dark:border-zinc-700 text-zinc-700 dark:text-zinc-300 hover:border-black dark:hover:border-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed" aria-label="First Page">
+                <button onClick={() => router.get('/admin/users', buildPaginationParams(1), { preserveState: true, only: ['users'] })} disabled={users.current_page === 1} className="px-3 py-2 border border-zinc-300 dark:border-zinc-700 text-zinc-700 dark:text-zinc-300 hover:border-black dark:hover:border-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer" aria-label="First Page">
                   <ChevronsLeft className="w-4 h-4" />
                 </button>
-                <button onClick={() => router.get('/admin/users', buildPaginationParams(users.current_page - 1), { preserveState: true, only: ['users'] })} disabled={users.current_page === 1} className="px-3 py-2 border border-zinc-300 dark:border-zinc-700 text-zinc-700 dark:text-zinc-300 hover:border-black dark:hover:border-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed" aria-label="Previous Page">
+                <button onClick={() => router.get('/admin/users', buildPaginationParams(users.current_page - 1), { preserveState: true, only: ['users'] })} disabled={users.current_page === 1} className="px-3 py-2 border border-zinc-300 dark:border-zinc-700 text-zinc-700 dark:text-zinc-300 hover:border-black dark:hover:border-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer" aria-label="Previous Page">
                   <ChevronLeft className="w-4 h-4" />
                 </button>
                 {users.current_page > 2 && (
                   <span className="px-2 text-zinc-500 dark:text-zinc-400">...</span>
                 )}
                 {users.current_page > 1 && (
-                  <button onClick={() => router.get('/admin/users', buildPaginationParams(users.current_page - 1), { preserveState: true, only: ['users'] })} className="px-4 py-2 font-medium transition-colors border bg-white dark:bg-zinc-900 text-zinc-700 dark:text-zinc-300 border-zinc-300 dark:border-zinc-700 hover:border-black dark:hover:border-white">
+                  <button onClick={() => router.get('/admin/users', buildPaginationParams(users.current_page - 1), { preserveState: true, only: ['users'] })} className="px-4 py-2 font-medium transition-colors border bg-white dark:bg-zinc-900 text-zinc-700 dark:text-zinc-300 border-zinc-300 dark:border-zinc-700 hover:border-black dark:hover:border-white cursor-pointer">
                     {users.current_page - 1}
                   </button>
                 )}
@@ -217,17 +248,17 @@ export default function UserManagement({ users, filters, user }: Props) {
                   {users.current_page}
                 </button>
                 {users.current_page < users.last_page && (
-                  <button onClick={() => router.get('/admin/users', buildPaginationParams(users.current_page + 1), { preserveState: true, only: ['users'] })} className="px-4 py-2 font-medium transition-colors border bg-white dark:bg-zinc-900 text-zinc-700 dark:text-zinc-300 border-zinc-300 dark:border-zinc-700 hover:border-black dark:hover:border-white">
+                  <button onClick={() => router.get('/admin/users', buildPaginationParams(users.current_page + 1), { preserveState: true, only: ['users'] })} className="px-4 py-2 font-medium transition-colors border bg-white dark:bg-zinc-900 text-zinc-700 dark:text-zinc-300 border-zinc-300 dark:border-zinc-700 hover:border-black dark:hover:border-white cursor-pointer">
                     {users.current_page + 1}
                   </button>
                 )}
                 {users.current_page < users.last_page - 1 && (
                   <span className="px-2 text-zinc-500 dark:text-zinc-400">...</span>
                 )}
-                <button onClick={() => router.get('/admin/users', buildPaginationParams(users.current_page + 1), { preserveState: true, only: ['users'] })} disabled={users.current_page === users.last_page} className="px-3 py-2 border border-zinc-300 dark:border-zinc-700 text-zinc-700 dark:text-zinc-300 hover:border-black dark:hover:border-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed" aria-label="Next Page">
+                <button onClick={() => router.get('/admin/users', buildPaginationParams(users.current_page + 1), { preserveState: true, only: ['users'] })} disabled={users.current_page === users.last_page} className="px-3 py-2 border border-zinc-300 dark:border-zinc-700 text-zinc-700 dark:text-zinc-300 hover:border-black dark:hover:border-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer" aria-label="Next Page">
                   <ChevronRight className="w-4 h-4" />
                 </button>
-                <button onClick={() => router.get('/admin/users', buildPaginationParams(users.last_page), { preserveState: true, only: ['users'] })} disabled={users.current_page === users.last_page} className="px-3 py-2 border border-zinc-300 dark:border-zinc-700 text-zinc-700 dark:text-zinc-300 hover:border-black dark:hover:border-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed" aria-label="Last Page">
+                <button onClick={() => router.get('/admin/users', buildPaginationParams(users.last_page), { preserveState: true, only: ['users'] })} disabled={users.current_page === users.last_page} className="px-3 py-2 border border-zinc-300 dark:border-zinc-700 text-zinc-700 dark:text-zinc-300 hover:border-black dark:hover:border-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer" aria-label="Last Page">
                   <ChevronsRight className="w-4 h-4" />
                 </button>
               </div>

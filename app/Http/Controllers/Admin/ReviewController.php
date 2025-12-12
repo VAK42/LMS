@@ -31,4 +31,9 @@ class ReviewController extends Controller
     $review->delete();
     return redirect()->back()->with('success', 'Review Deleted Successfully!');
   }
+  public function export()
+  {
+    $reviews = CourseReview::with(['course', 'user'])->get();
+    return response()->json($reviews);
+  }
 }

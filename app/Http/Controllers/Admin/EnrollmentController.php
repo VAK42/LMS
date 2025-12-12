@@ -72,4 +72,9 @@ class EnrollmentController extends Controller
     $enrollment->delete();
     return redirect()->back()->with('success', 'Enrollment Deleted Successfully!');
   }
+  public function export()
+  {
+    $enrollments = Enrollment::with(['user', 'course'])->get();
+    return response()->json($enrollments);
+  }
 }

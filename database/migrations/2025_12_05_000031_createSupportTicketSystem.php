@@ -11,7 +11,7 @@ return new class extends Migration
       $table->unsignedBigInteger('userId');
       $table->string('subject');
       $table->text('message');
-      $table->enum('status', ['open', 'in_progress', 'resolved', 'closed'])->default('open');
+      $table->enum('status', ['open', 'inProgress', 'resolved', 'closed'])->default('open');
       $table->enum('priority', ['low', 'medium', 'high', 'urgent'])->default('medium');
       $table->unsignedBigInteger('assignedTo')->nullable();
       $table->timestamp('resolvedAt')->nullable();

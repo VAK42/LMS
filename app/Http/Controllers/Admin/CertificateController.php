@@ -35,4 +35,9 @@ class CertificateController extends Controller
     $certificate->delete();
     return redirect()->back()->with('success', 'Certificate Deleted Successfully!');
   }
+  public function export()
+  {
+    $certificates = Certificate::with(['user', 'course'])->get();
+    return response()->json($certificates);
+  }
 }

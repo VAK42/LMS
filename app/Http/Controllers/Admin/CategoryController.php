@@ -49,4 +49,9 @@ class CategoryController extends Controller
     $category->delete();
     return redirect()->back()->with('success', 'Category Deleted Successfully!');
   }
+  public function export()
+  {
+    $categories = Category::select(['categoryId', 'categoryName', 'slug', 'description', 'createdAt'])->get();
+    return response()->json($categories);
+  }
 }

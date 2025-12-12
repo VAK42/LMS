@@ -5,6 +5,7 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Inertia\Inertia;
+use Illuminate\Http\JsonResponse;
 class UserController extends Controller
 {
   public function index(Request $request)
@@ -72,5 +73,10 @@ class UserController extends Controller
     }
     $user->delete();
     return redirect()->back()->with('success', 'User Deleted Successfully!');
+  }
+  public function export(): JsonResponse
+  {
+    $users = User::select(['userId', 'userName', 'userEmail', 'role', 'emailVerifiedAt', 'createdAt'])->get();
+    return response()->json($users);
   }
 }

@@ -69,4 +69,9 @@ class NotificationController extends Controller
     $notification->delete();
     return redirect()->back()->with('success', 'Notification Deleted Successfully!');
   }
+  public function export()
+  {
+    $notifications = Notification::with('user')->get();
+    return response()->json($notifications);
+  }
 }
