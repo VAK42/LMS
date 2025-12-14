@@ -7,8 +7,8 @@ class Category extends Model
   use HasFactory;
   protected $table = 'categories';
   protected $primaryKey = 'categoryId';
-  public const createdAt = 'createdAt';
-  public const updatedAt = 'updatedAt';
+  const CREATED_AT = 'createdAt';
+  const UPDATED_AT = 'updatedAt';
   protected $fillable = [
     'categoryName',
     'slug',
@@ -16,6 +16,11 @@ class Category extends Model
     'icon',
     'courseCount',
   ];
+  protected $appends = ['categoryDescription'];
+  public function getCategoryDescriptionAttribute()
+  {
+    return $this->description;
+  }
   public function courses()
   {
     return $this->hasMany(Course::class, 'categoryId', 'categoryId');

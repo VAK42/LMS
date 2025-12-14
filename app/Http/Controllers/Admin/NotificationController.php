@@ -56,12 +56,29 @@ class NotificationController extends Controller
       Notification::create([
         'userId' => $userId,
         'notificationTitle' => $validated['notificationTitle'],
-        'notificationMessage' => $validated['notificationMessage'],
+        'notificationContent' => $validated['notificationMessage'],
         'notificationType' => $validated['notificationType'],
         'isRead' => false,
       ]);
     }
     return redirect()->back()->with('success', 'Notification Sent To ' . count($recipients) . ' User(s)');
+  }
+  public function update(Request $request, $notificationId)
+  {
+    $notification = Notification::findOrFail($notificationId);
+    $validated = $request->validate([
+      'notificationTitle' => 'required|string|max:255',
+      'notificationMessage' => 'required|string',
+      'notificationType' => 'required|in:info,warning,success,error',
+      'isRead' => 'boolean'
+    ]);
+    $notification->update([
+      'notificationTitle' => $validated['notificationTitle'],
+      'notificationContent' => $validated['notificationMessage'],
+      'notificationType' => $validated['notificationType'],
+      'isRead' => $request->has('isRead') ? $validated['isRead'] : $notification->isRead
+    ]);
+    return redirect()->back()->with('success', 'Notification Updated Successfully!');
   }
   public function destroy($notificationId)
   {

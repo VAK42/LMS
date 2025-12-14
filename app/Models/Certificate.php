@@ -7,8 +7,8 @@ class Certificate extends Model
   use HasFactory;
   protected $table = 'certificates';
   protected $primaryKey = 'certificateId';
-  public const createdAt = 'createdAt';
-  public const updatedAt = 'updatedAt';
+  const CREATED_AT = 'createdAt';
+  const UPDATED_AT = 'updatedAt';
   protected $fillable = [
     'userId',
     'courseId',

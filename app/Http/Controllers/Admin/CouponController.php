@@ -18,8 +18,8 @@ class CouponController extends Controller
       $query->where('isActive', $isActive)
         ->where(function ($q) use ($isActive) {
           if ($isActive) {
-            $q->where('expiresAt', '>', now())
-              ->orWhereNull('expiresAt');
+            $q->where('validUntil', '>', now())
+              ->orWhereNull('validUntil');
           }
         });
     }
@@ -36,10 +36,11 @@ class CouponController extends Controller
       'couponCode' => 'required|string|max:50|unique:coupons,couponCode',
       'discountType' => 'required|in:percentage,fixed',
       'discountValue' => 'required|numeric|min:0',
-      'expiresAt' => 'nullable|date|after:now',
+      'validUntil' => 'nullable|date|after:now',
       'usageLimit' => 'nullable|integer|min:1',
       'isActive' => 'required|boolean',
     ]);
+    
     Coupon::create($validated);
     return redirect()->back()->with('success', 'Coupon Created Successfully!');
   }
@@ -50,10 +51,11 @@ class CouponController extends Controller
       'couponCode' => 'required|string|max:50|unique:coupons,couponCode,' . $couponId . ',couponId',
       'discountType' => 'required|in:percentage,fixed',
       'discountValue' => 'required|numeric|min:0',
-      'expiresAt' => 'nullable|date',
+      'validUntil' => 'nullable|date',
       'usageLimit' => 'nullable|integer|min:0',
       'isActive' => 'required|boolean',
     ]);
+
     $coupon->update($validated);
     return redirect()->back()->with('success', 'Coupon Updated Successfully!');
   }

@@ -28,6 +28,7 @@ return new class extends Migration
       $table->text('message');
       $table->boolean('isStaffReply')->default(false);
       $table->timestamp('createdAt')->useCurrent();
+      $table->timestamp('updatedAt')->useCurrent()->useCurrentOnUpdate();
       $table->foreign('ticketId')->references('ticketId')->on('supportTickets')->onDelete('cascade');
       $table->foreign('userId')->references('userId')->on('users')->onDelete('cascade');
     });

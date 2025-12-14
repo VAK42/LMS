@@ -25,10 +25,20 @@ class TransactionController extends Controller
     if ($request->has('status') && $request->status !== '') {
       $query->where('transactionStatus', $request->status);
     }
+    $totalTransactions = $query->count();
+    $completedQuery = clone $query;
+    $completedTransactions = $completedQuery->where('transactionStatus', 'completed')->count();
+    $revenueQuery = clone $query;
+    $totalRevenue = $revenueQuery->where('transactionStatus', 'completed')->sum('amount');
     $transactions = $query->orderBy('createdAt', 'desc')->paginate(2);
     return Inertia::render('Admin/TransactionManagement', [
       'transactions' => $transactions,
       'filters' => $request->only(['search', 'status']),
+      'stats' => [
+        'totalTransactions' => $totalTransactions,
+        'totalRevenue' => (float) $totalRevenue,
+        'completedTransactions' => $completedTransactions
+      ],
       'user' => auth()->user()
     ]);
   }

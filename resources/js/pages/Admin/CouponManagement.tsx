@@ -11,7 +11,7 @@ interface Coupon {
   couponCode: string;
   discountType: string;
   discountValue: number;
-  expiresAt: string | null;
+  validUntil: string | null;
   usageLimit: number | null;
   usageCount: number;
   isActive: boolean;
@@ -52,29 +52,43 @@ export default function CouponManagement({ coupons, filters, user }: Props) {
   };
   const handleCreate = (data: Record<string, any>) => {
     router.post('/admin/coupons', data, {
-      onSuccess: () => {
+      onSuccess: (page) => {
+        const successMsg = (page.props as any).success || 'Coupon Created Successfully!';
         setIsCreateModalOpen(false);
-        showToast('Coupon Created Successfully!', 'success');
+        showToast(successMsg, 'success');
       },
-      onError: () => showToast('Failed To Create Coupon! Please Try Again!', 'error')
+      onError: (errors) => {
+        const errorMsg = Object.values(errors)[0] as string || 'Failed To Create Coupon!';
+        showToast(errorMsg, 'error');
+      }
     });
   };
   const handleEdit = (data: Record<string, any>) => {
     if (!selectedCoupon) return;
     router.post(`/admin/coupons/${selectedCoupon.couponId}`, { ...data, _method: 'PUT' }, {
-      onSuccess: () => {
+      onSuccess: (page) => {
+        const successMsg = (page.props as any).success || 'Coupon Updated Successfully!';
         setIsEditModalOpen(false);
         setSelectedCoupon(null);
-        showToast('Coupon Updated Successfully!', 'success');
+        showToast(successMsg, 'success');
       },
-      onError: () => showToast('Failed To Update Coupon! Please Try Again!', 'error')
+      onError: (errors) => {
+        const errorMsg = Object.values(errors)[0] as string || 'Failed To Update Coupon!';
+        showToast(errorMsg, 'error');
+      }
     });
   };
   const handleDelete = (couponId: number) => {
     if (confirm('Are You Sure You Want To Delete This Coupon?')) {
       router.post(`/admin/coupons/${couponId}`, { _method: 'DELETE' }, {
-        onSuccess: () => showToast('Coupon Deleted Successfully!', 'success'),
-        onError: () => showToast('Failed To Delete Coupon! Please Try Again!', 'error')
+        onSuccess: (page) => {
+          const successMsg = (page.props as any).success || 'Coupon Deleted Successfully!';
+          showToast(successMsg, 'success');
+        },
+        onError: (errors) => {
+          const errorMsg = Object.values(errors)[0] as string || 'Failed To Delete Coupon!';
+          showToast(errorMsg, 'error');
+        }
       });
     }
   };
@@ -85,6 +99,37 @@ export default function CouponManagement({ coupons, filters, user }: Props) {
   const isExpired = (expiresAt: string | null) => {
     if (!expiresAt) return false;
     return new Date(expiresAt) < new Date();
+  };
+  const handleExportAllCoupons = async () => {
+    try {
+      const response = await fetch('/admin/coupons/export');
+      if (!response.ok) throw new Error('Export Failed');
+      const allCoupons = await response.json();
+      const exportColumns = columns.filter(col => col.key !== 'actions');
+      const headers = exportColumns.map(col => col.label).join(',');
+      const rows = allCoupons.map((coupon: Coupon) => exportColumns.map(col => {
+        let value = coupon[col.key as keyof Coupon];
+        if (col.key === 'validUntil' && value) {
+          value = new Date(value as string).toLocaleDateString();
+        } else if (col.key === 'isActive') {
+          value = value ? 'Active' : 'Inactive';
+        } else if (col.key === 'discountType') {
+          value = value === 'percentage' ? 'Percentage' : 'Fixed';
+        }
+        return typeof value === 'string' && value.includes(',') ? `"${value}"` : (value ?? '');
+      }).join(',')).join('\n');
+      const csv = `${headers}\n${rows}`;
+      const blob = new Blob([csv], { type: 'text/csv' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = 'Coupons.csv';
+      link.click();
+      URL.revokeObjectURL(url);
+      showToast('Coupons Exported Successfully!', 'success');
+    } catch (error) {
+      showToast('Failed To Export Coupons!', 'error');
+    }
   };
   const columns = [
     {
@@ -108,7 +153,7 @@ export default function CouponManagement({ coupons, filters, user }: Props) {
       )
     },
     {
-      key: 'expiresAt',
+      key: 'validUntil',
       label: 'Expires',
       sortable: true,
       render: (value: string | null, row: Coupon) => {
@@ -136,7 +181,7 @@ export default function CouponManagement({ coupons, filters, user }: Props) {
       label: 'Status',
       sortable: true,
       render: (value: boolean, row: Coupon) => {
-        const expired = isExpired(row.expiresAt);
+        const expired = isExpired(row.validUntil);
         const limitReached = row.usageLimit && row.usageCount >= row.usageLimit;
         const actuallyActive = value && !expired && !limitReached;
         return (
@@ -173,9 +218,9 @@ export default function CouponManagement({ coupons, filters, user }: Props) {
         { value: 'fixed', label: 'Fixed Amount' }
       ]
     },
-    { name: 'discountValue', label: 'Discount Value', type: 'number' as const, required: true },
-    { name: 'expiresAt', label: 'Expiration Date', type: 'date' as const, required: false },
-    { name: 'usageLimit', label: 'Usage Limit', type: 'number' as const, required: false },
+    { name: 'discountValue', label: 'Discount Value', type: 'number' as const, required: true, min: 0 },
+    { name: 'validUntil', label: 'Expiration Date', type: 'date' as const, required: false },
+    { name: 'usageLimit', label: 'Usage Limit', type: 'number' as const, required: false, min: 0 },
     {
       name: 'isActive',
       label: 'Status',
@@ -199,7 +244,7 @@ export default function CouponManagement({ coupons, filters, user }: Props) {
                 <h1 className="text-4xl font-bold text-black dark:text-white mb-2">Coupon Management</h1>
                 <p className="text-zinc-600 dark:text-zinc-400">Manage Discount Codes & Promotions</p>
               </div>
-              <button onClick={() => setIsCreateModalOpen(true)} className="flex items-center gap-2 px-6 py-3 bg-black dark:bg-white text-white dark:text-black font-medium hover:bg-zinc-800 dark:hover:bg-zinc-200">
+              <button onClick={() => setIsCreateModalOpen(true)} className="flex items-center gap-2 px-6 py-3 bg-black dark:bg-white text-white dark:text-black font-medium hover:bg-zinc-800 dark:hover:bg-zinc-200 cursor-pointer">
                 <Plus className="w-5 h-5" />
                 Add Coupon
               </button>
@@ -209,7 +254,7 @@ export default function CouponManagement({ coupons, filters, user }: Props) {
                 <div className="flex-1">
                   <input type="text" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} onKeyPress={(e) => e.key === 'Enter' && handleSearch()} placeholder="Search Coupons..." className="w-full px-4 py-2 border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 focus:outline-none focus:border-black dark:focus:border-white" />
                 </div>
-                <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)} className="px-4 py-2 border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 focus:outline-none focus:border-black dark:focus:border-white">
+                <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)} className="px-4 py-2 border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 focus:outline-none focus:border-black dark:focus:border-white cursor-pointer">
                   <option value="">All Status</option>
                   <option value="active">Active</option>
                   <option value="inactive">Inactive</option>
@@ -220,26 +265,44 @@ export default function CouponManagement({ coupons, filters, user }: Props) {
                 </button>
               </div>
             </div>
-            <DataTable columns={columns} data={coupons.data} exportable={true} keyField="couponId" />
+            <DataTable columns={columns} data={coupons.data} exportable={true} keyField="couponId" onExport={handleExportAllCoupons} />
             {coupons.last_page > 1 && (
               <div className="mt-6 flex justify-center items-center gap-2">
                 <button onClick={() => router.get('/admin/coupons', buildPaginationParams(1), { preserveState: true, only: ['coupons'] })} disabled={coupons.current_page === 1} className="px-3 py-2 border border-zinc-300 dark:border-zinc-700 text-zinc-700 dark:text-zinc-300 hover:border-black dark:hover:border-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer" aria-label="First Page">
                   <ChevronsLeft className="w-4 h-4" />
                 </button>
-                <button onClick={() => router.get('/admin/coupons', buildPaginationParams(coupons.current_page - 1), { preserveState: true, only: ['coupons'] })} disabled={coupons.current_page === 1} className="px-3 py-2 border border-zinc-300 dark:border-zinc-700 text-zinc-700 dark:text-zinc-300 hover:border-black dark:hover:border-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer" aria-label="Previous">
+                <button onClick={() => router.get('/admin/coupons', buildPaginationParams(coupons.current_page - 1), { preserveState: true, only: ['coupons'] })} disabled={coupons.current_page === 1} className="px-3 py-2 border border-zinc-300 dark:border-zinc-700 text-zinc-700 dark:text-zinc-300 hover:border-black dark:hover:border-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer" aria-label="Previous Page">
                   <ChevronLeft className="w-4 h-4" />
                 </button>
-                <button className="px-4 py-2 font-medium border bg-black dark:bg-white text-white dark:text-black">{coupons.current_page}</button>
-                <button onClick={() => router.get('/admin/coupons', buildPaginationParams(coupons.current_page + 1), { preserveState: true, only: ['coupons'] })} disabled={coupons.current_page === coupons.last_page} className="px-3 py-2 border border-zinc-300 dark:border-zinc-700 text-zinc-700 dark:text-zinc-300 hover:border-black dark:hover:border-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer" aria-label="Next">
+                {coupons.current_page > 2 && (
+                  <span className="px-2 text-zinc-500 dark:text-zinc-400">...</span>
+                )}
+                {coupons.current_page > 1 && (
+                  <button onClick={() => router.get('/admin/coupons', buildPaginationParams(coupons.current_page - 1), { preserveState: true, only: ['coupons'] })} className="px-4 py-2 font-medium transition-colors border bg-white dark:bg-zinc-900 text-zinc-700 dark:text-zinc-300 border-zinc-300 dark:border-zinc-700 hover:border-black dark:hover:border-white cursor-pointer">
+                    {coupons.current_page - 1}
+                  </button>
+                )}
+                <button className="px-4 py-2 font-medium transition-colors border bg-black dark:bg-white text-white dark:text-black border-black dark:border-white">
+                  {coupons.current_page}
+                </button>
+                {coupons.current_page < coupons.last_page && (
+                  <button onClick={() => router.get('/admin/coupons', buildPaginationParams(coupons.current_page + 1), { preserveState: true, only: ['coupons'] })} className="px-4 py-2 font-medium transition-colors border bg-white dark:bg-zinc-900 text-zinc-700 dark:text-zinc-300 border-zinc-300 dark:border-zinc-700 hover:border-black dark:hover:border-white cursor-pointer">
+                    {coupons.current_page + 1}
+                  </button>
+                )}
+                {coupons.current_page < coupons.last_page - 1 && (
+                  <span className="px-2 text-zinc-500 dark:text-zinc-400">...</span>
+                )}
+                <button onClick={() => router.get('/admin/coupons', buildPaginationParams(coupons.current_page + 1), { preserveState: true, only: ['coupons'] })} disabled={coupons.current_page === coupons.last_page} className="px-3 py-2 border border-zinc-300 dark:border-zinc-700 text-zinc-700 dark:text-zinc-300 hover:border-black dark:hover:border-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer" aria-label="Next Page">
                   <ChevronRight className="w-4 h-4" />
                 </button>
-                <button onClick={() => router.get('/admin/coupons', buildPaginationParams(coupons.last_page), { preserveState: true, only: ['coupons'] })} disabled={coupons.current_page === coupons.last_page} className="px-3 py-2 border border-zinc-300 dark:border-zinc-700 text-zinc-700 dark:text-zinc-300 hover:border-black dark:hover:border-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer" aria-label="Last">
+                <button onClick={() => router.get('/admin/coupons', buildPaginationParams(coupons.last_page), { preserveState: true, only: ['coupons'] })} disabled={coupons.current_page === coupons.last_page} className="px-3 py-2 border border-zinc-300 dark:border-zinc-700 text-zinc-700 dark:text-zinc-300 hover:border-black dark:hover:border-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer" aria-label="Last Page">
                   <ChevronsRight className="w-4 h-4" />
                 </button>
               </div>
             )}
             <ModalForm isOpen={isCreateModalOpen} onClose={() => setIsCreateModalOpen(false)} onSubmit={handleCreate} title="Create New Coupon" fields={formFields} submitLabel="Create Coupon" />
-            <ModalForm isOpen={isEditModalOpen} onClose={() => { setIsEditModalOpen(false); setSelectedCoupon(null); }} onSubmit={handleEdit} title="Edit Coupon" fields={formFields} initialData={selectedCoupon ? { couponCode: selectedCoupon.couponCode, discountType: selectedCoupon.discountType, discountValue: selectedCoupon.discountValue, expiresAt: selectedCoupon.expiresAt, usageLimit: selectedCoupon.usageLimit, isActive: selectedCoupon.isActive } : {}} submitLabel="Update Coupon" />
+            <ModalForm isOpen={isEditModalOpen} onClose={() => { setIsEditModalOpen(false); setSelectedCoupon(null); }} onSubmit={handleEdit} title="Edit Coupon" fields={formFields} initialData={selectedCoupon ? { couponCode: selectedCoupon.couponCode, discountType: selectedCoupon.discountType, discountValue: selectedCoupon.discountValue, validUntil: selectedCoupon.validUntil, usageLimit: selectedCoupon.usageLimit, isActive: selectedCoupon.isActive } : {}} submitLabel="Update Coupon" />
           </div>
         </div>
       </div>

@@ -3,10 +3,13 @@ import { useState, FormEvent, useEffect } from 'react';
 interface Field {
   name: string;
   label: string;
-  type: 'text' | 'email' | 'password' | 'number' | 'select' | 'textarea' | 'date';
+  type: 'text' | 'email' | 'password' | 'number' | 'select' | 'textarea' | 'date' | 'checkbox';
   required?: boolean;
   options?: { value: string | number; label: string }[];
   placeholder?: string;
+  min?: number;
+  max?: number;
+  disabled?: boolean;
 }
 interface Props {
   isOpen: boolean;
@@ -47,10 +50,12 @@ export default function ModalForm({ isOpen, onClose, onSubmit, title, fields, in
           <div className="space-y-4">
             {fields.map((field) => (
               <div key={field.name}>
-                <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2">
-                  {field.label}
-                  {field.required && <span className="text-red-600">*</span>}
-                </label>
+                {field.type !== 'checkbox' && (
+                  <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2">
+                    {field.label}
+                    {field.required && <span className="text-red-600">*</span>}
+                  </label>
+                )}
                 {field.type === 'select' ? (
                   <select value={formData[field.name] || ''} onChange={(e) => handleChange(field.name, e.target.value)} required={field.required} className="w-full px-4 py-2 border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 focus:outline-none focus:border-black dark:focus:border-white cursor-pointer">
                     <option value="" disabled>Select {field.label}</option>
@@ -69,6 +74,16 @@ export default function ModalForm({ isOpen, onClose, onSubmit, title, fields, in
                     rows={4}
                     className="w-full px-4 py-2 border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 focus:outline-none focus:border-black dark:focus:border-white"
                   />
+                ) : field.type === 'checkbox' ? (
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={!!formData[field.name]}
+                      onChange={(e) => handleChange(field.name, e.target.checked)}
+                      className="w-4 h-4 text-black dark:text-white border-zinc-300 dark:border-zinc-700 focus:ring-black dark:focus:ring-white"
+                    />
+                    <span className="text-sm font-medium text-zinc-700 dark:text-zinc-300">{field.label}</span>
+                  </label>
                 ) : (
                   <input
                     type={field.type}
@@ -76,7 +91,9 @@ export default function ModalForm({ isOpen, onClose, onSubmit, title, fields, in
                     onChange={(e) => handleChange(field.name, field.type === 'number' ? (e.target.value === '' ? '' : parseFloat(e.target.value)) : e.target.value)}
                     required={field.required}
                     placeholder={field.placeholder}
-                    min={field.type === 'number' && field.name === 'simulatedPrice' ? 0 : undefined}
+                    disabled={field.disabled}
+                    min={field.min}
+                    max={field.max}
                     step={field.type === 'number' && field.name === 'simulatedPrice' ? '0.01' : undefined}
                     className="w-full px-4 py-2 border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 focus:outline-none focus:border-black dark:focus:border-white"
                   />

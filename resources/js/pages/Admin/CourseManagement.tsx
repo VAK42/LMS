@@ -71,12 +71,15 @@ export default function CourseManagement({ courses, categories, instructors, fil
   };
   const handleCreate = (data: Record<string, any>) => {
     router.post('/admin/courses', data, {
-      onSuccess: () => {
+      preserveScroll: true,
+      onSuccess: (page) => {
+        const successMsg = (page.props as any).success || 'Course Created Successfully!';
         setIsCreateModalOpen(false);
-        showToast('Course Created Successfully!', 'success');
+        showToast(successMsg, 'success');
       },
-      onError: () => {
-        showToast('Failed To Create Course! Please Try Again!', 'error');
+      onError: (errors) => {
+        const errorMsg = Object.values(errors)[0] as string || 'Failed To Create Course!';
+        showToast(errorMsg, 'error');
       }
     });
   };
@@ -86,13 +89,16 @@ export default function CourseManagement({ courses, categories, instructors, fil
       ...data,
       _method: 'PUT'
     }, {
-      onSuccess: () => {
+      preserveScroll: true,
+      onSuccess: (page) => {
+        const successMsg = (page.props as any).success || 'Course Updated Successfully!';
         setIsEditModalOpen(false);
         setSelectedCourse(null);
-        showToast('Course Updated Successfully!', 'success');
+        showToast(successMsg, 'success');
       },
-      onError: () => {
-        showToast('Failed To Update Course! Please Try Again!', 'error');
+      onError: (errors) => {
+        const errorMsg = Object.values(errors)[0] as string || 'Failed To Update Course!';
+        showToast(errorMsg, 'error');
       }
     });
   };
@@ -101,11 +107,13 @@ export default function CourseManagement({ courses, categories, instructors, fil
       router.post(`/admin/courses/${courseId}`, {
         _method: 'DELETE'
       }, {
-        onSuccess: () => {
-          showToast('Course Deleted Successfully!', 'success');
+        onSuccess: (page) => {
+          const successMsg = (page.props as any).success || 'Course Deleted Successfully!';
+          showToast(successMsg, 'success');
         },
-        onError: () => {
-          showToast('Failed To Delete Course! Please Try Again!', 'error');
+        onError: (errors) => {
+          const errorMsg = Object.values(errors)[0] as string || 'Failed To Delete Course!';
+          showToast(errorMsg, 'error');
         }
       });
     }
@@ -118,11 +126,13 @@ export default function CourseManagement({ courses, categories, instructors, fil
       instructorId: course.instructor.userId,
       _method: 'PUT'
     }, {
-      onSuccess: () => {
-        showToast(`Course ${!course.isPublished ? 'Published' : 'Unpublished'} Successfully!`, 'success');
+      onSuccess: (page) => {
+        const successMsg = (page.props as any).success || `Course ${!course.isPublished ? 'Published' : 'Unpublished'} Successfully!`;
+        showToast(successMsg, 'success');
       },
-      onError: () => {
-        showToast('Failed To Update Course Status! Please Try Again!', 'error');
+      onError: (errors) => {
+        const errorMsg = Object.values(errors)[0] as string || 'Failed To Update Course Status!';
+        showToast(errorMsg, 'error');
       }
     });
   };
@@ -207,7 +217,7 @@ export default function CourseManagement({ courses, categories, instructors, fil
       const url = URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
-      link.download = 'Course.csv';
+      link.download = 'Courses.csv';
       link.click();
       URL.revokeObjectURL(url);
       showToast('Courses Exported Successfully!', 'success');
@@ -232,7 +242,7 @@ export default function CourseManagement({ courses, categories, instructors, fil
       required: true,
       options: instructors.map(inst => ({ value: inst.userId, label: inst.userName }))
     },
-    { name: 'simulatedPrice', label: 'Price', type: 'number' as const, required: true },
+    { name: 'simulatedPrice', label: 'Price', type: 'number' as const, required: true, min: 0 },
     {
       name: 'isPublished',
       label: 'Published',
@@ -264,13 +274,13 @@ export default function CourseManagement({ courses, categories, instructors, fil
             <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 p-6 mb-6">
               <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                 <input type="text" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} onKeyPress={(e) => e.key === 'Enter' && handleSearch()} placeholder="Search Courses..." className="px-4 py-2 border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 focus:outline-none focus:border-black dark:focus:border-white" />
-                <select value={categoryFilter} onChange={(e) => setCategoryFilter(e.target.value)} className="px-4 py-2 border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 focus:outline-none focus:border-black dark:focus:border-white">
+                <select value={categoryFilter} onChange={(e) => setCategoryFilter(e.target.value)} className="px-4 py-2 border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 focus:outline-none focus:border-black dark:focus:border-white cursor-pointer">
                   <option value="">All Categories</option>
                   {categories.map(cat => (
                     <option key={cat.categoryId} value={cat.categoryId}>{cat.categoryName}</option>
                   ))}
                 </select>
-                <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)} className="px-4 py-2 border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 focus:outline-none focus:border-black dark:focus:border-white">
+                <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)} className="px-4 py-2 border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 focus:outline-none focus:border-black dark:focus:border-white cursor-pointer">
                   <option value="">All Status</option>
                   <option value="published">Published</option>
                   <option value="draft">Draft</option>

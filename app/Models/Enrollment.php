@@ -9,8 +9,8 @@ class Enrollment extends Model
   protected $primaryKey = null;
   public $incrementing = false;
   protected $keyType = 'string';
-  public const createdAt = 'createdAt';
-  public const updatedAt = 'updatedAt';
+  const CREATED_AT = 'createdAt';
+  const UPDATED_AT = 'updatedAt';
   protected $fillable = [
     'userId',
     'courseId',

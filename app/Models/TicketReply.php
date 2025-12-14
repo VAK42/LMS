@@ -7,8 +7,8 @@ class TicketReply extends Model
   use HasFactory;
   protected $table = 'ticketReplies';
   protected $primaryKey = 'replyId';
-  public const createdAt = 'createdAt';
-  public const updatedAt = 'updatedAt';
+  const CREATED_AT = 'createdAt';
+  const UPDATED_AT = 'updatedAt';
   protected $fillable = [
     'ticketId',
     'userId',

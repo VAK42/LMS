@@ -7,8 +7,8 @@ class Notification extends Model
   use HasFactory;
   protected $table = 'notifications';
   protected $primaryKey = 'notificationId';
-  public const createdAt = 'createdAt';
-  public const updatedAt = 'updatedAt';
+  const CREATED_AT = 'createdAt';
+  const UPDATED_AT = 'updatedAt';
   protected $fillable = [
     'userId',
     'notificationType',

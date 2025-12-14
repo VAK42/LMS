@@ -8,7 +8,7 @@ class CategoryController extends Controller
 {
   public function index(Request $request)
   {
-    $query = Category::withCount('courses');
+    $query = Category::withCount(['courses as coursesCount']);
     if ($request->has('search')) {
       $search = $request->search;
       $query->where('categoryName', 'like', "%{$search}%");
@@ -26,6 +26,11 @@ class CategoryController extends Controller
       'categoryName' => 'required|string|max:255|unique:categories,categoryName',
       'categoryDescription' => 'nullable|string',
     ]);
+    $validated['slug'] = \Illuminate\Support\Str::camel($validated['categoryName']);
+    if (isset($validated['categoryDescription'])) {
+      $validated['description'] = $validated['categoryDescription'];
+      unset($validated['categoryDescription']);
+    }
     Category::create($validated);
     return redirect()->back()->with('success', 'Category Created Successfully!');
   }
@@ -36,6 +41,11 @@ class CategoryController extends Controller
       'categoryName' => 'required|string|max:255|unique:categories,categoryName,' . $categoryId . ',categoryId',
       'categoryDescription' => 'nullable|string',
     ]);
+    $validated['slug'] = \Illuminate\Support\Str::camel($validated['categoryName']);
+    if (isset($validated['categoryDescription'])) {
+      $validated['description'] = $validated['categoryDescription'];
+      unset($validated['categoryDescription']);
+    }
     $category->update($validated);
     return redirect()->back()->with('success', 'Category Updated Successfully!');
   }
@@ -51,7 +61,7 @@ class CategoryController extends Controller
   }
   public function export()
   {
-    $categories = Category::select(['categoryId', 'categoryName', 'slug', 'description', 'createdAt'])->get();
+    $categories = Category::withCount(['courses as coursesCount'])->get();
     return response()->json($categories);
   }
 }

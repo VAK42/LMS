@@ -10,7 +10,7 @@ interface Category {
   categoryId: number;
   categoryName: string;
   categoryDescription: string | null;
-  courses_count: number;
+  coursesCount: number;
 }
 interface Props {
   categories: {
@@ -43,33 +43,47 @@ export default function CategoryManagement({ categories, filters, user }: Props)
   };
   const handleCreate = (data: Record<string, any>) => {
     router.post('/admin/categories', data, {
-      onSuccess: () => {
+      onSuccess: (page) => {
+        const successMsg = (page.props as any).success || 'Category Created Successfully!';
         setIsCreateModalOpen(false);
-        showToast('Category Created Successfully!', 'success');
+        showToast(successMsg, 'success');
       },
-      onError: () => showToast('Failed To Create Category! Please Try Again!', 'error')
+      onError: (errors) => {
+        const errorMsg = Object.values(errors)[0] as string || 'Failed To Create Category!';
+        showToast(errorMsg, 'error');
+      }
     });
   };
   const handleEdit = (data: Record<string, any>) => {
     if (!selectedCategory) return;
     router.post(`/admin/categories/${selectedCategory.categoryId}`, { ...data, _method: 'PUT' }, {
-      onSuccess: () => {
+      onSuccess: (page) => {
+        const successMsg = (page.props as any).success || 'Category Updated Successfully!';
         setIsEditModalOpen(false);
         setSelectedCategory(null);
-        showToast('Category Updated Successfully!', 'success');
+        showToast(successMsg, 'success');
       },
-      onError: () => showToast('Failed To Update Category! Please Try Again!', 'error')
+      onError: (errors) => {
+        const errorMsg = Object.values(errors)[0] as string || 'Failed To Update Category!';
+        showToast(errorMsg, 'error');
+      }
     });
   };
   const handleDelete = (category: Category) => {
-    if (category.courses_count > 0) {
-      showToast(`Cannot Delete Category With ${category.courses_count} Courses!`, 'error');
+    if (category.coursesCount > 0) {
+      showToast(`Cannot Delete Category With ${category.coursesCount} Courses!`, 'error');
       return;
     }
     if (confirm('Are You Sure You Want To Delete This Category?')) {
       router.post(`/admin/categories/${category.categoryId}`, { _method: 'DELETE' }, {
-        onSuccess: () => showToast('Category Deleted Successfully!', 'success'),
-        onError: () => showToast('Failed To Delete Category! Please Try Again!', 'error')
+        onSuccess: (page) => {
+          const successMsg = (page.props as any).success || 'Category Deleted Successfully!';
+          showToast(successMsg, 'success');
+        },
+        onError: (errors) => {
+          const errorMsg = Object.values(errors)[0] as string || 'Failed To Delete Category!';
+          showToast(errorMsg, 'error');
+        }
       });
     }
   };
@@ -85,7 +99,7 @@ export default function CategoryManagement({ categories, filters, user }: Props)
       render: (value: string | null) => value || 'No Description'
     },
     {
-      key: 'courses_count',
+      key: 'coursesCount',
       label: 'Courses',
       sortable: true,
       render: (value: number) => (
@@ -102,13 +116,42 @@ export default function CategoryManagement({ categories, filters, user }: Props)
           <button onClick={() => openEditModal(row)} className="p-2 hover:bg-zinc-100 dark:hover:bg-zinc-800 cursor-pointer">
             <Edit className="w-4 h-4" />
           </button>
-          <button onClick={() => handleDelete(row)} disabled={row.courses_count > 0} className="p-2 hover:bg-zinc-100 dark:hover:bg-zinc-800 text-red-600 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer">
+          <button onClick={() => handleDelete(row)} disabled={row.coursesCount > 0} className="p-2 hover:bg-zinc-100 dark:hover:bg-zinc-800 text-red-600 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer">
             <Trash2 className="w-4 h-4" />
           </button>
         </div>
       )
     }
   ];
+  const handleExportAllCategories = async () => {
+    try {
+      const response = await fetch('/admin/categories/export');
+      if (!response.ok) throw new Error('Export Failed');
+      const allCategories = await response.json();
+      const exportColumns = columns.filter(col => col.key !== 'actions');
+      const headers = exportColumns.map(col => col.label).join(',');
+      const rows = allCategories.map((category: any) => exportColumns.map(col => {
+        let value = category[col.key];
+        if (col.key === 'categoryDescription') {
+          value = value || 'No Description';
+        } else if (col.key === 'coursesCount') {
+          value = `${value} Course${value !== 1 ? 's' : ''}`;
+        }
+        return typeof value === 'string' && value.includes(',') ? `"${value}"` : (value ?? '');
+      }).join(',')).join('\n');
+      const csv = `${headers}\n${rows}`;
+      const blob = new Blob([csv], { type: 'text/csv' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = 'Categories.csv';
+      link.click();
+      URL.revokeObjectURL(url);
+      showToast('Categories Exported Successfully!', 'success');
+    } catch (error) {
+      showToast('Failed To Export Categories!', 'error');
+    }
+  };
   const formFields = [
     { name: 'categoryName', label: 'Category Name', type: 'text' as const, required: true },
     { name: 'categoryDescription', label: 'Description', type: 'textarea' as const, required: false }
@@ -125,7 +168,7 @@ export default function CategoryManagement({ categories, filters, user }: Props)
                 <h1 className="text-4xl font-bold text-black dark:text-white mb-2">Category Management</h1>
                 <p className="text-zinc-600 dark:text-zinc-400">Manage Course Categories</p>
               </div>
-              <button onClick={() => setIsCreateModalOpen(true)} className="flex items-center gap-2 px-6 py-3 bg-black dark:bg-white text-white dark:text-black font-medium hover:bg-zinc-800 dark:hover:bg-zinc-200">
+              <button onClick={() => setIsCreateModalOpen(true)} className="flex items-center gap-2 px-6 py-3 bg-black dark:bg-white text-white dark:text-black font-medium hover:bg-zinc-800 dark:hover:bg-zinc-200 cursor-pointer">
                 <Plus className="w-5 h-5" />
                 Add Category
               </button>
@@ -141,7 +184,7 @@ export default function CategoryManagement({ categories, filters, user }: Props)
                 </button>
               </div>
             </div>
-            <DataTable columns={columns} data={categories.data} exportable={true} keyField="categoryId" />
+            <DataTable columns={columns} data={categories.data} exportable={true} keyField="categoryId" onExport={handleExportAllCategories} />
             {categories.last_page > 1 && (
               <div className="mt-6 flex justify-center items-center gap-2">
                 <button onClick={() => router.get('/admin/categories', buildPaginationParams(1), { preserveState: true, only: ['categories'] })} disabled={categories.current_page === 1} className="px-3 py-2 border border-zinc-300 dark:border-zinc-700 text-zinc-700 dark:text-zinc-300 hover:border-black dark:hover:border-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer" aria-label="First Page">
@@ -150,7 +193,25 @@ export default function CategoryManagement({ categories, filters, user }: Props)
                 <button onClick={() => router.get('/admin/categories', buildPaginationParams(categories.current_page - 1), { preserveState: true, only: ['categories'] })} disabled={categories.current_page === 1} className="px-3 py-2 border border-zinc-300 dark:border-zinc-700 text-zinc-700 dark:text-zinc-300 hover:border-black dark:hover:border-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer" aria-label="Previous">
                   <ChevronLeft className="w-4 h-4" />
                 </button>
-                <button className="px-4 py-2 font-medium border bg-black dark:bg-white text-white dark:text-black">{categories.current_page}</button>
+                {categories.current_page > 2 && (
+                  <span className="px-2 text-zinc-500 dark:text-zinc-400">...</span>
+                )}
+                {categories.current_page > 1 && (
+                  <button onClick={() => router.get('/admin/categories', buildPaginationParams(categories.current_page - 1), { preserveState: true, only: ['categories'] })} className="px-4 py-2 font-medium transition-colors border bg-white dark:bg-zinc-900 text-zinc-700 dark:text-zinc-300 border-zinc-300 dark:border-zinc-700 hover:border-black dark:hover:border-white cursor-pointer">
+                    {categories.current_page - 1}
+                  </button>
+                )}
+                <button className="px-4 py-2 font-medium transition-colors border bg-black dark:bg-white text-white dark:text-black border-black dark:border-white">
+                  {categories.current_page}
+                </button>
+                {categories.current_page < categories.last_page && (
+                  <button onClick={() => router.get('/admin/categories', buildPaginationParams(categories.current_page + 1), { preserveState: true, only: ['categories'] })} className="px-4 py-2 font-medium transition-colors border bg-white dark:bg-zinc-900 text-zinc-700 dark:text-zinc-300 border-zinc-300 dark:border-zinc-700 hover:border-black dark:hover:border-white cursor-pointer">
+                    {categories.current_page + 1}
+                  </button>
+                )}
+                {categories.current_page < categories.last_page - 1 && (
+                  <span className="px-2 text-zinc-500 dark:text-zinc-400">...</span>
+                )}
                 <button onClick={() => router.get('/admin/categories', buildPaginationParams(categories.current_page + 1), { preserveState: true, only: ['categories'] })} disabled={categories.current_page === categories.last_page} className="px-3 py-2 border border-zinc-300 dark:border-zinc-700 text-zinc-700 dark:text-zinc-300 hover:border-black dark:hover:border-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer" aria-label="Next">
                   <ChevronRight className="w-4 h-4" />
                 </button>
@@ -160,7 +221,7 @@ export default function CategoryManagement({ categories, filters, user }: Props)
               </div>
             )}
             <ModalForm isOpen={isCreateModalOpen} onClose={() => setIsCreateModalOpen(false)} onSubmit={handleCreate} title="Create New Category" fields={formFields} submitLabel="Create Category" />
-            <ModalForm isOpen={isEditModalOpen} onClose={() => { setIsEditModalOpen(false); setSelectedCategory(null); }} onSubmit={handleEdit} title="Edit Category" fields={formFields} initialData={selectedCategory ? { categoryName: selectedCategory.categoryName, categoryDescription: selectedCategory.categoryDescription } : {}} submitLabel="Update Category" />
+            <ModalForm isOpen={isEditModalOpen} onClose={() => { setIsEditModalOpen(false); setSelectedCategory(null); }} onSubmit={handleEdit} title="Edit Category" fields={formFields} initialData={selectedCategory ? { categoryName: selectedCategory.categoryName, categoryDescription: selectedCategory.categoryDescription || '' } : {}} submitLabel="Update Category" />
           </div>
         </div>
       </div>

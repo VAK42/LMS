@@ -1,6 +1,7 @@
 import { Head, router } from '@inertiajs/react';
 import { useState } from 'react';
 import { DollarSign, CreditCard, CheckCircle, XCircle, Clock, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, Filter } from 'lucide-react';
+import { useToast } from '../../contexts/ToastContext';
 import Layout from '../../components/Layout';
 import AdminSidebar from '../../components/Admin/Sidebar';
 import DataTable from '../../components/Admin/DataTable';
@@ -25,9 +26,15 @@ interface Props {
     search?: string;
     status?: string;
   };
+  stats: {
+    totalTransactions: number;
+    totalRevenue: number;
+    completedTransactions: number;
+  };
   user: any;
 }
-export default function TransactionManagement({ transactions, filters, user }: Props) {
+export default function TransactionManagement({ transactions, filters, stats, user }: Props) {
+  const { showToast } = useToast();
   const [searchTerm, setSearchTerm] = useState(filters.search || '');
   const [statusFilter, setStatusFilter] = useState(filters.status || '');
   const handleSearch = () => {
@@ -60,6 +67,34 @@ export default function TransactionManagement({ transactions, filters, user }: P
       case 'failed': return 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400';
       case 'pending': return 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400';
       default: return 'bg-zinc-100 text-zinc-700 dark:bg-zinc-900/30 dark:text-zinc-400';
+    }
+  };
+  const handleExportAllTransactions = async () => {
+    try {
+      const response = await fetch('/admin/transactions/export');
+      if (!response.ok) throw new Error('Export Failed');
+      const allTransactions = await response.json();
+      const exportColumns = columns.filter(col => col.key !== 'actions');
+      const headers = exportColumns.map(col => col.label).join(',');
+      const rows = allTransactions.map((txn: Transaction) => exportColumns.map(col => {
+        let value: any;
+        if (col.key === 'user') value = txn.user?.userName;
+        else if (col.key === 'course') value = txn.course?.courseTitle;
+        else if (col.key === 'createdAt') value = new Date(txn.createdAt).toLocaleDateString();
+        else value = txn[col.key as keyof Transaction];
+        return typeof value === 'string' && value.includes(',') ? `\"${value}\"` : (value ?? '');
+      }).join(',')).join('\n');
+      const csv = `${headers}\n${rows}`;
+      const blob = new Blob([csv], { type: 'text/csv' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = 'Transactions.csv';
+      link.click();
+      URL.revokeObjectURL(url);
+      showToast('Transactions Exported Successfully!', 'success');
+    } catch (error) {
+      showToast('Failed To Export Transactions!', 'error');
     }
   };
   const columns = [
@@ -127,9 +162,7 @@ export default function TransactionManagement({ transactions, filters, user }: P
       render: (value: string) => new Date(value).toLocaleDateString()
     }
   ];
-  const totalRevenue = (transactions.data || [])
-    .filter(t => t.transactionStatus === 'completed')
-    .reduce((sum, t) => sum + (parseFloat(String(t.amount || 0))), 0);
+
   return (
     <Layout user={user}>
       <Head title="Transaction Management" />
@@ -146,7 +179,7 @@ export default function TransactionManagement({ transactions, filters, user }: P
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm font-medium text-zinc-600 dark:text-zinc-400">Total Revenue</p>
-                    <p className="text-3xl font-bold text-black dark:text-white mt-2">${Number(totalRevenue || 0).toFixed(2)}</p>
+                    <p className="text-3xl font-bold text-black dark:text-white mt-2">${Number(stats.totalRevenue || 0).toFixed(2)}</p>
                   </div>
                   <div className="p-3 bg-green-50 dark:bg-green-900/20 rounded-lg">
                     <DollarSign className="w-6 h-6 text-green-600 dark:text-green-400" />
@@ -157,7 +190,7 @@ export default function TransactionManagement({ transactions, filters, user }: P
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm font-medium text-zinc-600 dark:text-zinc-400">Total Transactions</p>
-                    <p className="text-3xl font-bold text-black dark:text-white mt-2">{(transactions.data || []).length}</p>
+                    <p className="text-3xl font-bold text-black dark:text-white mt-2">{stats.totalTransactions}</p>
                   </div>
                   <div className="p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
                     <CreditCard className="w-6 h-6 text-blue-600 dark:text-blue-400" />
@@ -169,7 +202,7 @@ export default function TransactionManagement({ transactions, filters, user }: P
                   <div>
                     <p className="text-sm font-medium text-zinc-600 dark:text-zinc-400">Completed</p>
                     <p className="text-3xl font-bold text-black dark:text-white mt-2">
-                      {(transactions.data || []).filter(t => t.transactionStatus === 'completed').length}
+                      {stats.completedTransactions}
                     </p>
                   </div>
                   <div className="p-3 bg-green-50 dark:bg-green-900/20 rounded-lg">
@@ -183,7 +216,7 @@ export default function TransactionManagement({ transactions, filters, user }: P
                 <div className="flex-1">
                   <input type="text" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} onKeyPress={(e) => e.key === 'Enter' && handleSearch()} placeholder="Search By User Or Course..." className="w-full px-4 py-2 border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 focus:outline-none focus:border-black dark:focus:border-white" />
                 </div>
-                <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)} className="px-4 py-2 border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 focus:outline-none focus:border-black dark:focus:border-white">
+                <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)} className="px-4 py-2 border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 focus:outline-none focus:border-black dark:focus:border-white cursor-pointer">
                   <option value="">All Status</option>
                   <option value="completed">Completed</option>
                   <option value="pending">Pending</option>
@@ -195,7 +228,7 @@ export default function TransactionManagement({ transactions, filters, user }: P
                 </button>
               </div>
             </div>
-            <DataTable columns={columns} data={transactions.data} exportable={true} keyField="transactionId" />
+            <DataTable columns={columns} data={transactions.data} exportable={true} keyField="transactionId" onExport={handleExportAllTransactions} />
             {transactions.last_page > 1 && (
               <div className="mt-6 flex justify-center items-center gap-2">
                 <button onClick={() => router.get('/admin/transactions', buildPaginationParams(1), { preserveState: true, only: ['transactions'] })} disabled={transactions.current_page === 1} className="px-3 py-2 border border-zinc-300 dark:border-zinc-700 text-zinc-700 dark:text-zinc-300 hover:border-black dark:hover:border-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer" aria-label="First Page">
@@ -204,9 +237,25 @@ export default function TransactionManagement({ transactions, filters, user }: P
                 <button onClick={() => router.get('/admin/transactions', buildPaginationParams(transactions.current_page - 1), { preserveState: true, only: ['transactions'] })} disabled={transactions.current_page === 1} className="px-3 py-2 border border-zinc-300 dark:border-zinc-700 text-zinc-700 dark:text-zinc-300 hover:border-black dark:hover:border-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer" aria-label="Previous Page">
                   <ChevronLeft className="w-4 h-4" />
                 </button>
+                {transactions.current_page > 2 && (
+                  <span className="px-2 text-zinc-500 dark:text-zinc-400">...</span>
+                )}
+                {transactions.current_page > 1 && (
+                  <button onClick={() => router.get('/admin/transactions', buildPaginationParams(transactions.current_page - 1), { preserveState: true, only: ['transactions'] })} className="px-4 py-2 font-medium transition-colors border bg-white dark:bg-zinc-900 text-zinc-700 dark:text-zinc-300 border-zinc-300 dark:border-zinc-700 hover:border-black dark:hover:border-white cursor-pointer">
+                    {transactions.current_page - 1}
+                  </button>
+                )}
                 <button className="px-4 py-2 font-medium transition-colors border bg-black dark:bg-white text-white dark:text-black border-black dark:border-white">
                   {transactions.current_page}
                 </button>
+                {transactions.current_page < transactions.last_page && (
+                  <button onClick={() => router.get('/admin/transactions', buildPaginationParams(transactions.current_page + 1), { preserveState: true, only: ['transactions'] })} className="px-4 py-2 font-medium transition-colors border bg-white dark:bg-zinc-900 text-zinc-700 dark:text-zinc-300 border-zinc-300 dark:border-zinc-700 hover:border-black dark:hover:border-white cursor-pointer">
+                    {transactions.current_page + 1}
+                  </button>
+                )}
+                {transactions.current_page < transactions.last_page - 1 && (
+                  <span className="px-2 text-zinc-500 dark:text-zinc-400">...</span>
+                )}
                 <button onClick={() => router.get('/admin/transactions', buildPaginationParams(transactions.current_page + 1), { preserveState: true, only: ['transactions'] })} disabled={transactions.current_page === transactions.last_page} className="px-3 py-2 border border-zinc-300 dark:border-zinc-700 text-zinc-700 dark:text-zinc-300 hover:border-black dark:hover:border-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer" aria-label="Next Page">
                   <ChevronRight className="w-4 h-4" />
                 </button>

@@ -1,6 +1,6 @@
 import { Head, router } from '@inertiajs/react';
 import { useState } from 'react';
-import { Plus, Trash2, User, AlertCircle, CheckCircle, Info, AlertTriangle, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, Filter } from 'lucide-react';
+import { Plus, Trash2, User, AlertCircle, CheckCircle, Info, AlertTriangle, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, Filter, Edit } from 'lucide-react';
 import { useToast } from '../../contexts/ToastContext';
 import Layout from '../../components/Layout';
 import AdminSidebar from '../../components/Admin/Sidebar';
@@ -38,6 +38,8 @@ interface Props {
 export default function NotificationManagement({ notifications, filters, user }: Props) {
   const { showToast } = useToast();
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [selectedNotification, setSelectedNotification] = useState<Notification | null>(null);
   const [searchTerm, setSearchTerm] = useState(filters.search || '');
   const [typeFilter, setTypeFilter] = useState(filters.type || '');
   const handleSearch = () => {
@@ -58,12 +60,33 @@ export default function NotificationManagement({ notifications, filters, user }:
   };
   const handleCreate = (data: Record<string, any>) => {
     router.post('/admin/notifications', data, {
-      onSuccess: () => {
+      onSuccess: (page) => {
+        const successMsg = (page.props as any).success || 'Notification Sent Successfully!';
         setIsCreateModalOpen(false);
-        showToast('Notification Sent Successfully!', 'success');
+        showToast(successMsg, 'success');
       },
-      onError: () => {
-        showToast('Failed To Send Notification! Please Try Again!', 'error');
+      onError: (errors) => {
+        const errorMsg = Object.values(errors)[0] as string || 'Failed To Send Notification!';
+        showToast(errorMsg, 'error');
+      }
+    });
+  };
+  const openEditModal = (notification: Notification) => {
+    setSelectedNotification(notification);
+    setIsEditModalOpen(true);
+  };
+  const handleEdit = (data: Record<string, any>) => {
+    if (!selectedNotification) return;
+    router.post(`/admin/notifications/${selectedNotification.notificationId}`, { ...data, _method: 'PUT' }, {
+      onSuccess: (page) => {
+        const successMsg = (page.props as any).success || 'Notification Updated Successfully!';
+        setIsEditModalOpen(false);
+        setSelectedNotification(null);
+        showToast(successMsg, 'success');
+      },
+      onError: (errors) => {
+        const errorMsg = Object.values(errors)[0] as string || 'Failed To Update Notification!';
+        showToast(errorMsg, 'error');
       }
     });
   };
@@ -72,11 +95,13 @@ export default function NotificationManagement({ notifications, filters, user }:
       router.post(`/admin/notifications/${notificationId}`, {
         _method: 'DELETE'
       }, {
-        onSuccess: () => {
-          showToast('Notification Deleted Successfully!', 'success');
+        onSuccess: (page) => {
+          const successMsg = (page.props as any).success || 'Notification Deleted Successfully!';
+          showToast(successMsg, 'success');
         },
-        onError: () => {
-          showToast('Failed To Delete Notification! Please Try Again!', 'error');
+        onError: (errors) => {
+          const errorMsg = Object.values(errors)[0] as string || 'Failed To Delete Notification!';
+          showToast(errorMsg, 'error');
         }
       });
     }
@@ -95,6 +120,31 @@ export default function NotificationManagement({ notifications, filters, user }:
       case 'error': return 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400';
       case 'warning': return 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400';
       default: return 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400';
+    }
+  };
+  const handleExportAllNotifications = async () => {
+    try {
+      const response = await fetch('/admin/notifications/export');
+      if (!response.ok) throw new Error('Export Failed');
+      const allNotifications = await response.json();
+      const exportColumns = columns.filter(col => col.key !== 'actions');
+      const headers = exportColumns.map(col => col.label).join(',');
+      const rows = allNotifications.map((notif: Notification) => exportColumns.map(col => {
+        let value = notif[col.key as keyof Notification];
+        if (col.key === 'createdAt' && value) value = new Date(value as string).toLocaleDateString();
+        return typeof value === 'string' && value.includes(',') ? `\"${value}\"` : (value ?? '');
+      }).join(',')).join('\n');
+      const csv = `${headers}\n${rows}`;
+      const blob = new Blob([csv], { type: 'text/csv' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = 'Notifications.csv';
+      link.click();
+      URL.revokeObjectURL(url);
+      showToast('Notifications Exported Successfully!', 'success');
+    } catch (error) {
+      showToast('Failed To Export Notifications!', 'error');
     }
   };
   const columns = [
@@ -145,9 +195,14 @@ export default function NotificationManagement({ notifications, filters, user }:
       key: 'actions',
       label: 'Actions',
       render: (_: any, row: Notification) => (
-        <button onClick={() => handleDelete(row.notificationId)} className="p-2 hover:bg-zinc-100 dark:hover:bg-zinc-800 text-red-600 cursor-pointer">
-          <Trash2 className="w-4 h-4" />
-        </button>
+        <div className="flex items-center gap-2">
+          <button onClick={() => openEditModal(row)} title="Edit" className="p-2 hover:bg-zinc-100 dark:hover:bg-zinc-800 cursor-pointer">
+            <Edit className="w-4 h-4" />
+          </button>
+          <button onClick={() => handleDelete(row.notificationId)} title="Delete" className="p-2 hover:bg-zinc-100 dark:hover:bg-zinc-800 text-red-600 cursor-pointer">
+            <Trash2 className="w-4 h-4" />
+          </button>
+        </div>
       )
     }
   ];
@@ -156,15 +211,13 @@ export default function NotificationManagement({ notifications, filters, user }:
       name: 'notificationTitle',
       label: 'Title',
       type: 'text' as const,
-      required: true,
-      placeholder: 'e.g., New Course Available'
+      required: true
     },
     {
       name: 'notificationMessage',
       label: 'Message',
       type: 'textarea' as const,
-      required: true,
-      placeholder: 'Enter Notification Message...'
+      required: true
     },
     {
       name: 'notificationType',
@@ -191,7 +244,7 @@ export default function NotificationManagement({ notifications, filters, user }:
     },
     {
       name: 'recipientRole',
-      label: 'Role (If Applicable)',
+      label: 'Role - Optional',
       type: 'select' as const,
       required: false,
       options: [
@@ -199,6 +252,38 @@ export default function NotificationManagement({ notifications, filters, user }:
         { value: 'instructor', label: 'Instructors' },
         { value: 'learner', label: 'Learners' }
       ]
+    }
+  ];
+  const editFormFields = [
+    {
+      name: 'notificationTitle',
+      label: 'Title',
+      type: 'text' as const,
+      required: true
+    },
+    {
+      name: 'notificationMessage',
+      label: 'Message',
+      type: 'textarea' as const,
+      required: true
+    },
+    {
+      name: 'notificationType',
+      label: 'Type',
+      type: 'select' as const,
+      required: true,
+      options: [
+        { value: 'info', label: 'Info' },
+        { value: 'success', label: 'Success' },
+        { value: 'warning', label: 'Warning' },
+        { value: 'error', label: 'Error' }
+      ]
+    },
+    {
+      name: 'isRead',
+      label: 'Mark As Read',
+      type: 'checkbox' as const,
+      required: false
     }
   ];
   return (
@@ -213,7 +298,7 @@ export default function NotificationManagement({ notifications, filters, user }:
                 <h1 className="text-4xl font-bold text-black dark:text-white mb-2">Notification Management</h1>
                 <p className="text-zinc-600 dark:text-zinc-400">Send Bulk Notifications To Users</p>
               </div>
-              <button onClick={() => setIsCreateModalOpen(true)} className="flex items-center gap-2 px-6 py-3 bg-black dark:bg-white text-white dark:text-black font-medium hover:bg-zinc-800 dark:hover:bg-zinc-200">
+              <button onClick={() => setIsCreateModalOpen(true)} className="flex items-center gap-2 px-6 py-3 bg-black dark:bg-white text-white dark:text-black font-medium hover:bg-zinc-800 dark:hover:bg-zinc-200 cursor-pointer">
                 <Plus className="w-5 h-5" />
                 Send Notification
               </button>
@@ -223,7 +308,7 @@ export default function NotificationManagement({ notifications, filters, user }:
                 <div className="flex-1">
                   <input type="text" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} onKeyPress={(e) => e.key === 'Enter' && handleSearch()} placeholder="Search By Title Or Recipient..." className="w-full px-4 py-2 border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 focus:outline-none focus:border-black dark:focus:border-white" />
                 </div>
-                <select value={typeFilter} onChange={(e) => setTypeFilter(e.target.value)} className="px-4 py-2 border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 focus:outline-none focus:border-black dark:focus:border-white">
+                <select value={typeFilter} onChange={(e) => setTypeFilter(e.target.value)} className="px-4 py-2 border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 focus:outline-none focus:border-black dark:focus:border-white cursor-pointer">
                   <option value="">All Types</option>
                   <option value="info">Info</option>
                   <option value="success">Success</option>
@@ -236,25 +321,44 @@ export default function NotificationManagement({ notifications, filters, user }:
                 </button>
               </div>
             </div>
-            <DataTable columns={columns} data={notifications.data} exportable={true} keyField="notificationId" />
+            <DataTable columns={columns} data={notifications.data} exportable={true} keyField="notificationId" onExport={handleExportAllNotifications} />
             {notifications.last_page > 1 && (
               <div className="mt-6 flex justify-center items-center gap-2">
                 <button onClick={() => router.get('/admin/notifications', buildPaginationParams(1), { preserveState: true, only: ['notifications'] })} disabled={notifications.current_page === 1} className="px-3 py-2 border border-zinc-300 dark:border-zinc-700 text-zinc-700 dark:text-zinc-300 hover:border-black dark:hover:border-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer" aria-label="First Page">
                   <ChevronsLeft className="w-4 h-4" />
                 </button>
-                <button onClick={() => router.get('/admin/notifications', buildPaginationParams(notifications.current_page - 1), { preserveState: true, only: ['notifications'] })} disabled={notifications.current_page === 1} className="px-3 py-2 border border-zinc-300 dark:border-zinc-700 text-zinc-700 dark:text-zinc-300 hover:border-black dark:hover:border-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer" aria-label="Previous">
+                <button onClick={() => router.get('/admin/notifications', buildPaginationParams(notifications.current_page - 1), { preserveState: true, only: ['notifications'] })} disabled={notifications.current_page === 1} className="px-3 py-2 border border-zinc-300 dark:border-zinc-700 text-zinc-700 dark:text-zinc-300 hover:border-black dark:hover:border-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer" aria-label="Previous Page">
                   <ChevronLeft className="w-4 h-4" />
                 </button>
-                <button className="px-4 py-2 font-medium border bg-black dark:bg-white text-white dark:text-black">{notifications.current_page}</button>
-                <button onClick={() => router.get('/admin/notifications', buildPaginationParams(notifications.current_page + 1), { preserveState: true, only: ['notifications'] })} disabled={notifications.current_page === notifications.last_page} className="px-3 py-2 border border-zinc-300 dark:border-zinc-700 text-zinc-700 dark:text-zinc-300 hover:border-black dark:hover:border-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer" aria-label="Next">
+                {notifications.current_page > 2 && (
+                  <span className="px-2 text-zinc-500 dark:text-zinc-400">...</span>
+                )}
+                {notifications.current_page > 1 && (
+                  <button onClick={() => router.get('/admin/notifications', buildPaginationParams(notifications.current_page - 1), { preserveState: true, only: ['notifications'] })} className="px-4 py-2 font-medium transition-colors border bg-white dark:bg-zinc-900 text-zinc-700 dark:text-zinc-300 border-zinc-300 dark:border-zinc-700 hover:border-black dark:hover:border-white cursor-pointer">
+                    {notifications.current_page - 1}
+                  </button>
+                )}
+                <button className="px-4 py-2 font-medium transition-colors border bg-black dark:bg-white text-white dark:text-black border-black dark:border-white">
+                  {notifications.current_page}
+                </button>
+                {notifications.current_page < notifications.last_page && (
+                  <button onClick={() => router.get('/admin/notifications', buildPaginationParams(notifications.current_page + 1), { preserveState: true, only: ['notifications'] })} className="px-4 py-2 font-medium transition-colors border bg-white dark:bg-zinc-900 text-zinc-700 dark:text-zinc-300 border-zinc-300 dark:border-zinc-700 hover:border-black dark:hover:border-white cursor-pointer">
+                    {notifications.current_page + 1}
+                  </button>
+                )}
+                {notifications.current_page < notifications.last_page - 1 && (
+                  <span className="px-2 text-zinc-500 dark:text-zinc-400">...</span>
+                )}
+                <button onClick={() => router.get('/admin/notifications', buildPaginationParams(notifications.current_page + 1), { preserveState: true, only: ['notifications'] })} disabled={notifications.current_page === notifications.last_page} className="px-3 py-2 border border-zinc-300 dark:border-zinc-700 text-zinc-700 dark:text-zinc-300 hover:border-black dark:hover:border-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer" aria-label="Next Page">
                   <ChevronRight className="w-4 h-4" />
                 </button>
-                <button onClick={() => router.get('/admin/notifications', buildPaginationParams(notifications.last_page), { preserveState: true, only: ['notifications'] })} disabled={notifications.current_page === notifications.last_page} className="px-3 py-2 border border-zinc-300 dark:border-zinc-700 text-zinc-700 dark:text-zinc-300 hover:border-black dark:hover:border-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer" aria-label="Last">
+                <button onClick={() => router.get('/admin/notifications', buildPaginationParams(notifications.last_page), { preserveState: true, only: ['notifications'] })} disabled={notifications.current_page === notifications.last_page} className="px-3 py-2 border border-zinc-300 dark:border-zinc-700 text-zinc-700 dark:text-zinc-300 hover:border-black dark:hover:border-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer" aria-label="Last Page">
                   <ChevronsRight className="w-4 h-4" />
                 </button>
               </div>
             )}
             <ModalForm isOpen={isCreateModalOpen} onClose={() => setIsCreateModalOpen(false)} onSubmit={handleCreate} title="Send Notification" fields={formFields} submitLabel="Send" />
+            <ModalForm isOpen={isEditModalOpen} onClose={() => { setIsEditModalOpen(false); setSelectedNotification(null); }} onSubmit={handleEdit} title={`Edit Notification #${selectedNotification?.notificationId || ''}`} fields={editFormFields} initialData={selectedNotification ? { notificationTitle: selectedNotification.notificationTitle, notificationMessage: selectedNotification.notificationMessage, notificationType: selectedNotification.notificationType, isRead: selectedNotification.isRead } : {}} submitLabel="Update Notification" />
           </div>
         </div>
       </div>

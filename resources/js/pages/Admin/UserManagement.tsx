@@ -48,12 +48,14 @@ export default function UserManagement({ users, filters, user }: Props) {
   const handleCreate = (data: Record<string, any>) => {
     router.post('/admin/users', data, {
       preserveScroll: true,
-      onSuccess: () => {
+      onSuccess: (page) => {
+        const successMsg = (page.props as any).success || 'User Created Successfully!';
         setIsCreateModalOpen(false);
-        showToast('User Created Successfully!', 'success');
+        showToast(successMsg, 'success');
       },
-      onError: () => {
-        showToast('Failed To Create User! Please Try Again!', 'error');
+      onError: (errors) => {
+        const errorMsg = Object.values(errors)[0] as string || 'Failed To Create User!';
+        showToast(errorMsg, 'error');
       },
       onFinish: () => {
         router.reload({ only: ['users'] });
@@ -66,13 +68,15 @@ export default function UserManagement({ users, filters, user }: Props) {
       ...data,
       _method: 'PUT'
     }, {
-      onSuccess: () => {
+      onSuccess: (page) => {
+        const successMsg = (page.props as any).success || 'User Updated Successfully!';
         setIsEditModalOpen(false);
         setSelectedUser(null);
-        showToast('User Updated Successfully!', 'success');
+        showToast(successMsg, 'success');
       },
-      onError: () => {
-        showToast('Failed To Update User! Please Try Again!', 'error');
+      onError: (errors) => {
+        const errorMsg = Object.values(errors)[0] as string || 'Failed To Update User!';
+        showToast(errorMsg, 'error');
       }
     });
   };
@@ -81,11 +85,13 @@ export default function UserManagement({ users, filters, user }: Props) {
       router.post(`/admin/users/${userId}`, {
         _method: 'DELETE'
       }, {
-        onSuccess: () => {
-          showToast('User Deleted Successfully!', 'success');
+        onSuccess: (page) => {
+          const successMsg = (page.props as any).success || 'User Deleted Successfully!';
+          showToast(successMsg, 'success');
         },
-        onError: () => {
-          showToast('Failed To Delete User! Please Try Again!', 'error');
+        onError: (errors) => {
+          const errorMsg = Object.values(errors)[0] as string || 'Failed To Delete User!';
+          showToast(errorMsg, 'error');
         }
       });
     }
@@ -127,7 +133,7 @@ export default function UserManagement({ users, filters, user }: Props) {
       const url = URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
-      link.download = 'User.csv';
+      link.download = 'Users.csv';
       link.click();
       URL.revokeObjectURL(url);
       showToast('Users Exported Successfully!', 'success');
@@ -181,7 +187,7 @@ export default function UserManagement({ users, filters, user }: Props) {
   const formFields = [
     { name: 'userName', label: 'Name', type: 'text' as const, required: true },
     { name: 'userEmail', label: 'Email', type: 'email' as const, required: true },
-    { name: 'password', label: 'Password', type: 'text' as const, required: !selectedUser },
+    { name: 'password', label: 'Password', type: 'password' as const, required: !selectedUser, placeholder: selectedUser ? 'Leave Empty To Keep Current Password' : 'Minimum 8 Characters' },
     {
       name: 'role',
       label: 'Role',
@@ -264,7 +270,7 @@ export default function UserManagement({ users, filters, user }: Props) {
               </div>
             )}
             <ModalForm isOpen={isCreateModalOpen} onClose={() => setIsCreateModalOpen(false)} onSubmit={handleCreate} title="Create New User" fields={formFields} submitLabel="Create User" />
-            <ModalForm isOpen={isEditModalOpen} onClose={() => { setIsEditModalOpen(false); setSelectedUser(null); }} onSubmit={handleEdit} title="Edit User" fields={formFields} initialData={selectedUser ? { userName: selectedUser.userName, userEmail: selectedUser.userEmail, role: selectedUser.role } : {}} submitLabel="Update User" />
+            <ModalForm isOpen={isEditModalOpen} onClose={() => { setIsEditModalOpen(false); setSelectedUser(null); }} onSubmit={handleEdit} title="Edit User" fields={formFields} initialData={selectedUser ? { userName: selectedUser.userName, userEmail: selectedUser.userEmail, password: '', role: selectedUser.role } : {}} submitLabel="Update User" />
           </div>
         </div>
       </div>

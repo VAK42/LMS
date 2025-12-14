@@ -24,6 +24,10 @@ class EnrollmentController extends Controller
         });
       });
     }
+    if ($request->has('payment') && $request->payment !== '') {
+      $isPaid = $request->payment === 'paid';
+      $query->where('isPaid', $isPaid);
+    }
     $enrollments = $query->orderBy('createdAt', 'desc')->paginate(2);
     $users = User::where('role', 'learner')->where('userId', '!=', auth()->id())->get();
     $courses = Course::where('isPublished', true)->get();
@@ -31,7 +35,7 @@ class EnrollmentController extends Controller
       'enrollments' => $enrollments,
       'users' => $users,
       'courses' => $courses,
-      'filters' => $request->only(['search', 'status']),
+      'filters' => $request->only(['search', 'payment']),
       'user' => auth()->user()
     ]);
   }
@@ -40,6 +44,8 @@ class EnrollmentController extends Controller
     $validated = $request->validate([
       'userId' => 'required|exists:users,userId',
       'courseId' => 'required|exists:courses,courseId',
+      'isPaid' => 'required|boolean',
+      'completionPercent' => 'required|numeric|min:0|max:100',
     ]);
     $exists = Enrollment::where('userId', $validated['userId'])
       ->where('courseId', $validated['courseId'])
@@ -50,26 +56,27 @@ class EnrollmentController extends Controller
     Enrollment::create([
       'userId' => $validated['userId'],
       'courseId' => $validated['courseId'],
-      'enrollmentStatus' => 'active',
-      'progressPercentage' => 0,
-      'enrolledAt' => now(),
+      'isPaid' => $validated['isPaid'],
+      'completionPercent' => $validated['completionPercent'],
+      'enrollmentDate' => now(),
     ]);
-    return redirect()->back()->with('success', 'Manual Enrollment Created Successfully!');
+    return redirect()->back()->with('success', 'Enrollment Created Successfully!');
   }
-  public function update(Request $request, $enrollmentId)
+  public function update(Request $request, $userId, $courseId)
   {
-    $enrollment = Enrollment::findOrFail($enrollmentId);
     $validated = $request->validate([
-      'enrollmentStatus' => 'required|in:active,completed,dropped',
-      'progressPercentage' => 'required|numeric|min:0|max:100',
+      'isPaid' => 'required|boolean',
+      'completionPercent' => 'required|numeric|min:0|max:100',
     ]);
-    $enrollment->update($validated);
+    $updated = Enrollment::where('userId', $userId)->where('courseId', $courseId)->update($validated);
+    if (!$updated) {
+      return redirect()->back()->withErrors(['error' => 'Enrollment Not Found!']);
+    }
     return redirect()->back()->with('success', 'Enrollment Updated Successfully!');
   }
-  public function destroy($enrollmentId)
+  public function destroy($userId, $courseId)
   {
-    $enrollment = Enrollment::findOrFail($enrollmentId);
-    $enrollment->delete();
+    Enrollment::where('userId', $userId)->where('courseId', $courseId)->delete();
     return redirect()->back()->with('success', 'Enrollment Deleted Successfully!');
   }
   public function export()

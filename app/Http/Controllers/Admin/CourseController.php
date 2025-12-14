@@ -34,7 +34,7 @@ class CourseController extends Controller
   }
   public function store(Request $request)
   {
-    $validated = $request->validate([
+    $validator = \Illuminate\Support\Facades\Validator::make($request->all(), [
       'courseTitle' => 'required|string|max:255',
       'courseDescription' => 'required|string',
       'categoryId' => 'required|exists:categories,categoryId',
@@ -43,13 +43,22 @@ class CourseController extends Controller
       'isPublished' => 'required|boolean',
       'courseMeta' => 'nullable|json',
     ]);
-    Course::create($validated);
+    $validator->after(function ($validator) use ($request) {
+      $exists = Course::where('courseTitle', $request->courseTitle)->exists();
+      if ($exists) {
+        $validator->errors()->add('courseTitle', 'A Course With This Title Already Exists!');
+      }
+    });
+    if ($validator->fails()) {
+      throw new \Illuminate\Validation\ValidationException($validator);
+    }
+    Course::create($request->only(['courseTitle', 'courseDescription', 'categoryId', 'instructorId', 'simulatedPrice', 'isPublished', 'courseMeta']));
     return redirect()->back()->with('success', 'Course Created Successfully!');
   }
   public function update(Request $request, $courseId)
   {
     $course = Course::findOrFail($courseId);
-    $validated = $request->validate([
+    $validator = \Illuminate\Support\Facades\Validator::make($request->all(), [
       'courseTitle' => 'required|string|max:255',
       'courseDescription' => 'required|string',
       'categoryId' => 'required|exists:categories,categoryId',
@@ -58,7 +67,18 @@ class CourseController extends Controller
       'isPublished' => 'required|boolean',
       'courseMeta' => 'nullable|json',
     ]);
-    $course->update($validated);
+    $validator->after(function ($validator) use ($request, $courseId) {
+      $exists = Course::where('courseTitle', $request->courseTitle)
+        ->where('courseId', '!=', $courseId)
+        ->exists();
+      if ($exists) {
+        $validator->errors()->add('courseTitle', 'A Course With This Title Already Exists!');
+      }
+    });
+    if ($validator->fails()) {
+      throw new \Illuminate\Validation\ValidationException($validator);
+    }
+    $course->update($request->only(['courseTitle', 'courseDescription', 'categoryId', 'instructorId', 'simulatedPrice', 'isPublished', 'courseMeta']));
     return redirect()->back()->with('success', 'Course Updated Successfully!');
   }
   public function destroy($courseId)
