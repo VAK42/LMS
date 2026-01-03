@@ -7,12 +7,15 @@ class PaymentTransaction extends Model
   use HasFactory;
   protected $table = 'paymentTransactions';
   protected $primaryKey = 'transactionId';
-  public const createdAt = 'createdAt';
-  public const updatedAt = 'updatedAt';
+  const CREATED_AT = 'createdAt';
+  const UPDATED_AT = 'updatedAt';
   protected $fillable = [
     'userId',
     'courseId',
     'amount',
+    'instructorAmount',
+    'platformFee',
+    'escrowReleasedAt',
     'qrCodePath',
     'transactionStatus',
     'paymentMethod',
@@ -26,6 +29,9 @@ class PaymentTransaction extends Model
   {
     return [
       'amount' => 'decimal:2',
+      'instructorAmount' => 'decimal:2',
+      'platformFee' => 'decimal:2',
+      'escrowReleasedAt' => 'datetime',
       'transactionMeta' => 'array',
       'isRefunded' => 'boolean',
       'refundAmount' => 'decimal:2',
@@ -39,5 +45,9 @@ class PaymentTransaction extends Model
   public function course()
   {
     return $this->belongsTo(Course::class, 'courseId', 'courseId');
+  }
+  public function ledgerEntries()
+  {
+    return $this->hasMany(LedgerEntry::class, 'transactionId', 'transactionId');
   }
 }

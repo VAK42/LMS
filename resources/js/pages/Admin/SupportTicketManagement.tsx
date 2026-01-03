@@ -1,11 +1,11 @@
+import { Edit, Trash2, AlertCircle, Clock, CheckCircle, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, Filter, MessageCircle } from 'lucide-react';
 import { Head, router } from '@inertiajs/react';
 import { useState } from 'react';
-import { Edit, Trash2, AlertCircle, Clock, CheckCircle, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, Filter, MessageCircle } from 'lucide-react';
 import { useToast } from '../../contexts/ToastContext';
-import Layout from '../../components/Layout';
 import AdminSidebar from '../../components/Admin/Sidebar';
 import DataTable from '../../components/Admin/DataTable';
 import ModalForm from '../../components/Admin/ModalForm';
+import Layout from '../../components/Layout';
 interface Ticket {
   ticketId: number;
   user: { userId: number; userName: string; userEmail: string };
@@ -143,7 +143,8 @@ export default function SupportTicketManagement({ tickets, users, filters, user 
   };
   const handleExportAllTickets = async () => {
     try {
-      const response = await fetch('/admin/support/export');
+      const response = await fetch('/admin/support/export', { credentials: 'same-origin', headers: { 'Accept': 'application/json' } });
+      if (response.status === 419) { window.location.reload(); return; }
       if (!response.ok) throw new Error('Export Failed');
       const allTickets = await response.json();
       const exportColumns = columns.filter(col => col.key !== 'actions');

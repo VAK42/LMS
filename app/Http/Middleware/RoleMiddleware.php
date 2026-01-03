@@ -7,6 +7,9 @@ class RoleMiddleware
 {
   public function handle(Request $request, Closure $next, string $role): Response
   {
+    if (!$request->user()) {
+      return redirect('/login');
+    }
     if ($request->user()->role !== $role) {
       abort(403, 'Unauthorized Access!');
     }

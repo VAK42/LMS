@@ -63,6 +63,7 @@ class AnalyticsController extends Controller
       'charts' => ['userRegistrations' => $userRegistrations, 'topCourses' => $topCourses, 'roleDistribution' => $roleDistribution, 'monthlyRevenue' => $monthlyRevenue],
       'recentActivities' => $recentActivities,
       'recentUsers' => $recentUsers,
+      'hasQr' => \Illuminate\Support\Facades\Storage::disk('public')->exists('adminQr.png'),
       'user' => auth()->user()
     ]);
   }

@@ -1,11 +1,11 @@
+import { Trash2, Award, Download, Calendar, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, Filter, Edit } from 'lucide-react';
 import { Head, router } from '@inertiajs/react';
 import { useState } from 'react';
-import { Trash2, Award, Download, Calendar, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, Filter, Edit } from 'lucide-react';
 import { useToast } from '../../contexts/ToastContext';
-import Layout from '../../components/Layout';
 import AdminSidebar from '../../components/Admin/Sidebar';
 import DataTable from '../../components/Admin/DataTable';
 import ModalForm from '../../components/Admin/ModalForm';
+import Layout from '../../components/Layout';
 interface Certificate {
   certificateId: number;
   user: { userId: number; userName: string };
@@ -96,7 +96,8 @@ export default function CertificateManagement({ certificates, users, courses, fi
   };
   const handleExportAllCertificates = async () => {
     try {
-      const response = await fetch('/admin/certificates/export');
+      const response = await fetch('/admin/certificates/export', { credentials: 'same-origin', headers: { 'Accept': 'application/json' } });
+      if (response.status === 419) { window.location.reload(); return; }
       if (!response.ok) throw new Error('Export Failed');
       const allCertificates = await response.json();
       const exportColumns = columns.filter(col => col.key !== 'actions');

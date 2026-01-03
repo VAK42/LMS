@@ -1,10 +1,10 @@
+import { DollarSign, CreditCard, CheckCircle, XCircle, Clock, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, Filter } from 'lucide-react';
 import { Head, router } from '@inertiajs/react';
 import { useState } from 'react';
-import { DollarSign, CreditCard, CheckCircle, XCircle, Clock, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, Filter } from 'lucide-react';
 import { useToast } from '../../contexts/ToastContext';
-import Layout from '../../components/Layout';
 import AdminSidebar from '../../components/Admin/Sidebar';
 import DataTable from '../../components/Admin/DataTable';
+import Layout from '../../components/Layout';
 interface Transaction {
   transactionId: number;
   user: { userId: number; userName: string; userEmail: string };
@@ -71,7 +71,8 @@ export default function TransactionManagement({ transactions, filters, stats, us
   };
   const handleExportAllTransactions = async () => {
     try {
-      const response = await fetch('/admin/transactions/export');
+      const response = await fetch('/admin/transactions/export', { credentials: 'same-origin', headers: { 'Accept': 'application/json' } });
+      if (response.status === 419) { window.location.reload(); return; }
       if (!response.ok) throw new Error('Export Failed');
       const allTransactions = await response.json();
       const exportColumns = columns.filter(col => col.key !== 'actions');
@@ -160,9 +161,44 @@ export default function TransactionManagement({ transactions, filters, stats, us
       label: 'Date',
       sortable: true,
       render: (value: string) => new Date(value).toLocaleDateString()
+    },
+    {
+      key: 'actions',
+      label: 'Actions',
+      render: (_: any, row: Transaction) => (
+        row.transactionStatus === 'pending' ? (
+          <button
+            onClick={() => handleConfirmTransaction(row.transactionId)}
+            className="px-3 py-1 text-green-500 text-sm rounded hover:bg-green-900 hover:text-white cursor-pointer"
+          >
+            Confirm
+          </button>
+        ) : (
+          <span className="bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400"><CheckCircle className="w-4 h-4" /></span>
+        )
+      )
     }
   ];
-
+  const handleConfirmTransaction = async (transactionId: number) => {
+    if (!confirm('Confirm This Transaction? This Will Credit The Instructor Wallet!')) return;
+    try {
+      const response = await fetch(`/admin/transactions/${transactionId}/confirm`, {
+        method: 'POST',
+        credentials: 'same-origin',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+          'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
+        },
+      });
+      if (response.status === 419) { window.location.reload(); return; }
+      if (!response.ok) throw new Error('Failed');
+      showToast('Transaction Confirmed! Instructor Wallet Credited!', 'success');
+      router.reload();
+    } catch (error) {
+      showToast('Failed To Confirm Transaction!', 'error');
+    }
+  };
   return (
     <Layout user={user}>
       <Head title="Transaction Management" />

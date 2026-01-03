@@ -1,23 +1,23 @@
 <?php
 use Illuminate\Support\Str;
 return [
-  'driver' => env('SESSION_DRIVER', 'database'),
-  'lifetime' => (int) env('SESSION_LIFETIME', 120),
-  'expire_on_close' => env('SESSION_EXPIRE_ON_CLOSE', true),
-  'encrypt' => env('SESSION_ENCRYPT', false),
+  'driver' => env('sessionDriver', 'database'),
+  'lifetime' => (int) env('sessionLifetime', 120),
+  'expire_on_close' => env('sessionExpireOnClose', true),
+  'encrypt' => env('sessionEncrypt', false),
   'files' => storage_path('framework/sessions'),
-  'connection' => env('SESSION_CONNECTION'),
-  'table' => env('SESSION_TABLE', 'sessions'),
-  'store' => env('SESSION_STORE'),
+  'connection' => env('sessionConnection'),
+  'table' => env('sessionTable', 'sessions'),
+  'store' => env('sessionStore'),
   'lottery' => [2, 100],
   'cookie' => env(
-    'SESSION_COOKIE',
-    Str::slug((string) env('APP_NAME', 'laravel')).'-session'
+    'sessionCookie',
+    Str::slug((string) env('appName', 'lms')).'-session'
   ),
-  'path' => env('SESSION_PATH', '/'),
-  'domain' => env('SESSION_DOMAIN'),
-  'secure' => env('SESSION_SECURE_COOKIE'),
-  'http_only' => env('SESSION_HTTP_ONLY', true),
-  'same_site' => env('SESSION_SAME_SITE', 'lax'),
-  'partitioned' => env('SESSION_PARTITIONED_COOKIE', false),
+  'path' => env('sessionPath', '/'),
+  'domain' => env('sessionDomain'),
+  'secure' => env('sessionSecureCookie'),
+  'http_only' => env('sessionHttpOnly', true),
+  'same_site' => env('sessionSameSite', 'lax'),
+  'partitioned' => env('sessionPartitionedCookie', false),
 ];

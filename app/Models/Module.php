@@ -7,8 +7,8 @@ class Module extends Model
   use HasFactory;
   protected $table = 'modules';
   protected $primaryKey = 'moduleId';
-  public const createdAt = 'createdAt';
-  public const updatedAt = 'updatedAt';
+  const CREATED_AT = 'createdAt';
+  const UPDATED_AT = 'updatedAt';
   protected $fillable = [
     'courseId',
     'moduleTitle',

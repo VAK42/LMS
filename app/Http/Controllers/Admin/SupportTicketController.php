@@ -64,12 +64,12 @@ class SupportTicketController extends Controller
     }
     $ticket->update($validated);
     if (!empty($validated['adminResponse'])) {
-        \App\Models\TicketReply::create([
-            'ticketId' => $ticket->ticketId,
-            'userId' => auth()->id(),
-            'message' => $validated['adminResponse'],
-            'isStaffReply' => true
-        ]);
+      \App\Models\TicketReply::create([
+        'ticketId' => $ticket->ticketId,
+        'userId' => auth()->id(),
+        'message' => $validated['adminResponse'],
+        'isStaffReply' => true
+      ]);
     }
     return redirect()->back()->with('success', 'Support Ticket Updated Successfully!');
   }

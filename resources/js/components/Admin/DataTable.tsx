@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { ChevronDown, ChevronUp, Download, ArrowUpDown } from 'lucide-react';
+import { Download, ArrowUpDown } from 'lucide-react';
 interface Column {
   key: string;
   label: string;

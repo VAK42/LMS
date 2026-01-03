@@ -46,17 +46,9 @@ class Course extends Model
   {
     return $this->hasMany(Enrollment::class, 'courseId', 'courseId');
   }
-  public function discussionThreads()
-  {
-    return $this->hasMany(DiscussionThread::class, 'courseId', 'courseId');
-  }
   public function reviews()
   {
     return $this->hasMany(\App\Models\CourseReview::class, 'courseId', 'courseId');
-  }
-  public function bundles()
-  {
-    return $this->belongsToMany(\App\Models\CourseBundle::class, 'bundleCourses', 'courseId', 'bundleId');
   }
   public function scopePublished($query)
   {

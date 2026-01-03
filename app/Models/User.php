@@ -16,21 +16,14 @@ class User extends Authenticatable
     'userEmail',
     'password',
     'role',
-    'avatarPath',
+    'bankQrPath',
+    'bankName',
+    'bankAccountNumber',
+    'bankAccountName',
     'emailVerifiedAt',
     'twoFactorSecret',
     'twoFactorRecoveryCodes',
     'twoFactorConfirmedAt',
-    'preferredLocale',
-    'bio',
-    'website',
-    'twitter',
-    'linkedin',
-    'github',
-    'notificationPreferences',
-    'privacySettings',
-    'showProfile',
-    'showProgress',
   ];
   protected $hidden = [
     'password',
@@ -42,10 +35,6 @@ class User extends Authenticatable
     'emailVerifiedAt' => 'datetime',
     'twoFactorConfirmedAt' => 'datetime',
     'password' => 'hashed',
-    'notificationPreferences' => 'array',
-    'privacySettings' => 'array',
-    'showProfile' => 'boolean',
-    'showProgress' => 'boolean',
   ];
   public function courses()
   {
@@ -71,10 +60,7 @@ class User extends Authenticatable
   {
     return $this->hasMany(Notification::class, 'userId', 'userId');
   }
-  public function activityLogs()
-  {
-    return $this->hasMany(ActivityLog::class, 'userId', 'userId');
-  }
+
   public function isAdmin()
   {
     return $this->role === 'admin';
@@ -99,21 +85,17 @@ class User extends Authenticatable
   {
     return $this->hasMany(\App\Models\OauthProvider::class, 'userId', 'userId');
   }
-  public function affiliate()
-  {
-    return $this->hasOne(\App\Models\Affiliate::class, 'userId', 'userId');
-  }
-  public function leaderboard()
-  {
-    return $this->hasOne(\App\Models\Leaderboard::class, 'userId', 'userId');
-  }
-  public function bookmarks()
-  {
-    return $this->hasMany(\App\Models\Bookmark::class, 'userId', 'userId');
-  }
   public function wishlists()
   {
     return $this->hasMany(\App\Models\Wishlist::class, 'userId', 'userId');
+  }
+  public function wallet()
+  {
+    return $this->hasOne(\App\Models\Wallet::class, 'userId', 'userId');
+  }
+  public function payouts()
+  {
+    return $this->hasMany(\App\Models\Payout::class, 'instructorId', 'userId');
   }
   public function getRememberTokenName()
   {

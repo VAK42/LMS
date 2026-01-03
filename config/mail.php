@@ -1,22 +1,20 @@
 <?php
 return [
-  'default' => env('MAIL_MAILER', 'log'),
+  'default' => env('mailMailer', 'log'),
   'mailers' => [
     'smtp' => [
       'transport' => 'smtp',
-      'host' => env('MAIL_HOST', 'smtp.mailtrap.io'),
-      'port' => env('MAIL_PORT', 2525),
-      'username' => env('MAIL_USERNAME'),
-      'password' => env('MAIL_PASSWORD'),
+      'host' => env('mailHost', 'smtp.mailtrap.io'),
+      'port' => env('mailPort', 2525),
+      'username' => env('mailUsername'),
+      'password' => env('mailPassword'),
+      'encryption' => env('mailEncryption', 'tls'),
       'timeout' => null,
     ],
-    'log' => [
-      'transport' => 'log',
-      'channel' => env('MAIL_LOG_CHANNEL'),
-    ],
+
   ],
   'from' => [
-    'address' => env('MAIL_FROM_ADDRESS', 'admin@lms.com'),
-    'name' => env('MAIL_FROM_NAME', 'LMS'),
+    'address' => env('mailFromAddress', 'admin@lms.com'),
+    'name' => env('mailFromName', 'LMS'),
   ],
 ];

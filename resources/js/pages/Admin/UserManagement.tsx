@@ -1,11 +1,11 @@
+import { Plus, Edit, Trash2, Filter, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from 'lucide-react';
 import { Head, router } from '@inertiajs/react';
 import { useState } from 'react';
-import { Plus, Edit, Trash2, Filter, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from 'lucide-react';
 import { useToast } from '../../contexts/ToastContext';
-import Layout from '../../components/Layout';
 import AdminSidebar from '../../components/Admin/Sidebar';
 import DataTable from '../../components/Admin/DataTable';
 import ModalForm from '../../components/Admin/ModalForm';
+import Layout from '../../components/Layout';
 interface User {
   userId: number;
   userName: string;
@@ -112,7 +112,8 @@ export default function UserManagement({ users, filters, user }: Props) {
   };
   const handleExportAllUsers = async () => {
     try {
-      const response = await fetch('/admin/users/export');
+      const response = await fetch('/admin/users/export', { credentials: 'same-origin', headers: { 'Accept': 'application/json' } });
+      if (response.status === 419) { window.location.reload(); return; }
       if (!response.ok) throw new Error('Export Failed');
       const allUsers = await response.json();
       const exportColumns = columns.filter(col => col.key !== 'actions');

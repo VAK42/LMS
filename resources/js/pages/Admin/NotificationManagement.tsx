@@ -1,11 +1,11 @@
+import { Plus, Trash2, User, AlertCircle, CheckCircle, Info, AlertTriangle, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, Filter, Edit } from 'lucide-react';
 import { Head, router } from '@inertiajs/react';
 import { useState } from 'react';
-import { Plus, Trash2, User, AlertCircle, CheckCircle, Info, AlertTriangle, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, Filter, Edit } from 'lucide-react';
 import { useToast } from '../../contexts/ToastContext';
-import Layout from '../../components/Layout';
 import AdminSidebar from '../../components/Admin/Sidebar';
 import DataTable from '../../components/Admin/DataTable';
 import ModalForm from '../../components/Admin/ModalForm';
+import Layout from '../../components/Layout';
 interface Notification {
   notificationId: number;
   user: { userId: number; userName: string };
@@ -124,7 +124,8 @@ export default function NotificationManagement({ notifications, filters, user }:
   };
   const handleExportAllNotifications = async () => {
     try {
-      const response = await fetch('/admin/notifications/export');
+      const response = await fetch('/admin/notifications/export', { credentials: 'same-origin', headers: { 'Accept': 'application/json' } });
+      if (response.status === 419) { window.location.reload(); return; }
       if (!response.ok) throw new Error('Export Failed');
       const allNotifications = await response.json();
       const exportColumns = columns.filter(col => col.key !== 'actions');

@@ -1,6 +1,6 @@
 <?php
 return [
-  'default' => env('CACHE_STORE', 'database'),
+  'default' => env('cacheStore', 'database'),
   'stores' => [
     'array' => [
       'driver' => 'array',
@@ -8,10 +8,10 @@ return [
     ],
     'database' => [
       'driver' => 'database',
-      'connection' => env('DB_CACHE_CONNECTION'),
-      'table' => env('DB_CACHE_TABLE', 'cache'),
-      'lock_connection' => env('DB_CACHE_LOCK_CONNECTION'),
-      'lock_table' => env('DB_CACHE_LOCK_TABLE'),
+      'connection' => env('dbCacheConnection'),
+      'table' => env('dbCacheTable', 'cache'),
+      'lock_connection' => env('dbCacheLockConnection'),
+      'lock_table' => env('dbCacheLockTable'),
     ],
     'file' => [
       'driver' => 'file',
@@ -19,5 +19,5 @@ return [
       'lock_path' => storage_path('framework/cache/data'),
     ],
   ],
-  'prefix' => env('CACHE_PREFIX', 'laravel-cache-'),
+  'prefix' => env('cachePrefix', 'lms-cache-'),
 ];

@@ -7,8 +7,8 @@ class Progress extends Model
   use HasFactory;
   protected $table = 'progress';
   protected $primaryKey = 'progressId';
-  public const createdAt = 'createdAt';
-  public const updatedAt = 'updatedAt';
+  const CREATED_AT = 'createdAt';
+  const UPDATED_AT = 'updatedAt';
   protected $fillable = [
     'userId',
     'lessonId',
@@ -18,6 +18,7 @@ class Progress extends Model
     'score',
     'startedAt',
     'completedAt',
+    'lastAccessedAt',
   ];
   protected function casts(): array
   {

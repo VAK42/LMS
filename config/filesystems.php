@@ -1,6 +1,6 @@
 <?php
 return [
-  'default' => env('FILESYSTEM_DISK', 'local'),
+  'default' => env('filesystemDisk', 'local'),
   'disks' => [
     'local' => [
       'driver' => 'local',
@@ -12,7 +12,7 @@ return [
     'public' => [
       'driver' => 'local',
       'root' => storage_path('app/public'),
-      'url' => env('APP_URL').'/storage',
+      'url' => env('appUrl').'/storage',
       'visibility' => 'public',
       'throw' => false,
       'report' => false,

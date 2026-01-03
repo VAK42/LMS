@@ -1,11 +1,11 @@
+import { Plus, Edit, Trash2, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, Filter } from 'lucide-react';
 import { Head, router } from '@inertiajs/react';
 import { useState } from 'react';
-import { Plus, Edit, Trash2, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, Filter } from 'lucide-react';
 import { useToast } from '../../contexts/ToastContext';
-import Layout from '../../components/Layout';
 import AdminSidebar from '../../components/Admin/Sidebar';
 import DataTable from '../../components/Admin/DataTable';
 import ModalForm from '../../components/Admin/ModalForm';
+import Layout from '../../components/Layout';
 interface Enrollment {
   userId: number;
   courseId: number;
@@ -123,7 +123,8 @@ export default function EnrollmentManagement({ enrollments, users, courses, filt
   };
   const handleExportAllEnrollments = async () => {
     try {
-      const response = await fetch('/admin/enrollments/export');
+      const response = await fetch('/admin/enrollments/export', { credentials: 'same-origin', headers: { 'Accept': 'application/json' } });
+      if (response.status === 419) { window.location.reload(); return; }
       if (!response.ok) throw new Error('Export Failed');
       const allEnrollments = await response.json();
       const exportColumns = columns.filter(col => col.key !== 'actions');

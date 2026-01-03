@@ -1,11 +1,11 @@
+import { Trash2, Star, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, Filter, Plus, Edit } from 'lucide-react';
 import { Head, router } from '@inertiajs/react';
 import { useState } from 'react';
-import { Trash2, Star, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, Filter, Plus, Edit } from 'lucide-react';
 import { useToast } from '../../contexts/ToastContext';
-import Layout from '../../components/Layout';
 import AdminSidebar from '../../components/Admin/Sidebar';
 import DataTable from '../../components/Admin/DataTable';
 import ModalForm from '../../components/Admin/ModalForm';
+import Layout from '../../components/Layout';
 interface Review {
   reviewId: number;
   user: { userId: number; userName: string };
@@ -155,7 +155,8 @@ export default function ReviewManagement({ reviews, filters, users, courses, use
   ];
   const handleExportAllReviews = async () => {
     try {
-      const response = await fetch('/admin/reviews/export');
+      const response = await fetch('/admin/reviews/export', { credentials: 'same-origin', headers: { 'Accept': 'application/json' } });
+      if (response.status === 419) { window.location.reload(); return; }
       if (!response.ok) throw new Error('Export Failed');
       const allReviews = await response.json();
       const exportColumns = columns.filter(col => col.key !== 'actions');

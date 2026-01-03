@@ -1,8 +1,9 @@
-import { Head } from '@inertiajs/react';
-import { Users, BookOpen, DollarSign, Award, TrendingUp, Star, Activity, ShoppingCart } from 'lucide-react';
 import { LineChart, Line, BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
-import Layout from '../../components/Layout';
+import { Users, BookOpen, DollarSign, Award, TrendingUp, Star, Activity, ShoppingCart } from 'lucide-react';
+import { Head, router } from '@inertiajs/react';
+import { useToast } from '../../contexts/ToastContext';
 import AdminSidebar from '../../components/Admin/Sidebar';
+import Layout from '../../components/Layout';
 interface DashboardProps {
   metrics: {
     totalUsers: number;
@@ -36,9 +37,11 @@ interface DashboardProps {
     createdAt: string;
   }>;
   user: any;
+  hasQr: boolean;
 }
 const colors = ['#3b82f6', '#8b5cf6', '#10b981', '#f59e0b', '#ef4444', '#06b6d4'];
-export default function Dashboard({ metrics, charts, recentActivities, recentUsers, user }: DashboardProps) {
+export default function Dashboard({ metrics, charts, recentActivities, recentUsers, hasQr, user }: DashboardProps) {
+  const { showToast } = useToast();
   return (
     <Layout user={user}>
       <Head title="Admin Dashboard" />
@@ -261,6 +264,30 @@ export default function Dashboard({ metrics, charts, recentActivities, recentUse
                   </table>
                 </div>
               </div>
+            </div>
+            <div className="my-8">
+              <form>
+                <label className="cursor-pointer rounded inline-flex items-center gap-2 px-4 py-2 bg-black dark:bg-white text-white dark:text-black font-bold hover:bg-zinc-800 dark:hover:bg-zinc-200 transition-colors">
+                  {hasQr ? 'Replace QR' : 'Upload QR'}
+                  <input
+                    type="file"
+                    name="qr"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={(e) => {
+                      if (e.target.files && e.target.files[0]) {
+                        const formData = new FormData();
+                        formData.append('qr', e.target.files[0]);
+                        router.post('/admin/uploadQr', formData, {
+                          forceFormData: true,
+                          onSuccess: () => showToast('QR Code Uploaded Successfully!', 'success'),
+                          onError: () => showToast('Upload Failed!', 'error'),
+                        });
+                      }
+                    }}
+                  />
+                </label>
+              </form>
             </div>
           </div>
         </div>

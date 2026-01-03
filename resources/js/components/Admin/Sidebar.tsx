@@ -1,5 +1,5 @@
 import { Link } from '@inertiajs/react';
-import { LayoutDashboard, Users, BookOpen, FolderTree, Star, GraduationCap, Ticket, Award, Bell, CreditCard, LifeBuoy } from 'lucide-react';
+import { LayoutDashboard, Users, BookOpen, FolderTree, Star, GraduationCap, Award, Bell, CreditCard, LifeBuoy, Wallet } from 'lucide-react';
 interface Props {
   currentPath: string;
 }
@@ -11,11 +11,11 @@ export default function AdminSidebar({ currentPath }: Props) {
     { path: '/admin/categories', icon: FolderTree, label: 'Category Management' },
     { path: '/admin/reviews', icon: Star, label: 'Review Management' },
     { path: '/admin/enrollments', icon: GraduationCap, label: 'Enrollment Management' },
-    { path: '/admin/coupons', icon: Ticket, label: 'Coupon Management' },
     { path: '/admin/support', icon: LifeBuoy, label: 'Support Tickets' },
     { path: '/admin/certificates', icon: Award, label: 'Certificate Management' },
     { path: '/admin/notifications', icon: Bell, label: 'Notification Management' },
     { path: '/admin/transactions', icon: CreditCard, label: 'Transaction Management' },
+    { path: '/admin/payouts', icon: Wallet, label: 'Payout Management' },
   ];
   return (
     <div className="w-64 bg-white dark:bg-zinc-900 border-r border-zinc-200 dark:border-zinc-800 min-h-screen p-6">

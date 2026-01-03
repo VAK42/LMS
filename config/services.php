@@ -1,13 +1,13 @@
 <?php
 return [
   'github' => [
-    'client_id' => env('GITHUB_CLIENT_ID'),
-    'client_secret' => env('GITHUB_CLIENT_SECRET'),
-    'redirect' => env('GITHUB_REDIRECT_URI'),
+    'client_id' => env('githubClientId'),
+    'client_secret' => env('githubClientSecret'),
+    'redirect' => env('githubRedirectUri'),
   ],
   'google' => [
-    'client_id' => env('GOOGLE_CLIENT_ID'),
-    'client_secret' => env('GOOGLE_CLIENT_SECRET'),
-    'redirect' => env('GOOGLE_REDIRECT_URI'),
+    'client_id' => env('googleClientId'),
+    'client_secret' => env('googleClientSecret'),
+    'redirect' => env('googleRedirectUri'),
   ],
 ];

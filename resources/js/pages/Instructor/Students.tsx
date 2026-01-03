@@ -1,18 +1,106 @@
-import { Head } from '@inertiajs/react';
+import { ChevronLeft, Users, BookOpen, Calendar, Mail } from 'lucide-react';
+import { Head, Link } from '@inertiajs/react';
 import Layout from '../../components/Layout';
-export default function Students(user: any) {
+interface Enrollment {
+  enrollmentId: number;
+  enrollmentDate: string;
+  completionPercent: number;
+  isPaid: boolean;
+  user: {
+    userId: number;
+    userName: string;
+    userEmail: string;
+  };
+  course: {
+    courseId: number;
+    courseTitle: string;
+  };
+}
+interface Props {
+  enrollments: {
+    data: Enrollment[];
+    current_page: number;
+    last_page: number;
+  };
+  user: any;
+}
+export default function Students({ enrollments, user }: Props) {
+  const groupedByCourse = enrollments.data.reduce((acc: { [key: number]: { course: any; students: Enrollment[] } }, enrollment) => {
+    const courseId = enrollment.course.courseId;
+    if (!acc[courseId]) {
+      acc[courseId] = { course: enrollment.course, students: [] };
+    }
+    acc[courseId].students.push(enrollment);
+    return acc;
+  }, {});
   return (
     <Layout user={user}>
       <Head title="My Students" />
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <h1 className="text-3xl font-bold text-slate-900 dark:text-white mb-8">
-          My Students
-        </h1>
-        <div className="bg-white dark:bg-slate-800 rounded-lg shadow p-6">
-          <p className="text-slate-600 dark:text-slate-400">
-            Coming Soon...
-          </p>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="flex items-center gap-4 mb-8">
+          <Link href="/instructor/dashboard" className="p-2 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors">
+            <ChevronLeft className="w-6 h-6 text-zinc-600 dark:text-zinc-400" />
+          </Link>
+          <div>
+            <h1 className="text-2xl font-bold text-black dark:text-white">My Students</h1>
+            <p className="text-zinc-600 dark:text-zinc-400">{enrollments.data.length} Total Enrollments</p>
+          </div>
         </div>
+        {enrollments.data.length === 0 ? (
+          <div className="bg-white dark:bg-zinc-900 rounded-xl border border-zinc-200 dark:border-zinc-800 p-12 text-center">
+            <Users className="w-16 h-16 text-zinc-300 dark:text-zinc-600 mx-auto mb-4" />
+            <h3 className="text-xl font-bold text-black dark:text-white mb-2">No Students Yet</h3>
+            <p className="text-zinc-600 dark:text-zinc-400">Students Will Appear Here Once They Enroll In Your Courses</p>
+          </div>
+        ) : (
+          <div className="space-y-8">
+            {Object.values(groupedByCourse).map(({ course, students }) => (
+              <div key={course.courseId} className="bg-white dark:bg-zinc-900 rounded-xl border border-zinc-200 dark:border-zinc-800 overflow-hidden">
+                <div className="p-4 bg-zinc-50 dark:bg-zinc-800 border-b border-zinc-200 dark:border-zinc-700 flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <BookOpen className="w-5 h-5 text-blue-600" />
+                    <h2 className="font-bold text-black dark:text-white">{course.courseTitle}</h2>
+                  </div>
+                  <span className="text-sm text-zinc-500">{students.length} Students</span>
+                </div>
+                <div className="divide-y divide-zinc-100 dark:divide-zinc-800">
+                  {students.map((enrollment) => (
+                    <div key={enrollment.enrollmentId} className="p-4 flex items-center justify-between hover:bg-zinc-50 dark:hover:bg-zinc-800/50 transition-colors">
+                      <div>
+                        <p className="font-medium text-black dark:text-white">{enrollment.user.userName}</p>
+                        <p className="text-sm text-zinc-500 flex items-center gap-1">
+                          <Mail className="w-3 h-3" />
+                          {enrollment.user.userEmail}
+                        </p>
+                      </div>
+                      <div className="flex items-center gap-6">
+                        <div className="text-right">
+                          <p className="text-sm text-zinc-500">Progress</p>
+                          <div className="flex items-center gap-2">
+                            <div className="w-24 h-2 bg-zinc-200 dark:bg-zinc-700 rounded-full overflow-hidden">
+                              <div className="h-full bg-blue-600 rounded-full" style={{ width: `${enrollment.completionPercent}%` }} />
+                            </div>
+                            <span className="text-sm font-medium text-black dark:text-white">{enrollment.completionPercent}%</span>
+                          </div>
+                        </div>
+                        <div className="text-right">
+                          <p className="text-sm text-zinc-500">Enrolled</p>
+                          <p className="text-sm font-medium text-black dark:text-white flex items-center gap-1">
+                            <Calendar className="w-3 h-3" />
+                            {new Date(enrollment.enrollmentDate).toLocaleDateString()}
+                          </p>
+                        </div>
+                        <span className={`px-3 py-1 rounded-full text-xs font-medium ${enrollment.isPaid ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' : 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400'}`}>
+                          {enrollment.isPaid ? 'Paid' : 'Free'}
+                        </span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
     </Layout>
   )

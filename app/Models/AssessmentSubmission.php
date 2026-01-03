@@ -7,8 +7,8 @@ class AssessmentSubmission extends Model
   use HasFactory;
   protected $table = 'assessmentSubmissions';
   protected $primaryKey = 'submissionId';
-  public const createdAt = 'createdAt';
-  public const updatedAt = 'updatedAt';
+  const CREATED_AT = 'createdAt';
+  const UPDATED_AT = 'updatedAt';
   protected $fillable = [
     'assessmentId',
     'userId',

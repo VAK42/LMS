@@ -1,6 +1,6 @@
+import { BookOpen, User, LogOut, Menu, X, Search, Sun, Moon, ChevronDown, Bell, Settings, LayoutDashboard } from 'lucide-react';
+import { useState, useRef, useEffect } from 'react';
 import { Link, router } from '@inertiajs/react';
-import { BookOpen, User, LogOut, Menu, X, Search, Sun, Moon } from 'lucide-react';
-import { useState } from 'react';
 import { useTheme } from '../contexts/ThemeContext';
 interface HeaderProps {
   user?: {
@@ -12,14 +12,37 @@ interface HeaderProps {
 }
 export default function Header({ user }: HeaderProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [userMenuOpen, setUserMenuOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const { theme, toggleTheme } = useTheme();
+  const dropdownRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setUserMenuOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     if (searchQuery.trim()) {
       router.get('/courses', { search: searchQuery });
     }
   };
+  const getDashboardPath = () => {
+    if (!user) return '/dashboard';
+    if (user.role === 'admin') return '/admin/dashboard';
+    if (user.role === 'instructor') return '/instructor/dashboard';
+    return '/dashboard';
+  };
+  const isAdmin = user?.role === 'admin';
+  const userMenuItems = isAdmin ? [] : [
+    { href: getDashboardPath(), icon: LayoutDashboard, label: 'Dashboard' },
+    { href: '/notifications', icon: Bell, label: 'Notifications' },
+    { href: '/settings', icon: Settings, label: 'Settings' },
+  ];
   return (
     <nav className="sticky top-0 z-50 bg-white dark:bg-zinc-900 border-b border-zinc-200 dark:border-zinc-800">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -59,24 +82,51 @@ export default function Header({ user }: HeaderProps) {
               {theme === 'light' ? <Moon className="w-5 h-5" /> : <Sun className="w-5 h-5" />}
             </button>
             {user ? (
-              <>
-                <Link
-                  href={user.role === 'admin' ? '/admin/dashboard' : user.role === 'instructor' ? '/instructor/dashboard' : '/dashboard'}
-                  className="flex items-center gap-2 px-4 py-2 border border-zinc-300 dark:border-zinc-700 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-all"
+              <div className="relative" ref={dropdownRef}>
+                <button
+                  onClick={() => setUserMenuOpen(!userMenuOpen)}
+                  className="flex items-center gap-2 px-4 py-2 border border-zinc-300 dark:border-zinc-700 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-all cursor-pointer"
                 >
                   <User className="w-4 h-4" />
                   {user.userName}
-                </Link>
-                <Link
-                  href="/logout"
-                  method="post"
-                  as="button"
-                  className="flex items-center gap-2 px-4 py-2 text-zinc-700 dark:text-zinc-300 hover:text-black dark:hover:text-white transition-colors cursor-pointer"
-                >
-                  <LogOut className="w-4 h-4" />
-                  Logout
-                </Link>
-              </>
+                  <ChevronDown className={`w-4 h-4 transition-transform ${userMenuOpen ? 'rotate-180' : ''}`} />
+                </button>
+                {userMenuOpen && (
+                  <div className="absolute right-0 mt-2 w-56 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 shadow-lg z-50">
+                    <div className="px-4 py-3 border-b border-zinc-200 dark:border-zinc-800">
+                      <p className="text-sm font-medium text-black dark:text-white">{user.userName}</p>
+                      <p className="text-xs text-zinc-500 dark:text-zinc-400">{user.userEmail}</p>
+                    </div>
+                    {userMenuItems.length > 0 && (
+                      <div className="py-1">
+                        {userMenuItems.map((item) => (
+                          <Link
+                            key={item.href}
+                            href={item.href}
+                            className="flex items-center gap-3 px-4 py-2 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
+                            onClick={() => setUserMenuOpen(false)}
+                          >
+                            <item.icon className="w-4 h-4" />
+                            {item.label}
+                          </Link>
+                        ))}
+                      </div>
+                    )}
+                    <div className={userMenuItems.length > 0 ? "border-t border-zinc-200 dark:border-zinc-800 py-1" : "py-1"}>
+                      <Link
+                        href="/logout"
+                        method="post"
+                        as="button"
+                        className="flex items-center gap-3 w-full px-4 py-2 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors cursor-pointer"
+                        onClick={() => setUserMenuOpen(false)}
+                      >
+                        <LogOut className="w-4 h-4" />
+                        Logout
+                      </Link>
+                    </div>
+                  </div>
+                )}
+              </div>
             ) : (
               <>
                 <Link href="/login" className="text-zinc-700 dark:text-zinc-300 hover:text-black dark:hover:text-white transition-colors cursor-pointer">
@@ -127,10 +177,17 @@ export default function Header({ user }: HeaderProps) {
             </Link>
             {user ? (
               <>
-                <Link href="/dashboard" className="block px-4 py-2 text-zinc-700 dark:text-zinc-300">
-                  Dashboard
-                </Link>
-                <Link href="/logout" method="post" as="button" className="block w-full text-left px-4 py-2 text-zinc-700 dark:text-zinc-300 cursor-pointer">
+                <div className="border-t border-zinc-200 dark:border-zinc-800 pt-2 mt-2">
+                  <p className="px-4 py-2 text-sm font-medium text-black dark:text-white">{user.userName}</p>
+                </div>
+                {userMenuItems.map((item) => (
+                  <Link key={item.href} href={item.href} className="flex items-center gap-3 px-4 py-2 text-zinc-700 dark:text-zinc-300">
+                    <item.icon className="w-4 h-4" />
+                    {item.label}
+                  </Link>
+                ))}
+                <Link href="/logout" method="post" as="button" className="flex items-center gap-3 w-full text-left px-4 py-2 text-zinc-700 dark:text-zinc-300 cursor-pointer">
+                  <LogOut className="w-4 h-4" />
                   Logout
                 </Link>
               </>

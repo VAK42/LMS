@@ -76,7 +76,9 @@ class UserController extends Controller
   }
   public function export(): JsonResponse
   {
-    $users = User::select(['userId', 'userName', 'userEmail', 'role', 'emailVerifiedAt', 'createdAt'])->where('role', '!=', 'admin')->get();
+    $users = User::select(['userId', 'userName', 'userEmail', 'role', 'emailVerifiedAt', 'createdAt'])
+      ->where('role', '!=', 'admin')
+      ->get();
     return response()->json($users);
   }
 }

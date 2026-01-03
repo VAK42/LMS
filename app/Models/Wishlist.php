@@ -7,8 +7,8 @@ class Wishlist extends Model
   use HasFactory;
   protected $table = 'wishlists';
   protected $primaryKey = 'wishlistId';
-  public const createdAt = 'createdAt';
-  public const updatedAt = null;
+  const CREATED_AT = 'createdAt';
+  const UPDATED_AT = null;
   protected $fillable = [
     'userId',
     'courseId',
