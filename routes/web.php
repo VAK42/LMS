@@ -27,6 +27,8 @@ Route::post('/twoFactorChallenge', [Auth\AuthController::class, 'verifyTwoFactor
 Route::middleware(['auth', AdminRouteMiddleware::class])->group(function () {
   Route::get('/dashboard', [Learner\DashboardController::class, 'index'])->name('dashboard');
   Route::get('/settings', [Shared\SettingsController::class, 'index'])->name('settings');
+  Route::put('/api/settings/profile', [Shared\SettingsController::class, 'updateProfile']);
+  Route::put('/api/settings/password', [Shared\SettingsController::class, 'updatePassword']);
   Route::get('/lessons/{lessonId}', [Learner\LessonController::class, 'show']);
   Route::get('/courses/{courseId}/learn', [Learner\CourseController::class, 'learn']);
   Route::get('/courses/{courseId}/reviews', [Learner\ReviewController::class, 'index']);
