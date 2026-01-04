@@ -6,6 +6,7 @@ import AdminSidebar from '../../components/Admin/Sidebar';
 import DataTable from '../../components/Admin/DataTable';
 import ModalForm from '../../components/Admin/ModalForm';
 import Layout from '../../components/Layout';
+import useTranslation from '../../hooks/useTranslation';
 interface Notification {
   notificationId: number;
   user: { userId: number; userName: string };
@@ -37,6 +38,7 @@ interface Props {
 }
 export default function NotificationManagement({ notifications, filters, user }: Props) {
   const { showToast } = useToast();
+  const { t } = useTranslation();
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [selectedNotification, setSelectedNotification] = useState<Notification | null>(null);
@@ -61,12 +63,12 @@ export default function NotificationManagement({ notifications, filters, user }:
   const handleCreate = (data: Record<string, any>) => {
     router.post('/admin/notifications', data, {
       onSuccess: (page) => {
-        const successMsg = (page.props as any).success || 'Notification Sent Successfully!';
+        const successMsg = (page.props as any).success || t('notificationSentSuccess');
         setIsCreateModalOpen(false);
         showToast(successMsg, 'success');
       },
       onError: (errors) => {
-        const errorMsg = Object.values(errors)[0] as string || 'Failed To Send Notification!';
+        const errorMsg = Object.values(errors)[0] as string || t('notificationSendFailed');
         showToast(errorMsg, 'error');
       }
     });
@@ -79,28 +81,28 @@ export default function NotificationManagement({ notifications, filters, user }:
     if (!selectedNotification) return;
     router.post(`/admin/notifications/${selectedNotification.notificationId}`, { ...data, _method: 'PUT' }, {
       onSuccess: (page) => {
-        const successMsg = (page.props as any).success || 'Notification Updated Successfully!';
+        const successMsg = (page.props as any).success || t('notificationUpdatedSuccess');
         setIsEditModalOpen(false);
         setSelectedNotification(null);
         showToast(successMsg, 'success');
       },
       onError: (errors) => {
-        const errorMsg = Object.values(errors)[0] as string || 'Failed To Update Notification!';
+        const errorMsg = Object.values(errors)[0] as string || t('notificationUpdateFailed');
         showToast(errorMsg, 'error');
       }
     });
   };
   const handleDelete = (notificationId: number) => {
-    if (confirm('Are You Sure You Want To Delete This Notification?')) {
+    if (confirm(t('deleteNotificationConfirm'))) {
       router.post(`/admin/notifications/${notificationId}`, {
         _method: 'DELETE'
       }, {
         onSuccess: (page) => {
-          const successMsg = (page.props as any).success || 'Notification Deleted Successfully!';
+          const successMsg = (page.props as any).success || t('notificationDeletedSuccess');
           showToast(successMsg, 'success');
         },
         onError: (errors) => {
-          const errorMsg = Object.values(errors)[0] as string || 'Failed To Delete Notification!';
+          const errorMsg = Object.values(errors)[0] as string || t('notificationDeleteFailed');
           showToast(errorMsg, 'error');
         }
       });
@@ -143,20 +145,20 @@ export default function NotificationManagement({ notifications, filters, user }:
       link.download = 'Notifications.csv';
       link.click();
       URL.revokeObjectURL(url);
-      showToast('Notifications Exported Successfully!', 'success');
+      showToast(t('notificationsExportedSuccess'), 'success');
     } catch (error) {
-      showToast('Failed To Export Notifications!', 'error');
+      showToast(t('exportNotificationsFailed'), 'error');
     }
   };
   const columns = [
     {
       key: 'user',
-      label: 'Recipient',
+      label: t('recipient'),
       render: (_: any, row: Notification) => row.user.userName
     },
     {
       key: 'notificationTitle',
-      label: 'Notification',
+      label: t('notification'),
       render: (_: any, row: Notification) => (
         <div>
           <p className="font-medium text-black dark:text-white">{row.notificationTitle}</p>
@@ -166,41 +168,41 @@ export default function NotificationManagement({ notifications, filters, user }:
     },
     {
       key: 'notificationType',
-      label: 'Type',
+      label: t('type'),
       sortable: true,
       render: (value: string) => (
         <div className="flex items-center gap-2">
           {getTypeIcon(value)}
           <span className={`px-2 py-1 rounded text-xs font-medium ${getTypeColor(value)}`}>
-            {value.charAt(0).toUpperCase() + value.slice(1)}
+            {t(value.toLowerCase()) || value.charAt(0).toUpperCase() + value.slice(1)}
           </span>
         </div>
       )
     },
     {
       key: 'isRead',
-      label: 'Status',
+      label: t('status'),
       render: (value: boolean) => (
         <span className={`px-2 py-1 rounded text-xs font-medium ${value ? 'bg-zinc-100 text-zinc-700 dark:bg-zinc-900/30 dark:text-zinc-400' : 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400'}`}>
-          {value ? 'Read' : 'Unread'}
+          {value ? t('read') : t('unread')}
         </span>
       )
     },
     {
       key: 'createdAt',
-      label: 'Sent',
+      label: t('sent'),
       sortable: true,
       render: (value: string) => new Date(value).toLocaleDateString()
     },
     {
       key: 'actions',
-      label: 'Actions',
+      label: t('actions'),
       render: (_: any, row: Notification) => (
         <div className="flex items-center gap-2">
-          <button onClick={() => openEditModal(row)} title="Edit" className="p-2 hover:bg-zinc-100 dark:hover:bg-zinc-800 cursor-pointer">
+          <button onClick={() => openEditModal(row)} title={t('editUser')} className="p-2 hover:bg-zinc-100 dark:hover:bg-zinc-800 cursor-pointer">
             <Edit className="w-4 h-4" />
           </button>
-          <button onClick={() => handleDelete(row.notificationId)} title="Delete" className="p-2 hover:bg-zinc-100 dark:hover:bg-zinc-800 text-red-600 cursor-pointer">
+          <button onClick={() => handleDelete(row.notificationId)} title={t('delete')} className="p-2 hover:bg-zinc-100 dark:hover:bg-zinc-800 text-red-600 cursor-pointer">
             <Trash2 className="w-4 h-4" />
           </button>
         </div>
@@ -210,125 +212,125 @@ export default function NotificationManagement({ notifications, filters, user }:
   const formFields = [
     {
       name: 'notificationTitle',
-      label: 'Title',
+      label: t('title'),
       type: 'text' as const,
       required: true
     },
     {
       name: 'notificationMessage',
-      label: 'Message',
+      label: t('message'),
       type: 'textarea' as const,
       required: true
     },
     {
       name: 'notificationType',
-      label: 'Type',
+      label: t('type'),
       type: 'select' as const,
       required: true,
       options: [
-        { value: 'info', label: 'Info' },
-        { value: 'success', label: 'Success' },
-        { value: 'warning', label: 'Warning' },
-        { value: 'error', label: 'Error' }
+        { value: 'info', label: t('info') },
+        { value: 'success', label: t('success') },
+        { value: 'warning', label: t('warning') },
+        { value: 'error', label: t('error') }
       ]
     },
     {
       name: 'recipientType',
-      label: 'Send To',
+      label: t('sendTo'),
       type: 'select' as const,
       required: true,
       options: [
-        { value: 'all', label: 'All Users' },
-        { value: 'role', label: 'Specific Role' },
-        { value: 'specific', label: 'Specific Users' }
+        { value: 'all', label: t('allUsers') },
+        { value: 'role', label: t('specificRole') },
+        { value: 'specific', label: t('specificUsers') }
       ]
     },
     {
       name: 'recipientRole',
-      label: 'Role - Optional',
+      label: t('roleOptional'),
       type: 'select' as const,
       required: false,
       options: [
-        { value: 'admin', label: 'Admins' },
-        { value: 'instructor', label: 'Instructors' },
-        { value: 'learner', label: 'Learners' }
+        { value: 'admin', label: t('admins') },
+        { value: 'instructor', label: t('instructors') },
+        { value: 'learner', label: t('learners') }
       ]
     }
   ];
   const editFormFields = [
     {
       name: 'notificationTitle',
-      label: 'Title',
+      label: t('title'),
       type: 'text' as const,
       required: true
     },
     {
       name: 'notificationMessage',
-      label: 'Message',
+      label: t('message'),
       type: 'textarea' as const,
       required: true
     },
     {
       name: 'notificationType',
-      label: 'Type',
+      label: t('type'),
       type: 'select' as const,
       required: true,
       options: [
-        { value: 'info', label: 'Info' },
-        { value: 'success', label: 'Success' },
-        { value: 'warning', label: 'Warning' },
-        { value: 'error', label: 'Error' }
+        { value: 'info', label: t('info') },
+        { value: 'success', label: t('success') },
+        { value: 'warning', label: t('warning') },
+        { value: 'error', label: t('error') }
       ]
     },
     {
       name: 'isRead',
-      label: 'Mark As Read',
+      label: t('markAsRead'),
       type: 'checkbox' as const,
       required: false
     }
   ];
   return (
     <Layout user={user}>
-      <Head title="Notification Management" />
+      <Head title={t('notificationManagement')} />
       <div className="flex bg-zinc-50 dark:bg-black min-h-screen">
         <AdminSidebar currentPath="/admin/notifications" />
         <div className="flex-1">
           <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 py-8">
             <div className="flex items-center justify-between mb-8">
               <div>
-                <h1 className="text-4xl font-bold text-black dark:text-white mb-2">Notification Management</h1>
-                <p className="text-zinc-600 dark:text-zinc-400">Send Bulk Notifications To Users</p>
+                <h1 className="text-4xl font-bold text-black dark:text-white mb-2">{t('notificationManagement')}</h1>
+                <p className="text-zinc-600 dark:text-zinc-400">{t('sendBulkNotificationsSubtitle')}</p>
               </div>
               <button onClick={() => setIsCreateModalOpen(true)} className="flex items-center gap-2 px-6 py-3 bg-black dark:bg-white text-white dark:text-black font-medium hover:bg-zinc-800 dark:hover:bg-zinc-200 cursor-pointer">
                 <Plus className="w-5 h-5" />
-                Send Notification
+                {t('sendNotification')}
               </button>
             </div>
             <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 p-6 mb-6">
               <div className="flex items-center gap-4">
                 <div className="flex-1">
-                  <input type="text" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} onKeyPress={(e) => e.key === 'Enter' && handleSearch()} placeholder="Search By Title Or Recipient..." className="w-full px-4 py-2 border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 focus:outline-none focus:border-black dark:focus:border-white" />
+                  <input type="text" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} onKeyPress={(e) => e.key === 'Enter' && handleSearch()} placeholder={t('searchNotifications')} className="w-full px-4 py-2 border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 focus:outline-none focus:border-black dark:focus:border-white" />
                 </div>
                 <select value={typeFilter} onChange={(e) => setTypeFilter(e.target.value)} className="px-4 py-2 border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 focus:outline-none focus:border-black dark:focus:border-white cursor-pointer">
-                  <option value="">All Types</option>
-                  <option value="info">Info</option>
-                  <option value="success">Success</option>
-                  <option value="warning">Warning</option>
-                  <option value="error">Error</option>
+                  <option value="">{t('allTypes')}</option>
+                  <option value="info">{t('info')}</option>
+                  <option value="success">{t('success')}</option>
+                  <option value="warning">{t('warning')}</option>
+                  <option value="error">{t('error')}</option>
                 </select>
                 <button onClick={handleSearch} className="flex items-center gap-2 px-6 py-2 bg-black dark:bg-white text-white dark:text-black hover:bg-zinc-800 dark:hover:bg-zinc-200 cursor-pointer">
                   <Filter className="w-4 h-4" />
-                  Filter
+                  {t('filter')}
                 </button>
               </div>
             </div>
             <DataTable columns={columns} data={notifications.data} exportable={true} keyField="notificationId" onExport={handleExportAllNotifications} />
             {notifications.last_page > 1 && (
               <div className="mt-6 flex justify-center items-center gap-2">
-                <button onClick={() => router.get('/admin/notifications', buildPaginationParams(1), { preserveState: true, only: ['notifications'] })} disabled={notifications.current_page === 1} className="px-3 py-2 border border-zinc-300 dark:border-zinc-700 text-zinc-700 dark:text-zinc-300 hover:border-black dark:hover:border-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer" aria-label="First Page">
+                <button onClick={() => router.get('/admin/notifications', buildPaginationParams(1), { preserveState: true, only: ['notifications'] })} disabled={notifications.current_page === 1} className="px-3 py-2 border border-zinc-300 dark:border-zinc-700 text-zinc-700 dark:text-zinc-300 hover:border-black dark:hover:border-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer" aria-label={t('firstPage')}>
                   <ChevronsLeft className="w-4 h-4" />
                 </button>
-                <button onClick={() => router.get('/admin/notifications', buildPaginationParams(notifications.current_page - 1), { preserveState: true, only: ['notifications'] })} disabled={notifications.current_page === 1} className="px-3 py-2 border border-zinc-300 dark:border-zinc-700 text-zinc-700 dark:text-zinc-300 hover:border-black dark:hover:border-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer" aria-label="Previous Page">
+                <button onClick={() => router.get('/admin/notifications', buildPaginationParams(notifications.current_page - 1), { preserveState: true, only: ['notifications'] })} disabled={notifications.current_page === 1} className="px-3 py-2 border border-zinc-300 dark:border-zinc-700 text-zinc-700 dark:text-zinc-300 hover:border-black dark:hover:border-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer" aria-label={t('previousPage')}>
                   <ChevronLeft className="w-4 h-4" />
                 </button>
                 {notifications.current_page > 2 && (
@@ -350,16 +352,16 @@ export default function NotificationManagement({ notifications, filters, user }:
                 {notifications.current_page < notifications.last_page - 1 && (
                   <span className="px-2 text-zinc-500 dark:text-zinc-400">...</span>
                 )}
-                <button onClick={() => router.get('/admin/notifications', buildPaginationParams(notifications.current_page + 1), { preserveState: true, only: ['notifications'] })} disabled={notifications.current_page === notifications.last_page} className="px-3 py-2 border border-zinc-300 dark:border-zinc-700 text-zinc-700 dark:text-zinc-300 hover:border-black dark:hover:border-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer" aria-label="Next Page">
+                <button onClick={() => router.get('/admin/notifications', buildPaginationParams(notifications.current_page + 1), { preserveState: true, only: ['notifications'] })} disabled={notifications.current_page === notifications.last_page} className="px-3 py-2 border border-zinc-300 dark:border-zinc-700 text-zinc-700 dark:text-zinc-300 hover:border-black dark:hover:border-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer" aria-label={t('nextPage')}>
                   <ChevronRight className="w-4 h-4" />
                 </button>
-                <button onClick={() => router.get('/admin/notifications', buildPaginationParams(notifications.last_page), { preserveState: true, only: ['notifications'] })} disabled={notifications.current_page === notifications.last_page} className="px-3 py-2 border border-zinc-300 dark:border-zinc-700 text-zinc-700 dark:text-zinc-300 hover:border-black dark:hover:border-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer" aria-label="Last Page">
+                <button onClick={() => router.get('/admin/notifications', buildPaginationParams(notifications.last_page), { preserveState: true, only: ['notifications'] })} disabled={notifications.current_page === notifications.last_page} className="px-3 py-2 border border-zinc-300 dark:border-zinc-700 text-zinc-700 dark:text-zinc-300 hover:border-black dark:hover:border-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer" aria-label={t('lastPage')}>
                   <ChevronsRight className="w-4 h-4" />
                 </button>
               </div>
             )}
-            <ModalForm isOpen={isCreateModalOpen} onClose={() => setIsCreateModalOpen(false)} onSubmit={handleCreate} title="Send Notification" fields={formFields} submitLabel="Send" />
-            <ModalForm isOpen={isEditModalOpen} onClose={() => { setIsEditModalOpen(false); setSelectedNotification(null); }} onSubmit={handleEdit} title={`Edit Notification #${selectedNotification?.notificationId || ''}`} fields={editFormFields} initialData={selectedNotification ? { notificationTitle: selectedNotification.notificationTitle, notificationMessage: selectedNotification.notificationMessage, notificationType: selectedNotification.notificationType, isRead: selectedNotification.isRead } : {}} submitLabel="Update Notification" />
+            <ModalForm isOpen={isCreateModalOpen} onClose={() => setIsCreateModalOpen(false)} onSubmit={handleCreate} title={t('sendNotification')} fields={formFields} submitLabel={t('send')} />
+            <ModalForm isOpen={isEditModalOpen} onClose={() => { setIsEditModalOpen(false); setSelectedNotification(null); }} onSubmit={handleEdit} title={t('editNotificationId', { id: selectedNotification?.notificationId?.toString() || '' })} fields={editFormFields} initialData={selectedNotification ? { notificationTitle: selectedNotification.notificationTitle, notificationMessage: selectedNotification.notificationMessage, notificationType: selectedNotification.notificationType, isRead: selectedNotification.isRead } : {}} submitLabel={t('updateNotification')} />
           </div>
         </div>
       </div>

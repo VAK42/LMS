@@ -6,6 +6,7 @@ import AdminSidebar from '../../components/Admin/Sidebar';
 import DataTable from '../../components/Admin/DataTable';
 import ModalForm from '../../components/Admin/ModalForm';
 import Layout from '../../components/Layout';
+import useTranslation from '../../hooks/useTranslation';
 interface Review {
   reviewId: number;
   user: { userId: number; userName: string };
@@ -32,6 +33,7 @@ interface Props {
 }
 export default function ReviewManagement({ reviews, filters, users, courses, user }: Props) {
   const { showToast } = useToast();
+  const { t } = useTranslation();
   const [searchTerm, setSearchTerm] = useState(filters.search || '');
   const [ratingFilter, setRatingFilter] = useState(filters.rating || '');
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
@@ -50,14 +52,14 @@ export default function ReviewManagement({ reviews, filters, users, courses, use
     return params;
   };
   const handleDelete = (reviewId: number) => {
-    if (confirm('Are You Sure You Want To Delete This Review?')) {
+    if (confirm(t('deleteReviewConfirm'))) {
       router.post(`/admin/reviews/${reviewId}`, { _method: 'DELETE' }, {
         onSuccess: (page) => {
-          const successMsg = (page.props as any).success || 'Review Deleted Successfully!';
+          const successMsg = (page.props as any).success || t('reviewDeletedSuccess');
           showToast(successMsg, 'success');
         },
         onError: (errors) => {
-          const errorMsg = Object.values(errors)[0] as string || 'Failed To Delete Review!';
+          const errorMsg = Object.values(errors)[0] as string || t('reviewDeleteFailed');
           showToast(errorMsg, 'error');
         }
       });
@@ -67,12 +69,12 @@ export default function ReviewManagement({ reviews, filters, users, courses, use
     router.post('/admin/reviews', data, {
       preserveScroll: true,
       onSuccess: (page) => {
-        const successMsg = (page.props as any).success || 'Review Created Successfully!';
+        const successMsg = (page.props as any).success || t('reviewCreatedSuccess');
         setIsCreateModalOpen(false);
         showToast(successMsg, 'success');
       },
       onError: (errors) => {
-        const errorMsg = Object.values(errors)[0] as string || 'Failed To Create Review!';
+        const errorMsg = Object.values(errors)[0] as string || t('reviewCreateFailed');
         showToast(errorMsg, 'error');
       }
     });
@@ -82,13 +84,13 @@ export default function ReviewManagement({ reviews, filters, users, courses, use
     router.post(`/admin/reviews/${selectedReview.reviewId}`, { ...data, _method: 'PUT' }, {
       preserveScroll: true,
       onSuccess: (page) => {
-        const successMsg = (page.props as any).success || 'Review Updated Successfully!';
+        const successMsg = (page.props as any).success || t('reviewUpdatedSuccess');
         setIsEditModalOpen(false);
         setSelectedReview(null);
         showToast(successMsg, 'success');
       },
       onError: (errors) => {
-        const errorMsg = Object.values(errors)[0] as string || 'Failed To Update Review!';
+        const errorMsg = Object.values(errors)[0] as string || t('reviewUpdateFailed');
         showToast(errorMsg, 'error');
       }
     });
@@ -109,38 +111,38 @@ export default function ReviewManagement({ reviews, filters, users, courses, use
   const columns = [
     {
       key: 'user',
-      label: 'User',
+      label: t('user'),
       render: (_: any, row: Review) => row.user.userName
     },
     {
       key: 'course',
-      label: 'Course',
+      label: t('course'),
       render: (_: any, row: Review) => (
         <p className="font-medium text-black dark:text-white">{row.course.courseTitle}</p>
       )
     },
     {
       key: 'rating',
-      label: 'Rating',
+      label: t('rating'),
       sortable: true,
       render: (value: number) => renderStars(value)
     },
     {
       key: 'reviewText',
-      label: 'Review',
+      label: t('review'),
       render: (value: string | null) => (
-        <p className="max-w-md truncate text-zinc-600 dark:text-zinc-400">{value || 'No Review Text'}</p>
+        <p className="max-w-md truncate text-zinc-600 dark:text-zinc-400">{value || t('noReviewText')}</p>
       )
     },
     {
       key: 'createdAt',
-      label: 'Date',
+      label: t('date'),
       sortable: true,
       render: (value: string) => new Date(value).toLocaleDateString()
     },
     {
       key: 'actions',
-      label: 'Actions',
+      label: t('actions'),
       render: (_: any, row: Review) => (
         <div className="flex items-center gap-2">
           <button onClick={() => openEditModal(row)} className="p-2 hover:bg-zinc-100 dark:hover:bg-zinc-800 cursor-pointer">
@@ -182,60 +184,60 @@ export default function ReviewManagement({ reviews, filters, users, courses, use
       link.download = 'Reviews.csv';
       link.click();
       URL.revokeObjectURL(url);
-      showToast('Reviews Exported Successfully!', 'success');
+      showToast(t('reviewsExportedSuccess'), 'success');
     } catch (error) {
-      showToast('Failed To Export Reviews!', 'error');
+      showToast(t('exportReviewsFailed'), 'error');
     }
   };
   const formFields = [
-    { name: 'userId', label: 'User', type: 'select' as const, required: true, options: users.map(u => ({ value: u.userId.toString(), label: u.userName })) },
-    { name: 'courseId', label: 'Course', type: 'select' as const, required: true, options: courses.map(c => ({ value: c.courseId.toString(), label: c.courseTitle })) },
-    { name: 'rating', label: 'Rating', type: 'select' as const, required: true, options: [{ value: '5', label: '5 Stars' }, { value: '4', label: '4 Stars' }, { value: '3', label: '3 Stars' }, { value: '2', label: '2 Stars' }, { value: '1', label: '1 Star' }] },
-    { name: 'reviewText', label: 'Review Text', type: 'textarea' as const, required: false }
+    { name: 'userId', label: t('user'), type: 'select' as const, required: true, options: users.map(u => ({ value: u.userId.toString(), label: u.userName })) },
+    { name: 'courseId', label: t('course'), type: 'select' as const, required: true, options: courses.map(c => ({ value: c.courseId.toString(), label: c.courseTitle })) },
+    { name: 'rating', label: t('rating'), type: 'select' as const, required: true, options: [{ value: '5', label: t('5stars') }, { value: '4', label: t('4stars') }, { value: '3', label: t('3stars') }, { value: '2', label: t('2stars') }, { value: '1', label: t('1star') }] },
+    { name: 'reviewText', label: t('reviewText'), type: 'textarea' as const, required: false }
   ];
   return (
     <Layout user={user}>
-      <Head title="Review Management" />
+      <Head title={t('reviewManagement')} />
       <div className="flex bg-zinc-50 dark:bg-black min-h-screen">
         <AdminSidebar currentPath="/admin/reviews" />
         <div className="flex-1">
           <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 py-8">
             <div className="flex items-center justify-between mb-8">
               <div>
-                <h1 className="text-4xl font-bold text-black dark:text-white mb-2">Review Management</h1>
-                <p className="text-zinc-600 dark:text-zinc-400">Manage Course Reviews & Ratings</p>
+                <h1 className="text-4xl font-bold text-black dark:text-white mb-2">{t('reviewManagement')}</h1>
+                <p className="text-zinc-600 dark:text-zinc-400">{t('manageReviewsSubtitle')}</p>
               </div>
               <button onClick={() => setIsCreateModalOpen(true)} className="flex items-center gap-2 px-6 py-3 bg-black dark:bg-white text-white dark:text-black font-medium hover:bg-zinc-800 dark:hover:bg-zinc-200 cursor-pointer">
                 <Plus className="w-5 h-5" />
-                Add Review
+                {t('addReview')}
               </button>
             </div>
             <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 p-6 mb-6">
               <div className="flex items-center gap-4">
                 <div className="flex-1">
-                  <input type="text" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} onKeyPress={(e) => e.key === 'Enter' && handleSearch()} placeholder="Search By Course..." className="w-full px-4 py-2 border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 focus:outline-none focus:border-black dark:focus:border-white" />
+                  <input type="text" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} onKeyPress={(e) => e.key === 'Enter' && handleSearch()} placeholder={t('searchByCourse')} className="w-full px-4 py-2 border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 focus:outline-none focus:border-black dark:focus:border-white" />
                 </div>
                 <select value={ratingFilter} onChange={(e) => setRatingFilter(e.target.value)} className="px-4 py-2 border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 focus:outline-none focus:border-black dark:focus:border-white cursor-pointer">
-                  <option value="">All Ratings</option>
-                  <option value="5">5 Stars</option>
-                  <option value="4">4 Stars</option>
-                  <option value="3">3 Stars</option>
-                  <option value="2">2 Stars</option>
-                  <option value="1">1 Star</option>
+                  <option value="">{t('allRatings')}</option>
+                  <option value="5">{t('5stars')}</option>
+                  <option value="4">{t('4stars')}</option>
+                  <option value="3">{t('3stars')}</option>
+                  <option value="2">{t('2stars')}</option>
+                  <option value="1">{t('1star')}</option>
                 </select>
                 <button onClick={handleSearch} className="flex items-center gap-2 px-6 py-2 bg-black dark:bg-white text-white dark:text-black hover:bg-zinc-800 dark:hover:bg-zinc-200 cursor-pointer">
                   <Filter className="w-4 h-4" />
-                  Filter
+                  {t('filter')}
                 </button>
               </div>
             </div>
             <DataTable columns={columns} data={reviews.data} exportable={true} keyField="reviewId" onExport={handleExportAllReviews} />
             {reviews.last_page > 1 && (
               <div className="mt-6 flex justify-center items-center gap-2">
-                <button onClick={() => router.get('/admin/reviews', buildPaginationParams(1), { preserveState: true, only: ['reviews'] })} disabled={reviews.current_page === 1} className="px-3 py-2 border border-zinc-300 dark:border-zinc-700 text-zinc-700 dark:text-zinc-300 hover:border-black dark:hover:border-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer" aria-label="First Page">
+                <button onClick={() => router.get('/admin/reviews', buildPaginationParams(1), { preserveState: true, only: ['reviews'] })} disabled={reviews.current_page === 1} className="px-3 py-2 border border-zinc-300 dark:border-zinc-700 text-zinc-700 dark:text-zinc-300 hover:border-black dark:hover:border-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer" aria-label={t('firstPage')}>
                   <ChevronsLeft className="w-4 h-4" />
                 </button>
-                <button onClick={() => router.get('/admin/reviews', buildPaginationParams(reviews.current_page - 1), { preserveState: true, only: ['reviews'] })} disabled={reviews.current_page === 1} className="px-3 py-2 border border-zinc-300 dark:border-zinc-700 text-zinc-700 dark:text-zinc-300 hover:border-black dark:hover:border-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer" aria-label="Previous">
+                <button onClick={() => router.get('/admin/reviews', buildPaginationParams(reviews.current_page - 1), { preserveState: true, only: ['reviews'] })} disabled={reviews.current_page === 1} className="px-3 py-2 border border-zinc-300 dark:border-zinc-700 text-zinc-700 dark:text-zinc-300 hover:border-black dark:hover:border-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer" aria-label={t('previousPage')}>
                   <ChevronLeft className="w-4 h-4" />
                 </button>
                 {reviews.current_page > 2 && (
@@ -257,16 +259,16 @@ export default function ReviewManagement({ reviews, filters, users, courses, use
                 {reviews.current_page < reviews.last_page - 1 && (
                   <span className="px-2 text-zinc-500 dark:text-zinc-400">...</span>
                 )}
-                <button onClick={() => router.get('/admin/reviews', buildPaginationParams(reviews.current_page + 1), { preserveState: true, only: ['reviews'] })} disabled={reviews.current_page === reviews.last_page} className="px-3 py-2 border border-zinc-300 dark:border-zinc-700 text-zinc-700 dark:text-zinc-300 hover:border-black dark:hover:border-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer" aria-label="Next">
+                <button onClick={() => router.get('/admin/reviews', buildPaginationParams(reviews.current_page + 1), { preserveState: true, only: ['reviews'] })} disabled={reviews.current_page === reviews.last_page} className="px-3 py-2 border border-zinc-300 dark:border-zinc-700 text-zinc-700 dark:text-zinc-300 hover:border-black dark:hover:border-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer" aria-label={t('nextPage')}>
                   <ChevronRight className="w-4 h-4" />
                 </button>
-                <button onClick={() => router.get('/admin/reviews', buildPaginationParams(reviews.last_page), { preserveState: true, only: ['reviews'] })} disabled={reviews.current_page === reviews.last_page} className="px-3 py-2 border border-zinc-300 dark:border-zinc-700 text-zinc-700 dark:text-zinc-300 hover:border-black dark:hover:border-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer" aria-label="Last">
+                <button onClick={() => router.get('/admin/reviews', buildPaginationParams(reviews.last_page), { preserveState: true, only: ['reviews'] })} disabled={reviews.current_page === reviews.last_page} className="px-3 py-2 border border-zinc-300 dark:border-zinc-700 text-zinc-700 dark:text-zinc-300 hover:border-black dark:hover:border-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer" aria-label={t('lastPage')}>
                   <ChevronsRight className="w-4 h-4" />
                 </button>
               </div>
             )}
-            <ModalForm isOpen={isCreateModalOpen} onClose={() => setIsCreateModalOpen(false)} onSubmit={handleCreate} title="Create New Review" fields={formFields} submitLabel="Create Review" />
-            <ModalForm isOpen={isEditModalOpen} onClose={() => { setIsEditModalOpen(false); setSelectedReview(null); }} onSubmit={handleEdit} title="Edit Review" fields={formFields} initialData={selectedReview ? { userId: selectedReview.user.userId.toString(), courseId: selectedReview.course.courseId.toString(), rating: selectedReview.rating.toString(), reviewText: selectedReview.reviewText || '' } : {}} submitLabel="Update Review" />
+            <ModalForm isOpen={isCreateModalOpen} onClose={() => setIsCreateModalOpen(false)} onSubmit={handleCreate} title={t('createNewReview')} fields={formFields} submitLabel={t('addReview')} />
+            <ModalForm isOpen={isEditModalOpen} onClose={() => { setIsEditModalOpen(false); setSelectedReview(null); }} onSubmit={handleEdit} title={t('editReview')} fields={formFields} initialData={selectedReview ? { userId: selectedReview.user.userId.toString(), courseId: selectedReview.course.courseId.toString(), rating: selectedReview.rating.toString(), reviewText: selectedReview.reviewText || '' } : {}} submitLabel={t('updateReview')} />
           </div>
         </div>
       </div>

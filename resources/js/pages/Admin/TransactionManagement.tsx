@@ -5,6 +5,7 @@ import { useToast } from '../../contexts/ToastContext';
 import AdminSidebar from '../../components/Admin/Sidebar';
 import DataTable from '../../components/Admin/DataTable';
 import Layout from '../../components/Layout';
+import useTranslation from '../../hooks/useTranslation';
 interface Transaction {
   transactionId: number;
   user: { userId: number; userName: string; userEmail: string };
@@ -35,6 +36,7 @@ interface Props {
 }
 export default function TransactionManagement({ transactions, filters, stats, user }: Props) {
   const { showToast } = useToast();
+  const { t } = useTranslation();
   const [searchTerm, setSearchTerm] = useState(filters.search || '');
   const [statusFilter, setStatusFilter] = useState(filters.status || '');
   const handleSearch = () => {
@@ -93,15 +95,15 @@ export default function TransactionManagement({ transactions, filters, stats, us
       link.download = 'Transactions.csv';
       link.click();
       URL.revokeObjectURL(url);
-      showToast('Transactions Exported Successfully!', 'success');
+      showToast(t('transactionsExportedSuccess'), 'success');
     } catch (error) {
-      showToast('Failed To Export Transactions!', 'error');
+      showToast(t('exportTransactionsFailed'), 'error');
     }
   };
   const columns = [
     {
       key: 'transactionId',
-      label: 'Transaction ID',
+      label: t('transactionId'),
       render: (value: number) => (
         <div className="flex items-center gap-2">
           <CreditCard className="w-4 h-4 text-zinc-600 dark:text-zinc-400" />
@@ -111,7 +113,7 @@ export default function TransactionManagement({ transactions, filters, stats, us
     },
     {
       key: 'user',
-      label: 'User',
+      label: t('user'),
       render: (_: any, row: Transaction) => (
         <div>
           <p className="font-medium text-black dark:text-white">{row.user.userName}</p>
@@ -121,14 +123,14 @@ export default function TransactionManagement({ transactions, filters, stats, us
     },
     {
       key: 'course',
-      label: 'Course',
+      label: t('course'),
       render: (_: any, row: Transaction) => (
         <p className="font-medium text-black dark:text-white">{row.course.courseTitle}</p>
       )
     },
     {
       key: 'amount',
-      label: 'Amount',
+      label: t('amount'),
       sortable: true,
       render: (value: number) => value != null ? (
         <span className="font-semibold text-black dark:text-white">${Number(value).toFixed(2)}</span>
@@ -136,7 +138,7 @@ export default function TransactionManagement({ transactions, filters, stats, us
     },
     {
       key: 'paymentMethod',
-      label: 'Payment Method',
+      label: t('paymentMethod'),
       render: (value: string) => (
         <span className="px-2 py-1 bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400 rounded text-xs font-medium">
           {value.charAt(0).toUpperCase() + value.slice(1)}
@@ -145,33 +147,33 @@ export default function TransactionManagement({ transactions, filters, stats, us
     },
     {
       key: 'transactionStatus',
-      label: 'Status',
+      label: t('status'),
       sortable: true,
       render: (value: string) => (
         <div className="flex items-center gap-2">
           {getStatusIcon(value)}
           <span className={`px-2 py-1 rounded text-xs font-medium ${getStatusColor(value)}`}>
-            {value.charAt(0).toUpperCase() + value.slice(1)}
+            {t(value)}
           </span>
         </div>
       )
     },
     {
       key: 'createdAt',
-      label: 'Date',
+      label: t('date'),
       sortable: true,
       render: (value: string) => new Date(value).toLocaleDateString()
     },
     {
       key: 'actions',
-      label: 'Actions',
+      label: t('actions'),
       render: (_: any, row: Transaction) => (
         row.transactionStatus === 'pending' ? (
           <button
             onClick={() => handleConfirmTransaction(row.transactionId)}
             className="px-3 py-1 text-green-500 text-sm rounded hover:bg-green-900 hover:text-white cursor-pointer"
           >
-            Confirm
+            {t('confirm')}
           </button>
         ) : (
           <span className="bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400"><CheckCircle className="w-4 h-4" /></span>
@@ -180,7 +182,7 @@ export default function TransactionManagement({ transactions, filters, stats, us
     }
   ];
   const handleConfirmTransaction = async (transactionId: number) => {
-    if (!confirm('Confirm This Transaction? This Will Credit The Instructor Wallet!')) return;
+    if (!confirm(t('confirmTransactionConfirm'))) return;
     try {
       const response = await fetch(`/admin/transactions/${transactionId}/confirm`, {
         method: 'POST',
@@ -193,28 +195,28 @@ export default function TransactionManagement({ transactions, filters, stats, us
       });
       if (response.status === 419) { window.location.reload(); return; }
       if (!response.ok) throw new Error('Failed');
-      showToast('Transaction Confirmed! Instructor Wallet Credited!', 'success');
+      showToast(t('transactionConfirmedSuccess'), 'success');
       router.reload();
     } catch (error) {
-      showToast('Failed To Confirm Transaction!', 'error');
+      showToast(t('transactionConfirmFailed'), 'error');
     }
   };
   return (
     <Layout user={user}>
-      <Head title="Transaction Management" />
+      <Head title={t('transactionManagement')} />
       <div className="flex bg-zinc-50 dark:bg-black min-h-screen">
         <AdminSidebar currentPath="/admin/transactions" />
         <div className="flex-1">
           <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 py-8">
             <div className="mb-8">
-              <h1 className="text-4xl font-bold text-black dark:text-white mb-2">Transaction Management</h1>
-              <p className="text-zinc-600 dark:text-zinc-400">View All Payment Transactions & Revenue</p>
+              <h1 className="text-4xl font-bold text-black dark:text-white mb-2">{t('transactionManagement')}</h1>
+              <p className="text-zinc-600 dark:text-zinc-400">{t('viewTransactionsSubtitle')}</p>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
               <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 p-6">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm font-medium text-zinc-600 dark:text-zinc-400">Total Revenue</p>
+                    <p className="text-sm font-medium text-zinc-600 dark:text-zinc-400">{t('totalRevenue')}</p>
                     <p className="text-3xl font-bold text-black dark:text-white mt-2">${Number(stats.totalRevenue || 0).toFixed(2)}</p>
                   </div>
                   <div className="p-3 bg-green-50 dark:bg-green-900/20 rounded-lg">
@@ -225,7 +227,7 @@ export default function TransactionManagement({ transactions, filters, stats, us
               <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 p-6">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm font-medium text-zinc-600 dark:text-zinc-400">Total Transactions</p>
+                    <p className="text-sm font-medium text-zinc-600 dark:text-zinc-400">{t('totalTransactions')}</p>
                     <p className="text-3xl font-bold text-black dark:text-white mt-2">{stats.totalTransactions}</p>
                   </div>
                   <div className="p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
@@ -236,7 +238,7 @@ export default function TransactionManagement({ transactions, filters, stats, us
               <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 p-6">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm font-medium text-zinc-600 dark:text-zinc-400">Completed</p>
+                    <p className="text-sm font-medium text-zinc-600 dark:text-zinc-400">{t('completed')}</p>
                     <p className="text-3xl font-bold text-black dark:text-white mt-2">
                       {stats.completedTransactions}
                     </p>
@@ -250,27 +252,27 @@ export default function TransactionManagement({ transactions, filters, stats, us
             <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 p-6 mb-6">
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div className="flex-1">
-                  <input type="text" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} onKeyPress={(e) => e.key === 'Enter' && handleSearch()} placeholder="Search By User Or Course..." className="w-full px-4 py-2 border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 focus:outline-none focus:border-black dark:focus:border-white" />
+                  <input type="text" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} onKeyPress={(e) => e.key === 'Enter' && handleSearch()} placeholder={t('searchByUserOrCourse')} className="w-full px-4 py-2 border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 focus:outline-none focus:border-black dark:focus:border-white" />
                 </div>
                 <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)} className="px-4 py-2 border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 focus:outline-none focus:border-black dark:focus:border-white cursor-pointer">
-                  <option value="">All Status</option>
-                  <option value="completed">Completed</option>
-                  <option value="pending">Pending</option>
-                  <option value="failed">Failed</option>
+                  <option value="">{t('allStatus')}</option>
+                  <option value="completed">{t('completed')}</option>
+                  <option value="pending">{t('pending')}</option>
+                  <option value="failed">{t('failed')}</option>
                 </select>
                 <button onClick={handleSearch} className="flex items-center gap-2 px-6 py-2 bg-black dark:bg-white text-white dark:text-black hover:bg-zinc-800 dark:hover:bg-zinc-200 cursor-pointer">
                   <Filter className="w-4 h-4" />
-                  Filter
+                  {t('filter')}
                 </button>
               </div>
             </div>
             <DataTable columns={columns} data={transactions.data} exportable={true} keyField="transactionId" onExport={handleExportAllTransactions} />
             {transactions.last_page > 1 && (
               <div className="mt-6 flex justify-center items-center gap-2">
-                <button onClick={() => router.get('/admin/transactions', buildPaginationParams(1), { preserveState: true, only: ['transactions'] })} disabled={transactions.current_page === 1} className="px-3 py-2 border border-zinc-300 dark:border-zinc-700 text-zinc-700 dark:text-zinc-300 hover:border-black dark:hover:border-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer" aria-label="First Page">
+                <button onClick={() => router.get('/admin/transactions', buildPaginationParams(1), { preserveState: true, only: ['transactions'] })} disabled={transactions.current_page === 1} className="px-3 py-2 border border-zinc-300 dark:border-zinc-700 text-zinc-700 dark:text-zinc-300 hover:border-black dark:hover:border-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer" aria-label={t('firstPage')}>
                   <ChevronsLeft className="w-4 h-4" />
                 </button>
-                <button onClick={() => router.get('/admin/transactions', buildPaginationParams(transactions.current_page - 1), { preserveState: true, only: ['transactions'] })} disabled={transactions.current_page === 1} className="px-3 py-2 border border-zinc-300 dark:border-zinc-700 text-zinc-700 dark:text-zinc-300 hover:border-black dark:hover:border-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer" aria-label="Previous Page">
+                <button onClick={() => router.get('/admin/transactions', buildPaginationParams(transactions.current_page - 1), { preserveState: true, only: ['transactions'] })} disabled={transactions.current_page === 1} className="px-3 py-2 border border-zinc-300 dark:border-zinc-700 text-zinc-700 dark:text-zinc-300 hover:border-black dark:hover:border-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer" aria-label={t('previousPage')}>
                   <ChevronLeft className="w-4 h-4" />
                 </button>
                 {transactions.current_page > 2 && (
@@ -292,10 +294,10 @@ export default function TransactionManagement({ transactions, filters, stats, us
                 {transactions.current_page < transactions.last_page - 1 && (
                   <span className="px-2 text-zinc-500 dark:text-zinc-400">...</span>
                 )}
-                <button onClick={() => router.get('/admin/transactions', buildPaginationParams(transactions.current_page + 1), { preserveState: true, only: ['transactions'] })} disabled={transactions.current_page === transactions.last_page} className="px-3 py-2 border border-zinc-300 dark:border-zinc-700 text-zinc-700 dark:text-zinc-300 hover:border-black dark:hover:border-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer" aria-label="Next Page">
+                <button onClick={() => router.get('/admin/transactions', buildPaginationParams(transactions.current_page + 1), { preserveState: true, only: ['transactions'] })} disabled={transactions.current_page === transactions.last_page} className="px-3 py-2 border border-zinc-300 dark:border-zinc-700 text-zinc-700 dark:text-zinc-300 hover:border-black dark:hover:border-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer" aria-label={t('nextPage')}>
                   <ChevronRight className="w-4 h-4" />
                 </button>
-                <button onClick={() => router.get('/admin/transactions', buildPaginationParams(transactions.last_page), { preserveState: true, only: ['transactions'] })} disabled={transactions.current_page === transactions.last_page} className="px-3 py-2 border border-zinc-300 dark:border-zinc-700 text-zinc-700 dark:text-zinc-300 hover:border-black dark:hover:border-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer" aria-label="Last Page">
+                <button onClick={() => router.get('/admin/transactions', buildPaginationParams(transactions.last_page), { preserveState: true, only: ['transactions'] })} disabled={transactions.current_page === transactions.last_page} className="px-3 py-2 border border-zinc-300 dark:border-zinc-700 text-zinc-700 dark:text-zinc-300 hover:border-black dark:hover:border-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer" aria-label={t('lastPage')}>
                   <ChevronsRight className="w-4 h-4" />
                 </button>
               </div>

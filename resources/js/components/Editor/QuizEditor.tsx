@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { X, Plus, Trash2, Save } from 'lucide-react'
 import { useToast } from '../../contexts/ToastContext'
+import useTranslation from '../../hooks/useTranslation'
 interface Question {
   questionId?: number
   questionText: string
@@ -21,6 +22,7 @@ interface Props {
 }
 export default function QuizEditor({ isOpen, onClose, courseId }: Props) {
   const { showToast } = useToast()
+  const { t } = useTranslation()
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [quiz, setQuiz] = useState<Quiz>({
@@ -58,7 +60,7 @@ export default function QuizEditor({ isOpen, onClose, courseId }: Props) {
         if (data && data.quizId) {
           setQuiz({
             quizId: data.quizId,
-            quizTitle: data.quizTitle || 'Final Exam',
+            quizTitle: data.quizTitle,
             passingScore: data.passingScore ?? 70,
             timeLimitMinutes: data.timeLimitMinutes,
             questions: data.questions || []
@@ -96,20 +98,20 @@ export default function QuizEditor({ isOpen, onClose, courseId }: Props) {
       if (response.status === 419) { window.location.reload(); return }
       const data = await response.json()
       if (!response.ok) {
-        showToast(data.error || 'Failed To Save Quiz!', 'error')
+        showToast(data.error || t('quizSaveFailed'), 'error')
         return
       }
       setQuiz(prev => ({ ...prev, quizId: data.quizId, questions: data.questions || prev.questions }))
-      showToast('Quiz Saved!', 'success')
+      showToast(t('quizSavedSuccess'), 'success')
     } catch (error) {
-      showToast('Failed To Save Quiz!', 'error')
+      showToast(t('quizSaveFailed'), 'error')
     } finally {
       setSaving(false)
     }
   }
   const handleAddQuestion = () => {
     if (!newQuestion.questionText.trim() || newQuestion.options.some(o => !o.trim())) {
-      showToast('Fill All Fields!', 'error')
+      showToast(t('fillAllFields'), 'error')
       return
     }
     setQuiz(prev => ({
@@ -126,37 +128,37 @@ export default function QuizEditor({ isOpen, onClose, courseId }: Props) {
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
       <div className="bg-white dark:bg-zinc-900 rounded-xl w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col">
         <div className="flex items-center justify-between p-6 border-b border-zinc-200 dark:border-zinc-800">
-          <h2 className="text-xl font-bold text-black dark:text-white">Quiz Editor</h2>
+          <h2 className="text-xl font-bold text-black dark:text-white">{t('quizEditor')}</h2>
           <button onClick={onClose} className="p-2 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-full cursor-pointer">
             <X className="w-5 h-5 text-zinc-500" />
           </button>
         </div>
         <div className="flex-1 overflow-y-auto p-6 space-y-6">
           {loading ? (
-            <div className="text-center py-8 text-zinc-500">Loading...</div>
+            <div className="text-center py-8 text-zinc-500">{t('loading')}</div>
           ) : (
             <>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1">Quiz Title</label>
+                  <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1">{t('quizTitle')}</label>
                   <input type="text" value={quiz.quizTitle} onChange={e => setQuiz({ ...quiz, quizTitle: e.target.value })} className="w-full px-3 py-2 rounded border border-zinc-300 dark:border-zinc-600 bg-white dark:bg-zinc-800 dark:text-white" />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1">Passing Score %</label>
+                  <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1">{t('passingScorePercent')}</label>
                   <input type="number" min="0" max="100" value={quiz.passingScore} onChange={e => setQuiz({ ...quiz, passingScore: parseInt(e.target.value) || 0 })} className="w-full px-3 py-2 rounded border border-zinc-300 dark:border-zinc-600 bg-white dark:bg-zinc-800 dark:text-white" />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1">Time Limit</label>
-                  <input type="number" min="1" value={quiz.timeLimitMinutes || ''} onChange={e => setQuiz({ ...quiz, timeLimitMinutes: e.target.value ? parseInt(e.target.value) : null })} placeholder="No Limit" className="w-full px-3 py-2 rounded border border-zinc-300 dark:border-zinc-600 bg-white dark:bg-zinc-800 dark:text-white" />
+                  <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1">{t('timeLimit')}</label>
+                  <input type="number" min="1" value={quiz.timeLimitMinutes || ''} onChange={e => setQuiz({ ...quiz, timeLimitMinutes: e.target.value ? parseInt(e.target.value) : null })} placeholder={t('noLimit')} className="w-full px-3 py-2 rounded border border-zinc-300 dark:border-zinc-600 bg-white dark:bg-zinc-800 dark:text-white" />
                 </div>
               </div>
               <button onClick={handleSaveQuiz} disabled={saving} className="flex items-center gap-2 px-4 py-2 text-green-600 border border-green-600 rounded hover:bg-green-900 hover:text-white disabled:opacity-50 cursor-pointer">
                 <Save className="w-4 h-4" />
-                {saving ? 'Saving...' : 'Save Quiz Settings'}
+                {saving ? t('saving') : t('saveQuizSettings')}
               </button>
               <hr className="border-zinc-200 dark:border-zinc-700" />
               <div>
-                <h3 className="text-lg font-bold text-black dark:text-white mb-4">Questions ({quiz.questions.length})</h3>
+                <h3 className="text-lg font-bold text-black dark:text-white mb-4">{t('questions')} ({quiz.questions.length})</h3>
                 <div className="space-y-4">
                   {quiz.questions.map((q, idx) => (
                     <div key={q.questionId} className="p-4 bg-zinc-50 dark:bg-zinc-800 rounded-lg">
@@ -181,11 +183,11 @@ export default function QuizEditor({ isOpen, onClose, courseId }: Props) {
               </div>
               <hr className="border-zinc-200 dark:border-zinc-700" />
               <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
-                <h4 className="font-medium text-black dark:text-white mb-4">Add New Question</h4>
+                <h4 className="font-medium text-black dark:text-white mb-4">{t('addNewQuestion')}</h4>
                 <div className="space-y-4">
                   <div>
-                    <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1">Question</label>
-                    <textarea value={newQuestion.questionText} onChange={e => setNewQuestion({ ...newQuestion, questionText: e.target.value })} className="w-full px-3 py-2 rounded border border-zinc-300 dark:border-zinc-600 bg-white dark:bg-zinc-800 dark:text-white" rows={2} placeholder="Enter Your Question..." />
+                    <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1">{t('question')}</label>
+                    <textarea value={newQuestion.questionText} onChange={e => setNewQuestion({ ...newQuestion, questionText: e.target.value })} className="w-full px-3 py-2 rounded border border-zinc-300 dark:border-zinc-600 bg-white dark:bg-zinc-800 dark:text-white" rows={2} placeholder={t('enterQuestionPlaceholder')} />
                   </div>
                   <div className="grid grid-cols-2 gap-4">
                     {newQuestion.options.map((opt, i) => (
@@ -197,10 +199,10 @@ export default function QuizEditor({ isOpen, onClose, courseId }: Props) {
                       </div>
                     ))}
                   </div>
-                  <p className="text-xs text-zinc-500">Click A/B/C/D To Mark Correct Answer (Green)</p>
+                  <p className="text-xs text-zinc-500">{t('clickToMarkCorrect')}</p>
                   <button onClick={handleAddQuestion} className="flex items-center gap-2 px-4 py-2 border border-green-600 text-green-600 rounded hover:bg-green-900 hover:text-white cursor-pointer">
                     <Plus className="w-4 h-4" />
-                    Add Question
+                    {t('addQuestion')}
                   </button>
                 </div>
               </div>

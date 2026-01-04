@@ -3,6 +3,7 @@ import { Head, router } from '@inertiajs/react'
 import { useState, useEffect } from 'react'
 import { useToast } from '../../contexts/ToastContext'
 import Layout from '../../components/Layout'
+import useTranslation from '../../hooks/useTranslation'
 interface Question {
   questionId: number
   questionText: string
@@ -27,6 +28,7 @@ interface Props {
 }
 export default function Quiz({ quiz, lastAttempt, user }: Props) {
   const { showToast } = useToast()
+  const { t } = useTranslation()
   const [started, setStarted] = useState(false)
   const [currentQuestion, setCurrentQuestion] = useState(0)
   const [answers, setAnswers] = useState<{ [key: number]: number }>({})
@@ -64,13 +66,12 @@ export default function Quiz({ quiz, lastAttempt, user }: Props) {
         body: JSON.stringify({ answers })
       })
       if (response.status === 419) { window.location.reload(); return }
-      if (response.status === 419) { window.location.reload(); return }
       if (!response.ok) throw new Error('Failed')
       const data = await response.json()
       setResult(data)
-      showToast(data.passed ? 'Congratulations! You Passed!' : 'Try Again!', data.passed ? 'success' : 'error')
+      showToast(data.passed ? t('congratulationsPassed') : t('tryAgain'), data.passed ? 'success' : 'error')
     } catch (error) {
-      showToast('Failed To Submit!', 'error')
+      showToast(t('failedToSubmit'), 'error')
     } finally {
       setSubmitting(false)
     }
@@ -93,24 +94,24 @@ export default function Quiz({ quiz, lastAttempt, user }: Props) {
             <div className="grid grid-cols-3 gap-4 mb-8">
               <div className="p-4 bg-zinc-50 dark:bg-zinc-800 rounded-lg">
                 <p className="text-2xl font-bold text-black dark:text-white">{quiz.questions.length}</p>
-                <p className="text-sm text-zinc-500">Questions</p>
+                <p className="text-sm text-zinc-500">{t('questions')}</p>
               </div>
               <div className="p-4 bg-zinc-50 dark:bg-zinc-800 rounded-lg">
                 <p className="text-2xl font-bold text-black dark:text-white">{quiz.passingScore}%</p>
-                <p className="text-sm text-zinc-500">To Pass</p>
+                <p className="text-sm text-zinc-500">{t('toPass')}</p>
               </div>
               <div className="p-4 bg-zinc-50 dark:bg-zinc-800 rounded-lg">
                 <p className="text-2xl font-bold text-black dark:text-white">{quiz.timeLimitMinutes || '∞'}</p>
-                <p className="text-sm text-zinc-500">Minutes</p>
+                <p className="text-sm text-zinc-500">{t('minutes')}</p>
               </div>
             </div>
             {lastAttempt && (
               <div className="mb-6 p-4 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg">
-                <p className="text-yellow-700 dark:text-yellow-400">Last Attempt: {lastAttempt.score}% On {new Date(lastAttempt.completedAt).toLocaleDateString()}</p>
+                <p className="text-yellow-700 dark:text-yellow-400">{t('lastAttempt', { score: lastAttempt.score, date: new Date(lastAttempt.completedAt).toLocaleDateString() })}</p>
               </div>
             )}
             <button onClick={() => setStarted(true)} className="px-8 py-3 text-green-600 border-green-600 border rounded-lg hover:bg-green-900 hover:text-white cursor-pointer text-lg font-medium">
-              Start Quiz
+              {t('startQuiz')}
             </button>
           </div>
         ) : result ? (
@@ -121,21 +122,21 @@ export default function Quiz({ quiz, lastAttempt, user }: Props) {
               <XCircle className="w-20 h-20 text-red-500 mx-auto mb-4" />
             )}
             <h1 className="text-3xl font-bold text-black dark:text-white mb-2">
-              {result.passed ? 'Congratulations!' : 'Not Quite!'}
+              {result.passed ? t('congratulationsPassed') : t('notQuite')}
             </h1>
             <p className="text-zinc-600 dark:text-zinc-400 mb-6">
-              You Scored {result.score}% ({result.correctCount}/{result.totalQuestions} Correct)
+              {t('youScored', { score: result.score, correct: result.correctCount, total: result.totalQuestions })}
             </p>
             <p className={`text-lg font-medium mb-8 ${result.passed ? 'text-green-600' : 'text-red-600'}`}>
-              {result.passed ? 'You Passed The Quiz!' : `You Need ${quiz.passingScore}% To Pass! Try Again!`}
+              {result.passed ? t('youPassed') : t('youNeedToPass', { score: quiz.passingScore })}
             </p>
             <div className="flex gap-4 justify-center">
               <button onClick={() => router.visit(`/courses/${quiz.course.courseId}`)} className="px-6 py-3 border border-zinc-300 dark:border-zinc-600 text-zinc-700 dark:text-zinc-300 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 cursor-pointer">
-                Back To Course
+                {t('backToCourseSimple')}
               </button>
               {!result.passed && (
                 <button onClick={() => { setResult(null); setStarted(false); setAnswers({}); setCurrentQuestion(0); setTimeLeft(quiz.timeLimitMinutes ? quiz.timeLimitMinutes * 60 : null) }} className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 cursor-pointer">
-                  Try Again
+                  {t('tryAgain')}
                 </button>
               )}
             </div>
@@ -145,7 +146,7 @@ export default function Quiz({ quiz, lastAttempt, user }: Props) {
             <div className="p-4 bg-zinc-50 dark:bg-zinc-800 border-b border-zinc-200 dark:border-zinc-700 flex items-center justify-between">
               <div>
                 <h2 className="font-bold text-black dark:text-white">{quiz.quizTitle}</h2>
-                <p className="text-sm text-zinc-500">Question {currentQuestion + 1} Of {quiz.questions.length}</p>
+                <p className="text-sm text-zinc-500">{t('questionOf', { current: currentQuestion + 1, total: quiz.questions.length })}</p>
               </div>
               {timeLeft !== null && (
                 <div className={`flex items-center gap-2 px-4 py-2 rounded-lg ${timeLeft < 60 ? 'bg-red-100 dark:bg-red-900/30 text-red-600' : 'bg-blue-100 dark:bg-blue-900/30 text-blue-600'}`}>
@@ -170,7 +171,7 @@ export default function Quiz({ quiz, lastAttempt, user }: Props) {
             <div className="p-4 bg-zinc-50 dark:bg-zinc-800 border-t border-zinc-200 dark:border-zinc-700 flex items-center justify-between">
               <button onClick={() => setCurrentQuestion(Math.max(0, currentQuestion - 1))} disabled={currentQuestion === 0} className="flex items-center gap-2 px-4 py-2 text-zinc-600 dark:text-zinc-300 hover:bg-zinc-200 dark:hover:bg-zinc-700 rounded disabled:opacity-30 cursor-pointer">
                 <ArrowLeft className="w-4 h-4" />
-                Previous
+                {t('previous')}
               </button>
               <div className="flex gap-1">
                 {quiz.questions.map((_, idx) => (
@@ -182,11 +183,11 @@ export default function Quiz({ quiz, lastAttempt, user }: Props) {
               {currentQuestion === quiz.questions.length - 1 ? (
                 <button onClick={handleSubmit} disabled={submitting || answeredCount < quiz.questions.length} className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 disabled:opacity-50 cursor-pointer">
                   <Send className="w-4 h-4" />
-                  {submitting ? 'Submitting...' : 'Submit'}
+                  {submitting ? t('submitting') : t('submit')}
                 </button>
               ) : (
                 <button onClick={() => setCurrentQuestion(Math.min(quiz.questions.length - 1, currentQuestion + 1))} className="flex items-center gap-2 px-4 py-2 text-zinc-600 dark:text-zinc-300 hover:bg-zinc-200 dark:hover:bg-zinc-700 rounded cursor-pointer">
-                  Next
+                  {t('next')}
                   <ArrowRight className="w-4 h-4" />
                 </button>
               )}

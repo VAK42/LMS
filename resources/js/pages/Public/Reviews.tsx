@@ -3,6 +3,7 @@ import { Head, router } from '@inertiajs/react';
 import { useState } from 'react';
 import { useToast } from '../../contexts/ToastContext';
 import Layout from '../../components/Layout';
+import useTranslation from '../../hooks/useTranslation';
 interface Review {
   reviewId: number;
   rating: number;
@@ -19,6 +20,7 @@ interface ReviewsPageProps {
 }
 export default function Reviews({ courseId, reviews, user }: ReviewsPageProps) {
   const { showToast } = useToast();
+  const { t } = useTranslation();
   const [rating, setRating] = useState(5);
   const [reviewText, setReviewText] = useState('');
   const [submitting, setSubmitting] = useState(false);
@@ -46,35 +48,35 @@ export default function Reviews({ courseId, reviews, user }: ReviewsPageProps) {
       }
       const data = await response.json();
       if (!response.ok) {
-        showToast(data.error || 'Failed To Submit Review!', 'error');
+        showToast(data.error || t('failedReview'), 'error');
         return;
       }
-      showToast('Review Submitted Successfully!', 'success');
+      showToast(t('successReview'), 'success');
       setReviewText('');
       router.reload();
     } catch (error) {
       console.error(error);
-      showToast('An Error Occurred!', 'error');
+      showToast(t('errorOccurred'), 'error');
     } finally {
       setSubmitting(false);
     }
   };
   return (
     <Layout user={user}>
-      <Head title="Course Reviews" />
+      <Head title={t('courseReviews')} />
       <div className="max-w-4xl mx-auto px-4 py-12">
         <div className="flex items-center gap-4 mb-8">
           <button onClick={() => window.history.back()} className="p-2 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors cursor-pointer">
             <ChevronLeft className="w-6 h-6 text-zinc-600 dark:text-zinc-400" />
           </button>
-          <h1 className="text-3xl font-serif font-bold text-black dark:text-white">Course Reviews</h1>
+          <h1 className="text-3xl font-serif font-bold text-black dark:text-white">{t('courseReviews')}</h1>
         </div>
         {user && (
           <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 p-6 mb-8">
-            <h2 className="text-lg font-bold text-black dark:text-white mb-4">Write A Review</h2>
+            <h2 className="text-lg font-bold text-black dark:text-white mb-4">{t('writeReview')}</h2>
             <form onSubmit={handleSubmit}>
               <div className="mb-4">
-                <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2">Rating</label>
+                <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2">{t('rating')}</label>
                 <div className="flex gap-1">
                   {Array.from({ length: 5 }).map((_, i) => (
                     <button key={i} type="button" onClick={() => setRating(i + 1)} className="cursor-pointer">
@@ -84,11 +86,11 @@ export default function Reviews({ courseId, reviews, user }: ReviewsPageProps) {
                 </div>
               </div>
               <div className="mb-4">
-                <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2">Your Review</label>
-                <textarea value={reviewText} onChange={(e) => setReviewText(e.target.value)} placeholder="Share Your Thoughts..." rows={4} className="w-full px-4 py-2 border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 focus:outline-none focus:border-black dark:focus:border-white" required />
+                <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2">{t('yourReview')}</label>
+                <textarea value={reviewText} onChange={(e) => setReviewText(e.target.value)} placeholder={t('shareThoughts')} rows={4} className="w-full px-4 py-2 border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 focus:outline-none focus:border-black dark:focus:border-white" required />
               </div>
               <button type="submit" disabled={submitting} className="px-6 py-2 bg-black dark:bg-white text-white dark:text-black font-bold hover:bg-zinc-800 dark:hover:bg-zinc-200 transition-colors disabled:opacity-50 cursor-pointer">
-                {submitting ? 'Submitting...' : 'Submit Review'}
+                {submitting ? t('submitting') : t('submitReview')}
               </button>
             </form>
           </div>
@@ -108,7 +110,7 @@ export default function Reviews({ courseId, reviews, user }: ReviewsPageProps) {
                 <div className="bg-zinc-50 dark:bg-zinc-800 p-4 border-l-4 border-black dark:border-white">
                   <div className="flex items-center gap-2 mb-2">
                     <MessageSquare className="w-4 h-4 text-zinc-600 dark:text-zinc-400" />
-                    <span className="text-sm font-bold text-black dark:text-white">Instructor Response</span>
+                    <span className="text-sm font-bold text-black dark:text-white">{t('instructorResponse')}</span>
                   </div>
                   <p className="text-sm text-zinc-700 dark:text-zinc-300">{review.instructorResponse}</p>
                 </div>
@@ -118,8 +120,8 @@ export default function Reviews({ courseId, reviews, user }: ReviewsPageProps) {
           {reviews.data.length === 0 && (
             <div className="text-center py-16 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800">
               <Star className="w-16 h-16 text-zinc-300 dark:text-zinc-600 mx-auto mb-4" />
-              <h3 className="text-xl font-bold text-black dark:text-white mb-2">No Reviews Yet</h3>
-              <p className="text-zinc-600 dark:text-zinc-400">Be The First To Review This Course</p>
+              <h3 className="text-xl font-bold text-black dark:text-white mb-2">{t('noReviewsYet')}</h3>
+              <p className="text-zinc-600 dark:text-zinc-400">{t('beFirstReview')}</p>
             </div>
           )}
         </div>

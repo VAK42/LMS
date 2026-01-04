@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { X, Plus, Trash2, Save } from 'lucide-react'
 import { useToast } from '../../contexts/ToastContext'
+import useTranslation from '../../hooks/useTranslation'
 interface Question {
   questionId?: number
   questionText: string
@@ -19,6 +20,7 @@ interface Props {
 }
 export default function AssessmentEditor({ isOpen, onClose, courseId }: Props) {
   const { showToast } = useToast()
+  const { t } = useTranslation()
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [assessment, setAssessment] = useState<Assessment>({
@@ -51,7 +53,7 @@ export default function AssessmentEditor({ isOpen, onClose, courseId }: Props) {
         if (data && data.assessmentId) {
           setAssessment({
             assessmentId: data.assessmentId,
-            assessmentTitle: data.assessmentTitle || 'Essay Assignment',
+            assessmentTitle: data.assessmentTitle,
             passingScore: data.passingScore ?? 70,
             questions: data.questions || []
           })
@@ -83,20 +85,20 @@ export default function AssessmentEditor({ isOpen, onClose, courseId }: Props) {
       if (response.status === 419) { window.location.reload(); return }
       const data = await response.json()
       if (!response.ok) {
-        showToast(data.error || 'Failed To Save Assessment!', 'error')
+        showToast(data.error || t('assessmentSaveFailed'), 'error')
         return
       }
       setAssessment(prev => ({ ...prev, assessmentId: data.assessmentId }))
-      showToast('Assessment Saved!', 'success')
+      showToast(t('assessmentSavedSuccess'), 'success')
     } catch (error) {
-      showToast('Failed To Save Assessment!', 'error')
+      showToast(t('assessmentSaveFailed'), 'error')
     } finally {
       setSaving(false)
     }
   }
   const handleAddQuestion = () => {
     if (!newQuestion.questionText.trim()) {
-      showToast('Enter Question Text!', 'error')
+      showToast(t('enterQuestionText'), 'error')
       return
     }
     setAssessment(prev => ({
@@ -116,29 +118,29 @@ export default function AssessmentEditor({ isOpen, onClose, courseId }: Props) {
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
       <div className="bg-white dark:bg-zinc-900 rounded-xl w-full max-w-3xl max-h-[90vh] overflow-hidden flex flex-col">
         <div className="flex items-center justify-between p-6 border-b border-zinc-200 dark:border-zinc-800">
-          <h2 className="text-xl font-bold text-black dark:text-white">Essay Assessment Editor</h2>
+          <h2 className="text-xl font-bold text-black dark:text-white">{t('essayAssessmentEditor')}</h2>
           <button onClick={onClose} className="p-2 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-full cursor-pointer">
             <X className="w-5 h-5 text-zinc-500" />
           </button>
         </div>
         <div className="flex-1 overflow-y-auto p-6 space-y-6">
           {loading ? (
-            <div className="text-center py-8 text-zinc-500">Loading...</div>
+            <div className="text-center py-8 text-zinc-500">{t('loading')}</div>
           ) : (
             <>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1">Assessment Title</label>
+                  <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1">{t('assessmentTitle')}</label>
                   <input type="text" value={assessment.assessmentTitle} onChange={e => setAssessment({ ...assessment, assessmentTitle: e.target.value })} className="w-full px-3 py-2 rounded border border-zinc-300 dark:border-zinc-600 bg-white dark:bg-zinc-800 dark:text-white" />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1">Passing Score %</label>
+                  <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1">{t('passingScorePercent')}</label>
                   <input type="number" min="0" max="100" value={assessment.passingScore} onChange={e => setAssessment({ ...assessment, passingScore: parseInt(e.target.value) || 0 })} className="w-full px-3 py-2 rounded border border-zinc-300 dark:border-zinc-600 bg-white dark:bg-zinc-800 dark:text-white" />
                 </div>
               </div>
               <hr className="border-zinc-200 dark:border-zinc-700" />
               <div>
-                <h3 className="text-lg font-bold text-black dark:text-white mb-4">Essay Questions ({assessment.questions.length})</h3>
+                <h3 className="text-lg font-bold text-black dark:text-white mb-4">{t('essayQuestions')} ({assessment.questions.length})</h3>
                 <div className="space-y-3">
                   {assessment.questions.map((q, idx) => (
                     <div key={q.questionId || idx} className="p-4 bg-zinc-50 dark:bg-zinc-800 rounded-lg flex items-start justify-between gap-4">
@@ -153,14 +155,14 @@ export default function AssessmentEditor({ isOpen, onClose, courseId }: Props) {
                 </div>
               </div>
               <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg space-y-4">
-                <h4 className="font-medium text-black dark:text-white">Add New Essay Question</h4>
+                <h4 className="font-medium text-black dark:text-white">{t('addNewEssayQuestion')}</h4>
                 <div>
-                  <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1">Question</label>
-                  <textarea value={newQuestion.questionText} onChange={e => setNewQuestion({ ...newQuestion, questionText: e.target.value })} className="w-full px-3 py-2 rounded border border-zinc-300 dark:border-zinc-600 bg-white dark:bg-zinc-800 dark:text-white" rows={3} placeholder="Enter Essay Question..." />
+                  <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1">{t('question')}</label>
+                  <textarea value={newQuestion.questionText} onChange={e => setNewQuestion({ ...newQuestion, questionText: e.target.value })} className="w-full px-3 py-2 rounded border border-zinc-300 dark:border-zinc-600 bg-white dark:bg-zinc-800 dark:text-white" rows={3} placeholder={t('enterEssayQuestionPlaceholder')} />
                 </div>
                 <button onClick={handleAddQuestion} className="flex items-center gap-2 px-4 py-2 border border-green-600 text-green-600 rounded hover:bg-green-900 hover:text-white cursor-pointer">
                   <Plus className="w-4 h-4" />
-                  Add Question
+                  {t('addQuestion')}
                 </button>
               </div>
             </>
@@ -169,7 +171,7 @@ export default function AssessmentEditor({ isOpen, onClose, courseId }: Props) {
         <div className="p-6 border-t border-zinc-200 dark:border-zinc-800">
           <button onClick={handleSaveAssessment} disabled={saving} className="flex items-center gap-2 px-6 py-3 text-green-600 border border-green-600 rounded hover:bg-green-900 hover:text-white disabled:opacity-50 cursor-pointer">
             <Save className="w-4 h-4" />
-            {saving ? 'Saving...' : 'Save Assessment'}
+            {saving ? t('saving') : t('saveAssessment')}
           </button>
         </div>
       </div>

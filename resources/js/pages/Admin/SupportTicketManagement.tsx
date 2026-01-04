@@ -6,6 +6,7 @@ import AdminSidebar from '../../components/Admin/Sidebar';
 import DataTable from '../../components/Admin/DataTable';
 import ModalForm from '../../components/Admin/ModalForm';
 import Layout from '../../components/Layout';
+import useTranslation from '../../hooks/useTranslation';
 interface Ticket {
   ticketId: number;
   user: { userId: number; userName: string; userEmail: string };
@@ -35,6 +36,7 @@ interface Props {
 }
 export default function SupportTicketManagement({ tickets, users, filters, user }: Props) {
   const { showToast } = useToast();
+  const { t } = useTranslation();
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isReplyModalOpen, setIsReplyModalOpen] = useState(false);
@@ -59,12 +61,12 @@ export default function SupportTicketManagement({ tickets, users, filters, user 
   const handleCreate = (data: Record<string, any>) => {
     router.post('/admin/support', data, {
       onSuccess: (page) => {
-        const successMsg = (page.props as any).success || 'Support Ticket Created Successfully!';
+        const successMsg = (page.props as any).success || t('supportTicketCreatedSuccess');
         setIsCreateModalOpen(false);
         showToast(successMsg, 'success');
       },
       onError: (errors) => {
-        const errorMsg = Object.values(errors)[0] as string || 'Failed To Create Ticket!';
+        const errorMsg = Object.values(errors)[0] as string || t('ticketCreateFailed');
         showToast(errorMsg, 'error');
       }
     });
@@ -73,26 +75,26 @@ export default function SupportTicketManagement({ tickets, users, filters, user 
     if (!selectedTicket) return;
     router.post(`/admin/support/${selectedTicket.ticketId}`, { ...data, _method: 'PUT' }, {
       onSuccess: (page) => {
-        const successMsg = (page.props as any).success || 'Ticket Updated Successfully!';
+        const successMsg = (page.props as any).success || t('ticketUpdatedSuccess');
         setIsEditModalOpen(false);
         setSelectedTicket(null);
         showToast(successMsg, 'success');
       },
       onError: (errors) => {
-        const errorMsg = Object.values(errors)[0] as string || 'Failed To Update Ticket!';
+        const errorMsg = Object.values(errors)[0] as string || t('ticketUpdateFailed');
         showToast(errorMsg, 'error');
       }
     });
   };
   const handleDelete = (ticketId: number) => {
-    if (confirm('Are You Sure You Want To Delete This Support Ticket?')) {
+    if (confirm(t('deleteTicketConfirm'))) {
       router.post(`/admin/support/${ticketId}`, { _method: 'DELETE' }, {
         onSuccess: (page) => {
-          const successMsg = (page.props as any).success || 'Ticket Deleted Successfully!';
+          const successMsg = (page.props as any).success || t('ticketDeletedSuccess');
           showToast(successMsg, 'success');
         },
         onError: (errors) => {
-          const errorMsg = Object.values(errors)[0] as string || 'Failed To Delete Ticket!';
+          const errorMsg = Object.values(errors)[0] as string || t('ticketDeleteFailed');
           showToast(errorMsg, 'error');
         }
       });
@@ -114,13 +116,13 @@ export default function SupportTicketManagement({ tickets, users, filters, user 
       priority: selectedTicket.priority
     }, {
       onSuccess: (page) => {
-        const successMsg = (page.props as any).success || 'Reply Sent Successfully!';
+        const successMsg = (page.props as any).success || t('replySentSuccess');
         setIsReplyModalOpen(false);
         setSelectedTicket(null);
         showToast(successMsg, 'success');
       },
       onError: (errors) => {
-        const errorMsg = Object.values(errors)[0] as string || 'Failed To Send Reply!';
+        const errorMsg = Object.values(errors)[0] as string || t('replySendFailed');
         showToast(errorMsg, 'error');
       }
     });
@@ -162,20 +164,20 @@ export default function SupportTicketManagement({ tickets, users, filters, user 
       link.download = 'Tickets.csv';
       link.click();
       URL.revokeObjectURL(url);
-      showToast('Support Tickets Exported Successfully!', 'success');
+      showToast(t('supportTicketsExportedSuccess'), 'success');
     } catch (error) {
-      showToast('Failed To Export Support Tickets!', 'error');
+      showToast(t('exportSupportTicketsFailed'), 'error');
     }
   };
   const columns = [
     {
       key: 'ticketId',
-      label: 'ID',
+      label: t('ticketId'),
       render: (value: number) => `#${value}`
     },
     {
       key: 'user',
-      label: 'User',
+      label: t('user'),
       render: (_: any, row: Ticket) => (
         <div>
           <p className="font-medium text-black dark:text-white">{row.user.userName}</p>
@@ -185,7 +187,7 @@ export default function SupportTicketManagement({ tickets, users, filters, user 
     },
     {
       key: 'subject',
-      label: 'Subject',
+      label: t('subject'),
       sortable: true,
       render: (value: string, row: Ticket) => (
         <div>
@@ -196,45 +198,45 @@ export default function SupportTicketManagement({ tickets, users, filters, user 
     },
     {
       key: 'priority',
-      label: 'Priority',
+      label: t('priority'),
       sortable: true,
       render: (value: string) => (
         <span className={`px-2 py-1 rounded text-xs font-medium ${getPriorityColor(value)}`}>
-          {value.charAt(0).toUpperCase() + value.slice(1)}
+          {t(value)}
         </span>
       )
     },
     {
       key: 'status',
-      label: 'Status',
+      label: t('status'),
       sortable: true,
       render: (value: string) => (
         <div className="flex items-center gap-2">
           {value === 'resolved' ? <CheckCircle className="w-4 h-4 text-green-600" /> : value === 'inProgress' ? <Clock className="w-4 h-4 text-blue-600" /> : <AlertCircle className="w-4 h-4 text-yellow-600" />}
           <span className={`px-2 py-1 rounded text-xs font-medium ${getStatusColor(value)}`}>
-            {value ? value.replace('_', ' ').split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ') : 'N/A'}
+            {t(value)}
           </span>
         </div>
       )
     },
     {
       key: 'createdAt',
-      label: 'Created',
+      label: t('created'),
       sortable: true,
       render: (value: string) => new Date(value).toLocaleDateString()
     },
     {
       key: 'actions',
-      label: 'Actions',
+      label: t('actions'),
       render: (_: any, row: Ticket) => (
         <div className="flex items-center gap-2">
-          <button onClick={() => openReplyModal(row)} title="Reply" className="p-2 hover:bg-zinc-100 dark:hover:bg-zinc-800 text-blue-600 cursor-pointer">
+          <button onClick={() => openReplyModal(row)} title={t('reply')} className="p-2 hover:bg-zinc-100 dark:hover:bg-zinc-800 text-blue-600 cursor-pointer">
             <MessageCircle className="w-4 h-4" />
           </button>
-          <button onClick={() => openEditModal(row)} title="Edit" className="p-2 hover:bg-zinc-100 dark:hover:bg-zinc-800 cursor-pointer">
+          <button onClick={() => openEditModal(row)} title={t('editLink')} className="p-2 hover:bg-zinc-100 dark:hover:bg-zinc-800 cursor-pointer">
             <Edit className="w-4 h-4" />
           </button>
-          <button onClick={() => handleDelete(row.ticketId)} title="Delete" className="p-2 hover:bg-zinc-100 dark:hover:bg-zinc-800 text-red-600 cursor-pointer">
+          <button onClick={() => handleDelete(row.ticketId)} title={t('delete')} className="p-2 hover:bg-zinc-100 dark:hover:bg-zinc-800 text-red-600 cursor-pointer">
             <Trash2 className="w-4 h-4" />
           </button>
         </div>
@@ -244,174 +246,174 @@ export default function SupportTicketManagement({ tickets, users, filters, user 
   const formFields = [
     {
       name: 'userId',
-      label: 'User',
+      label: t('user'),
       type: 'select' as const,
       required: true,
       options: users.map(u => ({ value: u.userId.toString(), label: `${u.userName} (${u.userEmail})` }))
     },
-    { name: 'subject', label: 'Subject', type: 'text' as const, required: true },
-    { name: 'message', label: 'Message', type: 'textarea' as const, required: true },
+    { name: 'subject', label: t('subject'), type: 'text' as const, required: true },
+    { name: 'message', label: t('message'), type: 'textarea' as const, required: true },
     {
       name: 'status',
-      label: 'Status',
+      label: t('status'),
       type: 'select' as const,
       required: true,
       options: [
-        { value: 'open', label: 'Open' },
-        { value: 'inProgress', label: 'In Progress' },
-        { value: 'resolved', label: 'Resolved' },
-        { value: 'closed', label: 'Closed' }
+        { value: 'open', label: t('open') },
+        { value: 'inProgress', label: t('inProgress') },
+        { value: 'resolved', label: t('resolved') },
+        { value: 'closed', label: t('closed') }
       ]
     },
     {
       name: 'priority',
-      label: 'Priority',
+      label: t('priority'),
       type: 'select' as const,
       required: true,
       options: [
-        { value: 'low', label: 'Low' },
-        { value: 'medium', label: 'Medium' },
-        { value: 'high', label: 'High' },
-        { value: 'urgent', label: 'Urgent' }
+        { value: 'low', label: t('low') },
+        { value: 'medium', label: t('medium') },
+        { value: 'high', label: t('high') },
+        { value: 'urgent', label: t('urgent') }
       ]
     }
   ];
   const editFormFields = [
     {
       name: 'user',
-      label: 'User',
+      label: t('user'),
       type: 'text' as const,
       required: false,
       disabled: true
     },
-    { name: 'subject', label: 'Subject', type: 'text' as const, required: true },
-    { name: 'message', label: 'Message', type: 'textarea' as const, required: true },
+    { name: 'subject', label: t('subject'), type: 'text' as const, required: true },
+    { name: 'message', label: t('message'), type: 'textarea' as const, required: true },
     {
       name: 'status',
-      label: 'Status',
+      label: t('status'),
       type: 'select' as const,
       required: true,
       options: [
-        { value: 'open', label: 'Open' },
-        { value: 'inProgress', label: 'In Progress' },
-        { value: 'resolved', label: 'Resolved' },
-        { value: 'closed', label: 'Closed' }
+        { value: 'open', label: t('open') },
+        { value: 'inProgress', label: t('inProgress') },
+        { value: 'resolved', label: t('resolved') },
+        { value: 'closed', label: t('closed') }
       ]
     },
     {
       name: 'priority',
-      label: 'Priority',
+      label: t('priority'),
       type: 'select' as const,
       required: true,
       options: [
-        { value: 'low', label: 'Low' },
-        { value: 'medium', label: 'Medium' },
-        { value: 'high', label: 'High' },
-        { value: 'urgent', label: 'Urgent' }
+        { value: 'low', label: t('low') },
+        { value: 'medium', label: t('medium') },
+        { value: 'high', label: t('high') },
+        { value: 'urgent', label: t('urgent') }
       ]
     }
   ];
   const replyFormFields = [
     {
       name: 'user',
-      label: 'User',
+      label: t('user'),
       type: 'text' as const,
       required: false,
       disabled: true
     },
     {
       name: 'subject',
-      label: 'Subject',
+      label: t('subject'),
       type: 'text' as const,
       required: false,
       disabled: true
     },
     {
       name: 'message',
-      label: 'Original Message',
+      label: t('originalMessage'),
       type: 'textarea' as const,
       required: false,
       disabled: true
     },
     {
       name: 'adminResponse',
-      label: 'Reply Message',
+      label: t('replyMessage'),
       type: 'textarea' as const,
       required: true,
-      placeholder: 'Enter Your Response To The User...'
+      placeholder: t('enterResponsePlaceholder')
     },
     {
       name: 'status',
-      label: 'Update Status',
+      label: t('updateStatus'),
       type: 'select' as const,
       required: true,
       options: [
-        { value: 'open', label: 'Open' },
-        { value: 'inProgress', label: 'In Progress' },
-        { value: 'resolved', label: 'Resolved' },
-        { value: 'closed', label: 'Closed' }
+        { value: 'open', label: t('open') },
+        { value: 'inProgress', label: t('inProgress') },
+        { value: 'resolved', label: t('resolved') },
+        { value: 'closed', label: t('closed') }
       ]
     },
     {
       name: 'priority',
-      label: 'Update Priority',
+      label: t('updatePriority'),
       type: 'select' as const,
       required: true,
       options: [
-        { value: 'low', label: 'Low' },
-        { value: 'medium', label: 'Medium' },
-        { value: 'high', label: 'High' },
-        { value: 'urgent', label: 'Urgent' }
+        { value: 'low', label: t('low') },
+        { value: 'medium', label: t('medium') },
+        { value: 'high', label: t('high') },
+        { value: 'urgent', label: t('urgent') }
       ]
     }
   ];
   return (
     <Layout user={user}>
-      <Head title="Support Tickets" />
+      <Head title={t('supportTickets')} />
       <div className="flex bg-zinc-50 dark:bg-black min-h-screen">
         <AdminSidebar currentPath="/admin/support" />
         <div className="flex-1">
           <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 py-8">
             <div className="flex items-center justify-between mb-8">
               <div>
-                <h1 className="text-4xl font-bold text-black dark:text-white mb-2">Support Tickets</h1>
-                <p className="text-zinc-600 dark:text-zinc-400">Manage User Support Requests & Inquiries</p>
+                <h1 className="text-4xl font-bold text-black dark:text-white mb-2">{t('supportTickets')}</h1>
+                <p className="text-zinc-600 dark:text-zinc-400">{t('manageSupportSubtitle')}</p>
               </div>
               <button onClick={() => setIsCreateModalOpen(true)} className="flex items-center gap-2 px-6 py-3 bg-black dark:bg-white text-white dark:text-black font-medium hover:bg-zinc-800 dark:hover:bg-zinc-200 cursor-pointer">
                 <span className="text-xl">+</span>
-                Create Ticket
+                {t('createTicket')}
               </button>
             </div>
             <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 p-6 mb-6">
               <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                <input type="text" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} onKeyPress={(e) => e.key === 'Enter' && handleSearch()} placeholder="Search By Subject Or User..." className="px-4 py-2 border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 focus:outline-none focus:border-black dark:focus:border-white" />
+                <input type="text" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} onKeyPress={(e) => e.key === 'Enter' && handleSearch()} placeholder={t('searchBySubjectOrUser')} className="px-4 py-2 border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 focus:outline-none focus:border-black dark:focus:border-white" />
                 <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)} className="px-4 py-2 border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 focus:outline-none focus:border-black dark:focus:border-white cursor-pointer">
-                  <option value="">All Status</option>
-                  <option value="open">Open</option>
-                  <option value="inProgress">In Progress</option>
-                  <option value="resolved">Resolved</option>
-                  <option value="closed">Closed</option>
+                  <option value="">{t('allStatus')}</option>
+                  <option value="open">{t('open')}</option>
+                  <option value="inProgress">{t('inProgress')}</option>
+                  <option value="resolved">{t('resolved')}</option>
+                  <option value="closed">{t('closed')}</option>
                 </select>
                 <select value={priorityFilter} onChange={(e) => setPriorityFilter(e.target.value)} className="px-4 py-2 border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 focus:outline-none focus:border-black dark:focus:border-white cursor-pointer">
-                  <option value="">All Priorities</option>
-                  <option value="low">Low</option>
-                  <option value="medium">Medium</option>
-                  <option value="high">High</option>
-                  <option value="urgent">Urgent</option>
+                  <option value="">{t('allPriorities')}</option>
+                  <option value="low">{t('low')}</option>
+                  <option value="medium">{t('medium')}</option>
+                  <option value="high">{t('high')}</option>
+                  <option value="urgent">{t('urgent')}</option>
                 </select>
                 <button onClick={handleSearch} className="flex items-center gap-2 px-6 py-2 bg-black dark:bg-white text-white dark:text-black hover:bg-zinc-800 dark:hover:bg-zinc-200 cursor-pointer">
                   <Filter className="w-4 h-4" />
-                  Filter
+                  {t('filter')}
                 </button>
               </div>
             </div>
             <DataTable columns={columns} data={tickets.data} exportable={true} keyField="ticketId" onExport={handleExportAllTickets} />
             {tickets.last_page > 1 && (
               <div className="mt-6 flex justify-center items-center gap-2">
-                <button onClick={() => router.get('/admin/support', buildPaginationParams(1), { preserveState: true, only: ['tickets'] })} disabled={tickets.current_page === 1} className="px-3 py-2 border border-zinc-300 dark:border-zinc-700 text-zinc-700 dark:text-zinc-300 hover:border-black dark:hover:border-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer" aria-label="First Page">
+                <button onClick={() => router.get('/admin/support', buildPaginationParams(1), { preserveState: true, only: ['tickets'] })} disabled={tickets.current_page === 1} className="px-3 py-2 border border-zinc-300 dark:border-zinc-700 text-zinc-700 dark:text-zinc-300 hover:border-black dark:hover:border-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer" aria-label={t('firstPage')}>
                   <ChevronsLeft className="w-4 h-4" />
                 </button>
-                <button onClick={() => router.get('/admin/support', buildPaginationParams(tickets.current_page - 1), { preserveState: true, only: ['tickets'] })} disabled={tickets.current_page === 1} className="px-3 py-2 border border-zinc-300 dark:border-zinc-700 text-zinc-700 dark:text-zinc-300 hover:border-black dark:hover:border-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer" aria-label="Previous Page">
+                <button onClick={() => router.get('/admin/support', buildPaginationParams(tickets.current_page - 1), { preserveState: true, only: ['tickets'] })} disabled={tickets.current_page === 1} className="px-3 py-2 border border-zinc-300 dark:border-zinc-700 text-zinc-700 dark:text-zinc-300 hover:border-black dark:hover:border-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer" aria-label={t('previousPage')}>
                   <ChevronLeft className="w-4 h-4" />
                 </button>
                 {tickets.current_page > 2 && (
@@ -433,17 +435,17 @@ export default function SupportTicketManagement({ tickets, users, filters, user 
                 {tickets.current_page < tickets.last_page - 1 && (
                   <span className="px-2 text-zinc-500 dark:text-zinc-400">...</span>
                 )}
-                <button onClick={() => router.get('/admin/support', buildPaginationParams(tickets.current_page + 1), { preserveState: true, only: ['tickets'] })} disabled={tickets.current_page === tickets.last_page} className="px-3 py-2 border border-zinc-300 dark:border-zinc-700 text-zinc-700 dark:text-zinc-300 hover:border-black dark:hover:border-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer" aria-label="Next Page">
+                <button onClick={() => router.get('/admin/support', buildPaginationParams(tickets.current_page + 1), { preserveState: true, only: ['tickets'] })} disabled={tickets.current_page === tickets.last_page} className="px-3 py-2 border border-zinc-300 dark:border-zinc-700 text-zinc-700 dark:text-zinc-300 hover:border-black dark:hover:border-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer" aria-label={t('nextPage')}>
                   <ChevronRight className="w-4 h-4" />
                 </button>
-                <button onClick={() => router.get('/admin/support', buildPaginationParams(tickets.last_page), { preserveState: true, only: ['tickets'] })} disabled={tickets.current_page === tickets.last_page} className="px-3 py-2 border border-zinc-300 dark:border-zinc-700 text-zinc-700 dark:text-zinc-300 hover:border-black dark:hover:border-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer" aria-label="Last Page">
+                <button onClick={() => router.get('/admin/support', buildPaginationParams(tickets.last_page), { preserveState: true, only: ['tickets'] })} disabled={tickets.current_page === tickets.last_page} className="px-3 py-2 border border-zinc-300 dark:border-zinc-700 text-zinc-700 dark:text-zinc-300 hover:border-black dark:hover:border-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer" aria-label={t('lastPage')}>
                   <ChevronsRight className="w-4 h-4" />
                 </button>
               </div>
             )}
-            <ModalForm isOpen={isCreateModalOpen} onClose={() => setIsCreateModalOpen(false)} onSubmit={handleCreate} title="Create Support Ticket" fields={formFields} submitLabel="Create Ticket" />
-            <ModalForm isOpen={isEditModalOpen} onClose={() => { setIsEditModalOpen(false); setSelectedTicket(null); }} onSubmit={handleEdit} title={`Edit Ticket #${selectedTicket?.ticketId || ''}`} fields={editFormFields} initialData={selectedTicket ? { user: `${selectedTicket.user.userName} (${selectedTicket.user.userEmail})`, subject: selectedTicket.subject, message: selectedTicket.message, status: selectedTicket.status, priority: selectedTicket.priority } : {}} submitLabel="Update Ticket" />
-            <ModalForm isOpen={isReplyModalOpen} onClose={() => { setIsReplyModalOpen(false); setSelectedTicket(null); }} onSubmit={handleReply} title={`Reply To Ticket #${selectedTicket?.ticketId || ''}`} fields={replyFormFields} initialData={selectedTicket ? { user: `${selectedTicket.user.userName} (${selectedTicket.user.userEmail})`, subject: selectedTicket.subject, message: selectedTicket.message, status: selectedTicket.status, priority: selectedTicket.priority, adminResponse: '' } : {}} submitLabel="Send Reply" />
+            <ModalForm isOpen={isCreateModalOpen} onClose={() => setIsCreateModalOpen(false)} onSubmit={handleCreate} title={t('createSupportTicket')} fields={formFields} submitLabel={t('createTicket')} />
+            <ModalForm isOpen={isEditModalOpen} onClose={() => { setIsEditModalOpen(false); setSelectedTicket(null); }} onSubmit={handleEdit} title={t('editTicketWithId', { id: selectedTicket?.ticketId || '' })} fields={editFormFields} initialData={selectedTicket ? { user: `${selectedTicket.user.userName} (${selectedTicket.user.userEmail})`, subject: selectedTicket.subject, message: selectedTicket.message, status: selectedTicket.status, priority: selectedTicket.priority } : {}} submitLabel={t('updateTicket')} />
+            <ModalForm isOpen={isReplyModalOpen} onClose={() => { setIsReplyModalOpen(false); setSelectedTicket(null); }} onSubmit={handleReply} title={t('replyToTicketWithId', { id: selectedTicket?.ticketId || '' })} fields={replyFormFields} initialData={selectedTicket ? { user: `${selectedTicket.user.userName} (${selectedTicket.user.userEmail})`, subject: selectedTicket.subject, message: selectedTicket.message, status: selectedTicket.status, priority: selectedTicket.priority, adminResponse: '' } : {}} submitLabel={t('sendReply')} />
           </div>
         </div>
       </div>

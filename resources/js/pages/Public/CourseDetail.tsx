@@ -1,9 +1,10 @@
 import { PlayCircle, Clock, Star, CheckCircle, Users, Share2, Heart, FileText, Download, Award, MessageSquare } from 'lucide-react';
-import { Head, Link, router } from '@inertiajs/react';
+import { Head, Link, router, usePage } from '@inertiajs/react';
 import { useState } from 'react';
 import { useToast } from '../../contexts/ToastContext';
 import PaymentModal from '../../components/PaymentModal';
 import Layout from '../../components/Layout';
+import useTranslation from '../../hooks/useTranslation';
 interface Module {
   moduleId: number;
   moduleTitle: string;
@@ -46,28 +47,29 @@ interface CourseDetailProps {
 }
 export default function CourseDetail({ course, adminQrPath, isEnrolled, isInWishlist: initialWishlist, user }: CourseDetailProps) {
   const { showToast } = useToast();
+  const { t } = useTranslation();
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [inWishlist, setInWishlist] = useState(initialWishlist ?? false);
   const [wishlistLoading, setWishlistLoading] = useState(false);
   const handleBuyNow = () => {
     if (!user) {
-      showToast('You Have To Log In As Student To Purchase!', 'error');
+      showToast(t('youHaveToLogIn'), 'error');
       setTimeout(() => router.get('/login'), 1000);
       return;
     }
     if (user.role !== 'learner') {
-      showToast('Only Students Can Purchase Courses!', 'error');
+      showToast(t('onlyStudentsPurchase'), 'error');
       return;
     }
     setShowPaymentModal(true);
   };
   const handleWishlistToggle = async () => {
     if (!user) {
-      showToast('Please Log In To Add To Wishlist!', 'error');
+      showToast(t('pleaseLogInWishlist'), 'error');
       return;
     }
     if (isEnrolled) {
-      showToast('You Already Own This Course!', 'info');
+      showToast(t('alreadyOwnCourse'), 'info');
       return;
     }
     setWishlistLoading(true);
@@ -87,7 +89,7 @@ export default function CourseDetail({ course, adminQrPath, isEnrolled, isInWish
       setInWishlist(data.inWishlist);
       showToast(data.message, 'success');
     } catch (error) {
-      showToast('Failed To Update Wishlist!', 'error');
+      showToast(t('failedToUpdateWishlist'), 'error');
     } finally {
       setWishlistLoading(false);
     }
@@ -116,15 +118,15 @@ export default function CourseDetail({ course, adminQrPath, isEnrolled, isInWish
                       <Star key={i} className={`w-4 h-4 ${i < Math.floor(course.rating) ? 'fill-current' : ''}`} />
                     ))}
                   </div>
-                  <span className="text-slate-400 ml-1">{course.ratingsCount > 0 ? course.ratingsCount.toLocaleString() : 0} Ratings</span>
+                  <span className="text-slate-400 ml-1">{course.ratingsCount > 0 ? course.ratingsCount.toLocaleString() : 0} {t('ratings')}</span>
                 </div>
                 <div className="flex items-center gap-2 text-slate-300">
                   <Users className="w-4 h-4" />
-                  <span>{course.studentsCount.toLocaleString()} Students Enrolled</span>
+                  <span>{course.studentsCount.toLocaleString()} {t('studentsEnrolled')}</span>
                 </div>
                 <div className="flex items-center gap-2 text-slate-300">
                   <Clock className="w-4 h-4" />
-                  <span>Last Updated: {new Date(course.lastUpdated).toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}</span>
+                  <span>{t('lastUpdated')} {new Date(course.lastUpdated).toLocaleDateString((usePage().props as any).locale, { month: 'long', year: 'numeric' })}</span>
                 </div>
               </div>
               <div className="flex items-center gap-4 pt-4">
@@ -146,7 +148,7 @@ export default function CourseDetail({ course, adminQrPath, isEnrolled, isInWish
                       });
                     } else {
                       navigator.clipboard.writeText(window.location.href);
-                      showToast('Course Link Copied To Clipboard!', 'success');
+                      showToast(t('courseLinkCopied'), 'success');
                     }
                   }}
                   className="p-2 rounded-full bg-white/10 hover:bg-white/20 transition-colors cursor-pointer"
@@ -156,7 +158,7 @@ export default function CourseDetail({ course, adminQrPath, isEnrolled, isInWish
                 <button
                   onClick={() => router.visit(`/courses/${course.courseId}/reviews`)}
                   className="p-2 rounded-full bg-white/10 hover:bg-white/20 transition-colors cursor-pointer"
-                  title="Reviews"
+                  title={t('reviews')}
                 >
                   <MessageSquare className="w-6 h-6" />
                 </button>
@@ -170,7 +172,7 @@ export default function CourseDetail({ course, adminQrPath, isEnrolled, isInWish
           <div className="lg:col-span-2 space-y-12">
             <div className="bg-white dark:bg-slate-800 rounded-2xl p-8 border border-slate-200 dark:border-slate-700">
               <h2 className="text-2xl font-bold text-slate-900 dark:text-white mb-6">
-                What You'll Learn
+                {t('whatYouWillLearn')}
               </h2>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {course.whatYouLearn?.map((item, i) => (
@@ -183,7 +185,7 @@ export default function CourseDetail({ course, adminQrPath, isEnrolled, isInWish
             </div>
             <div>
               <h2 className="text-2xl font-bold text-slate-900 dark:text-white mb-6">
-                Course Content
+                {t('courseContent')}
               </h2>
               <div className="space-y-4">
                 {course.modules.map((module) => (
@@ -192,7 +194,7 @@ export default function CourseDetail({ course, adminQrPath, isEnrolled, isInWish
                       <div className="flex items-center gap-3">
                         <span className="font-bold text-slate-900 dark:text-white">{module.moduleTitle}</span>
                       </div>
-                      <span className="text-sm text-slate-500 dark:text-slate-400">{module.lessonCount} Lessons • {module.duration}M</span>
+                      <span className="text-sm text-slate-500 dark:text-slate-400">{module.lessonCount} {t('lessons')} • {module.duration}{t('minutesAbbr')}</span>
                     </div>
                     <div className="divide-y divide-slate-100 dark:divide-slate-800">
                       {module.lessons.map((lesson) => (
@@ -201,7 +203,7 @@ export default function CourseDetail({ course, adminQrPath, isEnrolled, isInWish
                             <PlayCircle className="w-4 h-4 text-slate-400" />
                             <span className="text-slate-700 dark:text-slate-300">{lesson.lessonTitle}</span>
                           </div>
-                          <span className="text-sm text-slate-400">{lesson.duration} Min</span>
+                          <span className="text-sm text-slate-400">{lesson.duration} {t('minutesShort')}</span>
                         </div>
                       ))}
                     </div>
@@ -220,40 +222,40 @@ export default function CourseDetail({ course, adminQrPath, isEnrolled, isInWish
                 </div>
                 <div className="p-6">
                   <div className="text-3xl font-bold text-slate-900 dark:text-white mb-4">
-                    {course.price === 0 ? 'Free' : `$${course.price.toFixed(2)}`}
+                    {course.price === 0 ? t('free') : `$${course.price.toFixed(2)}`}
                   </div>
                   {isEnrolled ? (
                     <div className="w-full py-4 bg-zinc-800 dark:bg-white text-white dark:text-black font-bold text-center rounded flex items-center justify-center gap-2">
                       <CheckCircle className="w-5 h-5" />
-                      Purchased
+                      {t('purchased')}
                     </div>
                   ) : (
                     <button
                       onClick={handleBuyNow}
                       className="w-full py-4 bg-zinc-800 dark:bg-white text-white dark:text-black font-bold hover:bg-zinc-900 dark:hover:bg-zinc-100 transition-colors mb-4 cursor-pointer"
                     >
-                      Buy Now
+                      {t('buyNow')}
                     </button>
                   )}
                 </div>
                 <div className="px-6 pb-6 pt-0 space-y-4 border-t border-slate-100 dark:border-slate-700 mt-4 pt-4">
-                  <h3 className="font-bold text-slate-900 dark:text-white">This Course Includes:</h3>
+                  <h3 className="font-bold text-slate-900 dark:text-white">{t('thisCourseIncludes')}</h3>
                   <ul className="space-y-3 text-sm text-slate-600 dark:text-slate-400">
                     <li className="flex items-center gap-3">
                       <PlayCircle className="w-4 h-4" />
-                      {course.videoDuration ?? 0} Hours On-Demand Video
+                      {course.videoDuration ?? 0} {t('onDemandVideo')}
                     </li>
                     <li className="flex items-center gap-3">
                       <FileText className="w-4 h-4" />
-                      {course.articlesCount ?? 0} Articles
+                      {course.articlesCount ?? 0} {t('articles')}
                     </li>
                     <li className="flex items-center gap-3">
                       <Download className="w-4 h-4" />
-                      {course.resourcesCount ?? 0} Downloadable Resources
+                      {course.resourcesCount ?? 0} {t('downloadableResources')}
                     </li>
                     <li className="flex items-center gap-3">
                       <Award className="w-4 h-4" />
-                      Certificate Of Completion
+                      {t('certificateOfCompletion')}
                     </li>
                   </ul>
                 </div>

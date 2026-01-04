@@ -1,6 +1,7 @@
 import { Heart, BookOpen } from 'lucide-react';
 import { Head, Link } from '@inertiajs/react';
 import Layout from '../../components/Layout';
+import useTranslation from '../../hooks/useTranslation';
 interface WishlistProps {
   wishlists: Array<{
     wishlistId: number;
@@ -17,27 +18,28 @@ interface WishlistProps {
   user: any;
 }
 export default function WishlistPage({ wishlists, user }: WishlistProps) {
+  const { t } = useTranslation();
   return (
     <Layout user={user}>
-      <Head title="My Wishlist" />
+      <Head title={t('myWishlist')} />
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <h1 className="text-4xl font-serif font-bold text-black dark:text-white mb-8">
-          My Wishlist
+          {t('myWishlist')}
         </h1>
         {wishlists.length === 0 ? (
           <div className="text-center py-20 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800">
             <Heart className="w-16 h-16 text-zinc-400 mx-auto mb-4" />
             <h3 className="text-xl font-serif font-bold text-black dark:text-white mb-2">
-              Your Wishlist Is Empty
+              {t('yourWishlistIsEmpty')}
             </h3>
             <p className="text-zinc-600 dark:text-zinc-400 mb-6">
-              Save Courses You're Interested In To Review Later
+              {t('saveCourses')}
             </p>
             <Link
               href="/courses"
               className="inline-flex items-center gap-2 px-6 py-3 bg-black dark:bg-white text-white dark:text-black font-medium hover:bg-zinc-800 dark:hover:bg-zinc-200 transition-colors"
             >
-              Browse Courses
+              {t('browseCourses')}
             </Link>
           </div>
         ) : (
@@ -77,7 +79,7 @@ export default function WishlistPage({ wishlists, user }: WishlistProps) {
                       href={`/courses/${item.course.courseId}`}
                       className="px-4 py-2 bg-zinc-100 dark:bg-zinc-800 text-black dark:text-white font-medium hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black transition-colors"
                     >
-                      View Course
+                      {t('viewCourse')}
                     </Link>
                   </div>
                 </div>

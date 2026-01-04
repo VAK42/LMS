@@ -2,6 +2,7 @@ import { X, Upload, FileText, Video, Loader2, Check } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { useToast } from '../../contexts/ToastContext';
 import TiptapEditor from './TiptapEditor';
+import useTranslation from '../../hooks/useTranslation';
 interface Props {
   isOpen: boolean;
   onClose: () => void;
@@ -19,6 +20,7 @@ interface Props {
 }
 export default function LessonContentEditor({ isOpen, onClose, lesson, onSaved }: Props) {
   const { showToast } = useToast();
+  const { t } = useTranslation();
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [htmlContent, setHtmlContent] = useState('');
@@ -65,11 +67,11 @@ export default function LessonContentEditor({ isOpen, onClose, lesson, onSaved }
       });
       if (response.status === 419) { window.location.reload(); return; }
       if (!response.ok) throw new Error('Failed To Save Content!');
-      showToast('Content Saved!', 'success');
+      showToast(t('contentSavedSuccess'), 'success');
       onSaved(lesson.lessonId);
       onClose();
     } catch (error) {
-      showToast('Failed To Save Content!', 'error');
+      showToast(t('contentSaveFailed'), 'error');
     } finally {
       setSaving(false);
     }
@@ -108,13 +110,13 @@ export default function LessonContentEditor({ isOpen, onClose, lesson, onSaved }
       if (response.status === 419) { window.location.reload(); return; }
       if (!response.ok) {
         const data = await response.json();
-        throw new Error(data.error || 'Failed To Upload File!');
+        throw new Error(data.error);
       }
-      showToast('File Uploaded!', 'success');
+      showToast(t('fileUploadedSuccess'), 'success');
       onSaved(lesson.lessonId);
       onClose();
     } catch (error: any) {
-      showToast(error.message || 'Failed To Upload File!', 'error');
+      showToast(error.message || t('fileUploadFailed'), 'error');
     } finally {
       setSaving(false);
     }
@@ -130,7 +132,7 @@ export default function LessonContentEditor({ isOpen, onClose, lesson, onSaved }
       <div className="bg-white dark:bg-zinc-900 rounded-2xl max-w-3xl w-full max-h-[90vh] overflow-hidden shadow-2xl flex flex-col">
         <div className="flex items-center justify-between p-6 border-b border-zinc-200 dark:border-zinc-800">
           <div>
-            <h2 className="text-xl font-bold text-black dark:text-white">Edit Lesson Content</h2>
+            <h2 className="text-xl font-bold text-black dark:text-white">{t('editLessonContent')}</h2>
             <p className="text-sm text-zinc-500">{lesson.lessonTitle}</p>
           </div>
           <button onClick={onClose} className="p-2 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-full cursor-pointer">
@@ -144,7 +146,7 @@ export default function LessonContentEditor({ isOpen, onClose, lesson, onSaved }
             </div>
           ) : lesson.contentType === 'text' ? (
             <div className="space-y-4">
-              <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300">Lesson Content</label>
+              <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300">{t('lessonContent')}</label>
               <TiptapEditor content={htmlContent} onChange={setHtmlContent} />
             </div>
           ) : (
@@ -154,7 +156,7 @@ export default function LessonContentEditor({ isOpen, onClose, lesson, onSaved }
                   <div className="flex items-center gap-3">
                     <Check className="w-5 h-5 text-green-600" />
                     <div>
-                      <p className="font-medium text-green-700 dark:text-green-300">Current File</p>
+                      <p className="font-medium text-green-700 dark:text-green-300">{t('currentFile')}</p>
                       <p className="text-sm text-green-600">{currentContent.filename}</p>
                     </div>
                   </div>
@@ -167,13 +169,13 @@ export default function LessonContentEditor({ isOpen, onClose, lesson, onSaved }
                   <FileText className="w-12 h-12 text-zinc-400 mx-auto mb-4" />
                 )}
                 <p className="text-lg font-medium text-zinc-700 dark:text-zinc-300 mb-2">
-                  {selectedFile ? selectedFile.name : `Upload ${lesson.contentType === 'video' ? 'Video' : 'PDF'} File`}
+                  {selectedFile ? selectedFile.name : t('uploadVideoOrPdf')}
                 </p>
                 <p className="text-sm text-zinc-500 mb-2">
-                  {lesson.contentType === 'video' ? 'Supported: MP4, WebM, MOV (Max 500MB)' : 'Supported: PDF (Max 500MB)'}
+                  {lesson.contentType === 'video' ? t('supportedFormatsVideo') : t('supportedFormatsPdf')}
                 </p>
                 {lesson.contentType === 'video' && videoDuration && (
-                  <p className="text-sm font-medium text-blue-600 mb-4">Video Length: {videoDuration} Minute{videoDuration > 1 ? 's' : ''}</p>
+                  <p className="text-sm font-medium text-blue-600 mb-4">{t('videoLength', { duration: videoDuration })}</p>
                 )}
                 <input
                   type="file"
@@ -187,21 +189,21 @@ export default function LessonContentEditor({ isOpen, onClose, lesson, onSaved }
                   className="inline-flex items-center gap-2 px-6 py-3 border border-green-600 text-green-600 rounded-lg hover:bg-green-900 hover:text-white cursor-pointer"
                 >
                   <Upload className="w-5 h-5" />
-                  Choose File
+                  {t('chooseFile')}
                 </label>
               </div>
             </div>
           )}
         </div>
         <div className="flex gap-4 p-6 border-t border-zinc-200 dark:border-zinc-800">
-          <button onClick={onClose} className="flex-1 px-4 py-3 border border-zinc-300 dark:border-zinc-700 text-zinc-700 dark:text-zinc-300 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 cursor-pointer">Cancel</button>
+          <button onClick={onClose} className="flex-1 px-4 py-3 border border-zinc-300 dark:border-zinc-700 text-zinc-700 dark:text-zinc-300 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 cursor-pointer">{t('cancel')}</button>
           {lesson.contentType === 'text' ? (
             <button onClick={handleSaveText} disabled={saving || !htmlContent.trim()} className="flex-1 px-4 py-3 text-green-600 border-green-600 border rounded-lg hover:bg-green-900 hover:text-white disabled:opacity-50 cursor-pointer">
-              {saving ? 'Saving...' : 'Save Content'}
+              {saving ? t('saving') : t('saveContent')}
             </button>
           ) : (
             <button onClick={handleUploadFile} disabled={saving || !selectedFile} className="flex-1 px-4 py-3 text-green-600 border-green-600 border rounded-lg hover:bg-green-900 hover:text-white disabled:opacity-50 cursor-pointer">
-              {saving ? 'Uploading...' : 'Upload File'}
+              {saving ? t('uploading') : t('uploadFile')}
             </button>
           )}
         </div>

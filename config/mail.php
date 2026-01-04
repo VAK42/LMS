@@ -4,8 +4,8 @@ return [
   'mailers' => [
     'smtp' => [
       'transport' => 'smtp',
-      'host' => env('mailHost', 'smtp.mailtrap.io'),
-      'port' => env('mailPort', 2525),
+      'host' => env('mailHost', 'smtp.gmail.com'),
+      'port' => env('mailPort', 587),
       'username' => env('mailUsername'),
       'password' => env('mailPassword'),
       'encryption' => env('mailEncryption', 'tls'),

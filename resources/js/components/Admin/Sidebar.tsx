@@ -1,27 +1,29 @@
 import { Link } from '@inertiajs/react';
 import { LayoutDashboard, Users, BookOpen, FolderTree, Star, GraduationCap, Award, Bell, CreditCard, LifeBuoy, Wallet } from 'lucide-react';
+import useTranslation from '../../hooks/useTranslation';
 interface Props {
   currentPath: string;
 }
 export default function AdminSidebar({ currentPath }: Props) {
+  const { t } = useTranslation();
   const menuItems = [
-    { path: '/admin/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
-    { path: '/admin/users', icon: Users, label: 'User Management' },
-    { path: '/admin/courses', icon: BookOpen, label: 'Course Management' },
-    { path: '/admin/categories', icon: FolderTree, label: 'Category Management' },
-    { path: '/admin/reviews', icon: Star, label: 'Review Management' },
-    { path: '/admin/enrollments', icon: GraduationCap, label: 'Enrollment Management' },
-    { path: '/admin/support', icon: LifeBuoy, label: 'Support Tickets' },
-    { path: '/admin/certificates', icon: Award, label: 'Certificate Management' },
-    { path: '/admin/notifications', icon: Bell, label: 'Notification Management' },
-    { path: '/admin/transactions', icon: CreditCard, label: 'Transaction Management' },
-    { path: '/admin/payouts', icon: Wallet, label: 'Payout Management' },
+    { path: '/admin/dashboard', icon: LayoutDashboard, label: t('adminDashboard') },
+    { path: '/admin/users', icon: Users, label: t('userManagement') },
+    { path: '/admin/courses', icon: BookOpen, label: t('courseManagement') },
+    { path: '/admin/categories', icon: FolderTree, label: t('categoryManagement') },
+    { path: '/admin/reviews', icon: Star, label: t('reviewManagement') },
+    { path: '/admin/enrollments', icon: GraduationCap, label: t('enrollmentManagement') },
+    { path: '/admin/support', icon: LifeBuoy, label: t('supportTicketManagement') },
+    { path: '/admin/certificates', icon: Award, label: t('certificateManagement') },
+    { path: '/admin/notifications', icon: Bell, label: t('notificationManagement') },
+    { path: '/admin/transactions', icon: CreditCard, label: t('transactionManagement') },
+    { path: '/admin/payouts', icon: Wallet, label: t('payoutManagement') },
   ];
   return (
     <div className="w-64 bg-white dark:bg-zinc-900 border-r border-zinc-200 dark:border-zinc-800 min-h-screen p-6">
       <div className="mb-8">
-        <h2 className="text-2xl font-bold text-black dark:text-white">Admin Panel</h2>
-        <p className="text-sm text-zinc-600 dark:text-zinc-400">Learning Management System</p>
+        <h2 className="text-2xl font-bold text-black dark:text-white">{t('adminPanel')}</h2>
+        <p className="text-sm text-zinc-600 dark:text-zinc-400">{t('lmsFullName')}</p>
       </div>
       <nav className="space-y-1">
         {menuItems.map((item) => {

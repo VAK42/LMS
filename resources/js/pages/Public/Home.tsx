@@ -1,6 +1,7 @@
 import { BookOpen, TrendingUp, Users, Award, ArrowRight, Star, CheckCircle, User } from 'lucide-react';
 import { Head, Link } from '@inertiajs/react';
 import Layout from '../../components/Layout';
+import useTranslation from '../../hooks/useTranslation';
 interface Course {
   courseId: number;
   courseTitle: string;
@@ -18,33 +19,34 @@ interface HomeProps {
   user: any;
 }
 export default function Home({ featuredCourses, user }: HomeProps) {
+  const { t } = useTranslation();
   return (
     <Layout user={user}>
-      <Head title="Home" />
+      <Head title={t('home')} />
       <section className="relative bg-white dark:bg-zinc-900 border-b border-zinc-200 dark:border-zinc-800">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 md:py-32">
           <div className="text-center max-w-4xl mx-auto">
             <h1 className="text-5xl md:text-6xl lg:text-7xl font-serif font-bold leading-tight text-black dark:text-white tracking-tight">
-              Transform Your Future With
+              {t('homeTitle')}
               <span className="block mt-2">
-                Cutting-Edge Skills
+                {t('cuttingEdgeSkills')}
               </span>
             </h1>
             <p className="mt-8 text-lg md:text-xl text-zinc-700 dark:text-zinc-300 leading-relaxed max-w-2xl mx-auto">
-              Master In-Demand Technologies, Build Real-World Projects & Accelerate Your Career With Expert-Led Courses Designed For Success.
+              {t('homeSubtitle')}
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mt-12">
               <Link
                 href="/courses"
                 className="px-8 py-3 bg-black dark:bg-white text-white dark:text-black font-medium hover:bg-zinc-800 dark:hover:bg-zinc-200 transition-colors w-full sm:w-auto text-center"
               >
-                Explore Courses
+                {t('exploreCourses')}
               </Link>
               <Link
                 href="/register"
                 className="px-8 py-3 border border-black dark:border-white text-black dark:text-white font-medium hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black transition-colors w-full sm:w-auto text-center"
               >
-                Get Started Free
+                {t('getStartedFree')}
               </Link>
             </div>
           </div>
@@ -58,28 +60,28 @@ export default function Home({ featuredCourses, user }: HomeProps) {
                 <BookOpen className="w-8 h-8 text-black dark:text-white" />
               </div>
               <h3 className="text-3xl font-serif font-bold text-black dark:text-white mb-2">500+</h3>
-              <p className="text-zinc-600 dark:text-zinc-400">Expert Courses</p>
+              <p className="text-zinc-600 dark:text-zinc-400">{t('expertCourses')}</p>
             </div>
             <div className="text-center p-8 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800">
               <div className="inline-flex p-4 bg-zinc-100 dark:bg-zinc-800 mb-4">
                 <Users className="w-8 h-8 text-black dark:text-white" />
               </div>
               <h3 className="text-3xl font-serif font-bold text-black dark:text-white mb-2">50K+</h3>
-              <p className="text-zinc-600 dark:text-zinc-400">Active Learners</p>
+              <p className="text-zinc-600 dark:text-zinc-400">{t('activeLearners')}</p>
             </div>
             <div className="text-center p-8 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800">
               <div className="inline-flex p-4 bg-zinc-100 dark:bg-zinc-800 mb-4">
                 <Award className="w-8 h-8 text-black dark:text-white" />
               </div>
               <h3 className="text-3xl font-serif font-bold text-black dark:text-white mb-2">30K+</h3>
-              <p className="text-zinc-600 dark:text-zinc-400">Certificates Issued</p>
+              <p className="text-zinc-600 dark:text-zinc-400">{t('certificatesIssued')}</p>
             </div>
             <div className="text-center p-8 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800">
               <div className="inline-flex p-4 bg-zinc-100 dark:bg-zinc-800 mb-4">
                 <TrendingUp className="w-8 h-8 text-black dark:text-white" />
               </div>
               <h3 className="text-3xl font-serif font-bold text-black dark:text-white mb-2">95%</h3>
-              <p className="text-zinc-600 dark:text-zinc-400">Success Rate</p>
+              <p className="text-zinc-600 dark:text-zinc-400">{t('successRate')}</p>
             </div>
           </div>
         </div>
@@ -89,17 +91,17 @@ export default function Home({ featuredCourses, user }: HomeProps) {
           <div className="flex items-end justify-between mb-12">
             <div>
               <h2 className="text-3xl md:text-4xl font-serif font-bold text-black dark:text-white mb-3">
-                Featured Courses
+                {t('featuredCourses')}
               </h2>
               <p className="text-zinc-600 dark:text-zinc-400 text-lg">
-                Explore Our Most Popular & Highly-Rated Courses
+                {t('popularCoursesSubtitle')}
               </p>
             </div>
             <Link
               href="/courses"
               className="hidden sm:flex items-center text-black dark:text-white font-medium hover:underline transition-colors"
             >
-              View All Courses <ArrowRight className="w-4 h-4 ml-2" />
+              {t('viewAllCourses')} <ArrowRight className="w-4 h-4 ml-2" />
             </Link>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -137,7 +139,7 @@ export default function Home({ featuredCourses, user }: HomeProps) {
                       </span>
                     </div>
                     <span className="font-bold text-black dark:text-white">
-                      {!course.price || course.price === 0 ? 'Free' : `$${course.price.toFixed(2)}`}
+                      {!course.price || course.price === 0 ? t('free') : `$${course.price.toFixed(2)}`}
                     </span>
                   </div>
                 </div>
@@ -149,7 +151,7 @@ export default function Home({ featuredCourses, user }: HomeProps) {
               href="/courses"
               className="inline-flex items-center text-black dark:text-white font-medium hover:underline transition-colors"
             >
-              View All Courses <ArrowRight className="w-4 h-4 ml-2" />
+              {t('viewAllCourses')} <ArrowRight className="w-4 h-4 ml-2" />
             </Link>
           </div>
         </div>
@@ -158,10 +160,10 @@ export default function Home({ featuredCourses, user }: HomeProps) {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center max-w-3xl mx-auto mb-16">
             <h2 className="text-3xl md:text-4xl font-serif font-bold text-black dark:text-white mb-4">
-              Why Choose Our Platform?
+              {t('whyChoosePlatform')}
             </h2>
             <p className="text-lg text-zinc-600 dark:text-zinc-400">
-              Everything You Need To Succeed In Your Learning Journey
+              {t('whyChooseSubtitle')}
             </p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
@@ -170,10 +172,10 @@ export default function Home({ featuredCourses, user }: HomeProps) {
                 <CheckCircle className="w-10 h-10 text-black dark:text-white" />
               </div>
               <h3 className="text-xl font-serif font-bold text-black dark:text-white mb-3">
-                Expert Instructors
+                {t('expertInstructors')}
               </h3>
               <p className="text-zinc-600 dark:text-zinc-400 leading-relaxed">
-                Learn From Industry Professionals With Years Of Real-World Experience
+                {t('expertInstructorsDesc')}
               </p>
             </div>
             <div className="text-center p-8 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800">
@@ -181,10 +183,10 @@ export default function Home({ featuredCourses, user }: HomeProps) {
                 <CheckCircle className="w-10 h-10 text-black dark:text-white" />
               </div>
               <h3 className="text-xl font-serif font-bold text-black dark:text-white mb-3">
-                Flexible Learning
+                {t('flexibleLearning')}
               </h3>
               <p className="text-zinc-600 dark:text-zinc-400 leading-relaxed">
-                Study At Your Own Pace With Lifetime Access To Course Materials
+                {t('flexibleLearningDesc')}
               </p>
             </div>
             <div className="text-center p-8 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800">
@@ -192,10 +194,10 @@ export default function Home({ featuredCourses, user }: HomeProps) {
                 <CheckCircle className="w-10 h-10 text-black dark:text-white" />
               </div>
               <h3 className="text-xl font-serif font-bold text-black dark:text-white mb-3">
-                Career Support
+                {t('careerSupport')}
               </h3>
               <p className="text-zinc-600 dark:text-zinc-400 leading-relaxed">
-                Get Career Guidance & Certificate To Boost Your Professional Growth
+                {t('careerSupportDesc')}
               </p>
             </div>
           </div>

@@ -4,6 +4,7 @@ import { Head, router } from '@inertiajs/react';
 import { useToast } from '../../contexts/ToastContext';
 import AdminSidebar from '../../components/Admin/Sidebar';
 import Layout from '../../components/Layout';
+import useTranslation from '../../hooks/useTranslation';
 interface DashboardProps {
   metrics: {
     totalUsers: number;
@@ -42,29 +43,30 @@ interface DashboardProps {
 const colors = ['#3b82f6', '#8b5cf6', '#10b981', '#f59e0b', '#ef4444', '#06b6d4'];
 export default function Dashboard({ metrics, charts, recentActivities, recentUsers, hasQr, user }: DashboardProps) {
   const { showToast } = useToast();
+  const { t } = useTranslation();
   return (
     <Layout user={user}>
-      <Head title="Admin Dashboard" />
+      <Head title={t('adminDashboard')} />
       <div className="flex bg-zinc-50 dark:bg-black min-h-screen">
         <AdminSidebar currentPath="/admin/dashboard" />
         <div className="flex-1">
           <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 py-8">
             <div className="mb-8">
-              <h1 className="text-4xl font-bold text-black dark:text-white mb-2">Admin Dashboard</h1>
-              <p className="text-zinc-600 dark:text-zinc-400">Comprehensive Overview Of Platform Analytics</p>
+              <h1 className="text-4xl font-bold text-black dark:text-white mb-2">{t('adminDashboard')}</h1>
+              <p className="text-zinc-600 dark:text-zinc-400">{t('adminDashboardSubtitle')}</p>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
               <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 p-6">
                 <div className="flex items-start justify-between">
                   <div>
-                    <p className="text-sm font-medium text-zinc-600 dark:text-zinc-400 mb-1">Total Users</p>
+                    <p className="text-sm font-medium text-zinc-600 dark:text-zinc-400 mb-1">{t('totalUsers')}</p>
                     <p className="text-3xl font-bold text-black dark:text-white">{metrics.totalUsers.toLocaleString()}</p>
                     <div className="flex items-center mt-2">
                       <TrendingUp className={`w-4 h-4 mr-1 ${metrics.userGrowth >= 0 ? 'text-green-500' : 'text-red-500'}`} />
                       <span className={`text-sm font-medium ${metrics.userGrowth >= 0 ? 'text-green-500' : 'text-red-500'}`}>
                         {metrics.userGrowth >= 0 ? '+' : ''}{metrics.userGrowth}%
                       </span>
-                      <span className="text-sm text-zinc-500 dark:text-zinc-500 ml-1">VS Last Month</span>
+                      <span className="text-sm text-zinc-500 dark:text-zinc-500 ml-1">{t('vsLastMonth')}</span>
                     </div>
                   </div>
                   <div className="bg-blue-100 dark:bg-blue-900/30 p-3 rounded-lg">
@@ -75,14 +77,14 @@ export default function Dashboard({ metrics, charts, recentActivities, recentUse
               <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 p-6">
                 <div className="flex items-start justify-between">
                   <div>
-                    <p className="text-sm font-medium text-zinc-600 dark:text-zinc-400 mb-1">Total Courses</p>
+                    <p className="text-sm font-medium text-zinc-600 dark:text-zinc-400 mb-1">{t('totalCourses')}</p>
                     <p className="text-3xl font-bold text-black dark:text-white">{metrics.totalCourses.toLocaleString()}</p>
                     <div className="flex items-center mt-2">
                       <TrendingUp className={`w-4 h-4 mr-1 ${metrics.courseGrowth >= 0 ? 'text-green-500' : 'text-red-500'}`} />
                       <span className={`text-sm font-medium ${metrics.courseGrowth >= 0 ? 'text-green-500' : 'text-red-500'}`}>
                         {metrics.courseGrowth >= 0 ? '+' : ''}{metrics.courseGrowth}%
                       </span>
-                      <span className="text-sm text-zinc-500 dark:text-zinc-500 ml-1">VS Last Month</span>
+                      <span className="text-sm text-zinc-500 dark:text-zinc-500 ml-1">{t('vsLastMonth')}</span>
                     </div>
                   </div>
                   <div className="bg-purple-100 dark:bg-purple-900/30 p-3 rounded-lg">
@@ -93,14 +95,14 @@ export default function Dashboard({ metrics, charts, recentActivities, recentUse
               <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 p-6">
                 <div className="flex items-start justify-between">
                   <div>
-                    <p className="text-sm font-medium text-zinc-600 dark:text-zinc-400 mb-1">Total Revenue</p>
+                    <p className="text-sm font-medium text-zinc-600 dark:text-zinc-400 mb-1">{t('totalRevenue')}</p>
                     <p className="text-3xl font-bold text-black dark:text-white">${metrics.totalRevenue.toLocaleString()}</p>
                     <div className="flex items-center mt-2">
                       <TrendingUp className={`w-4 h-4 mr-1 ${metrics.revenueGrowth >= 0 ? 'text-green-500' : 'text-red-500'}`} />
                       <span className={`text-sm font-medium ${metrics.revenueGrowth >= 0 ? 'text-green-500' : 'text-red-500'}`}>
                         {metrics.revenueGrowth >= 0 ? '+' : ''}{metrics.revenueGrowth}%
                       </span>
-                      <span className="text-sm text-zinc-500 dark:text-zinc-500 ml-1">VS Last Month</span>
+                      <span className="text-sm text-zinc-500 dark:text-zinc-500 ml-1">{t('vsLastMonth')}</span>
                     </div>
                   </div>
                   <div className="bg-green-100 dark:bg-green-900/30 p-3 rounded-lg">
@@ -111,9 +113,9 @@ export default function Dashboard({ metrics, charts, recentActivities, recentUse
               <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 p-6">
                 <div className="flex items-start justify-between">
                   <div>
-                    <p className="text-sm font-medium text-zinc-600 dark:text-zinc-400 mb-1">Active Enrollments</p>
+                    <p className="text-sm font-medium text-zinc-600 dark:text-zinc-400 mb-1">{t('activeEnrollments')}</p>
                     <p className="text-3xl font-bold text-black dark:text-white">{metrics.totalEnrollments.toLocaleString()}</p>
-                    <p className="text-sm text-zinc-500 dark:text-zinc-500 mt-2">Paid Enrollments</p>
+                    <p className="text-sm text-zinc-500 dark:text-zinc-500 mt-2">{t('paidEnrollments')}</p>
                   </div>
                   <div className="bg-orange-100 dark:bg-orange-900/30 p-3 rounded-lg">
                     <ShoppingCart className="w-6 h-6 text-orange-600 dark:text-orange-400" />
@@ -123,9 +125,9 @@ export default function Dashboard({ metrics, charts, recentActivities, recentUse
               <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 p-6">
                 <div className="flex items-start justify-between">
                   <div>
-                    <p className="text-sm font-medium text-zinc-600 dark:text-zinc-400 mb-1">Completion Rate</p>
+                    <p className="text-sm font-medium text-zinc-600 dark:text-zinc-400 mb-1">{t('completionRate')}</p>
                     <p className="text-3xl font-bold text-black dark:text-white">{metrics.averageCompletion}%</p>
-                    <p className="text-sm text-zinc-500 dark:text-zinc-500 mt-2">Avg Course Progress</p>
+                    <p className="text-sm text-zinc-500 dark:text-zinc-500 mt-2">{t('avgCourseProgress')}</p>
                   </div>
                   <div className="bg-cyan-100 dark:bg-cyan-900/30 p-3 rounded-lg">
                     <Award className="w-6 h-6 text-cyan-600 dark:text-cyan-400" />
@@ -135,11 +137,11 @@ export default function Dashboard({ metrics, charts, recentActivities, recentUse
               <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 p-6">
                 <div className="flex items-start justify-between">
                   <div>
-                    <p className="text-sm font-medium text-zinc-600 dark:text-zinc-400 mb-1">Average Rating</p>
+                    <p className="text-sm font-medium text-zinc-600 dark:text-zinc-400 mb-1">{t('averageRating')}</p>
                     <p className="text-3xl font-bold text-black dark:text-white">{metrics.averageRating.toFixed(2)}</p>
                     <div className="flex items-center mt-2">
                       <Star className="w-4 h-4 text-yellow-500 fill-yellow-500 mr-1" />
-                      <span className="text-sm text-zinc-500 dark:text-zinc-500">Out Of 5.0</span>
+                      <span className="text-sm text-zinc-500 dark:text-zinc-500">{t('outOf5')}</span>
                     </div>
                   </div>
                   <div className="bg-yellow-100 dark:bg-yellow-900/30 p-3 rounded-lg">
@@ -150,7 +152,7 @@ export default function Dashboard({ metrics, charts, recentActivities, recentUse
             </div>
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
               <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 p-6">
-                <h3 className="text-lg font-bold text-black dark:text-white mb-4">User Registrations</h3>
+                <h3 className="text-lg font-bold text-black dark:text-white mb-4">{t('userRegistrations')}</h3>
                 <ResponsiveContainer width="100%" height={300}>
                   <LineChart data={charts.userRegistrations}>
                     <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
@@ -162,7 +164,7 @@ export default function Dashboard({ metrics, charts, recentActivities, recentUse
                 </ResponsiveContainer>
               </div>
               <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 p-6">
-                <h3 className="text-lg font-bold text-black dark:text-white mb-4">Monthly Revenue</h3>
+                <h3 className="text-lg font-bold text-black dark:text-white mb-4">{t('monthlyRevenue')}</h3>
                 <ResponsiveContainer width="100%" height={300}>
                   <LineChart data={charts.monthlyRevenue}>
                     <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
@@ -174,7 +176,7 @@ export default function Dashboard({ metrics, charts, recentActivities, recentUse
                 </ResponsiveContainer>
               </div>
               <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 p-6">
-                <h3 className="text-lg font-bold text-black dark:text-white mb-4">Top Courses By Enrollment</h3>
+                <h3 className="text-lg font-bold text-black dark:text-white mb-4">{t('topCoursesByEnrollment')}</h3>
                 <ResponsiveContainer width="100%" height={300}>
                   <BarChart data={charts.topCourses}>
                     <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
@@ -186,7 +188,7 @@ export default function Dashboard({ metrics, charts, recentActivities, recentUse
                 </ResponsiveContainer>
               </div>
               <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 p-6">
-                <h3 className="text-lg font-bold text-black dark:text-white mb-4">User Distribution By Role</h3>
+                <h3 className="text-lg font-bold text-black dark:text-white mb-4">{t('userDistributionByRole')}</h3>
                 <ResponsiveContainer width="100%" height={300}>
                   <PieChart>
                     <Pie data={charts.roleDistribution} cx="50%" cy="50%" outerRadius={100} fill="#8884d8" dataKey="value">
@@ -203,7 +205,7 @@ export default function Dashboard({ metrics, charts, recentActivities, recentUse
               <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 p-6">
                 <h3 className="text-lg font-bold text-black dark:text-white mb-4 flex items-center">
                   <Activity className="w-5 h-5 mr-2" />
-                  Recent Activity
+                  {t('recentActivity')}
                 </h3>
                 <div className="space-y-3">
                   {recentActivities.map((activity, index) => (
@@ -213,7 +215,7 @@ export default function Dashboard({ metrics, charts, recentActivities, recentUse
                       </div>
                       <div className="flex-1 min-w-0">
                         <p className="text-sm text-black dark:text-white font-medium truncate">
-                          {activity.user} {activity.type === 'enrollment' ? 'Enrolled In' : activity.type === 'completion' ? 'Completed' : 'Reviewed'}
+                          {activity.user} {activity.type === 'enrollment' ? t('enrolledIn') : activity.type === 'completion' ? t('completedActivity') : t('reviewedActivity')}
                         </p>
                         <p className="text-sm text-zinc-600 dark:text-zinc-400 truncate">{activity.course}</p>
                         {activity.rating && (
@@ -232,15 +234,15 @@ export default function Dashboard({ metrics, charts, recentActivities, recentUse
               <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 p-6">
                 <h3 className="text-lg font-bold text-black dark:text-white mb-4 flex items-center">
                   <Users className="w-5 h-5 mr-2" />
-                  Recent Users
+                  {t('recentUsers')}
                 </h3>
                 <div className="overflow-x-auto">
                   <table className="w-full">
                     <thead>
                       <tr className="border-b border-zinc-200 dark:border-zinc-800">
-                        <th className="text-left py-2 text-sm font-medium text-zinc-600 dark:text-zinc-400">Name</th>
-                        <th className="text-left py-2 text-sm font-medium text-zinc-600 dark:text-zinc-400">Role</th>
-                        <th className="text-left py-2 text-sm font-medium text-zinc-600 dark:text-zinc-400">Joined</th>
+                        <th className="text-left py-2 text-sm font-medium text-zinc-600 dark:text-zinc-400">{t('name')}</th>
+                        <th className="text-left py-2 text-sm font-medium text-zinc-600 dark:text-zinc-400">{t('role')}</th>
+                        <th className="text-left py-2 text-sm font-medium text-zinc-600 dark:text-zinc-400">{t('joined')}</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -268,7 +270,7 @@ export default function Dashboard({ metrics, charts, recentActivities, recentUse
             <div className="my-8">
               <form>
                 <label className="cursor-pointer rounded inline-flex items-center gap-2 px-4 py-2 bg-black dark:bg-white text-white dark:text-black font-bold hover:bg-zinc-800 dark:hover:bg-zinc-200 transition-colors">
-                  {hasQr ? 'Replace QR' : 'Upload QR'}
+                  {hasQr ? t('replaceQr') : t('uploadQr')}
                   <input
                     type="file"
                     name="qr"
@@ -280,8 +282,8 @@ export default function Dashboard({ metrics, charts, recentActivities, recentUse
                         formData.append('qr', e.target.files[0]);
                         router.post('/admin/uploadQr', formData, {
                           forceFormData: true,
-                          onSuccess: () => showToast('QR Code Uploaded Successfully!', 'success'),
-                          onError: () => showToast('Upload Failed!', 'error'),
+                          onSuccess: () => showToast(t('qrUploadedSuccess'), 'success'),
+                          onError: () => showToast(t('uploadFailed'), 'error'),
                         });
                       }
                     }}

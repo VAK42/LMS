@@ -2,6 +2,7 @@ import { FileText, CheckCircle, ChevronDown, ChevronRight, Clock, PlayCircle, Fi
 import { Head, Link } from '@inertiajs/react';
 import { useState } from 'react';
 import Layout from '../../components/Layout';
+import useTranslation from '../../hooks/useTranslation';
 interface Lesson {
   lessonId: number;
   lessonTitle: string;
@@ -34,6 +35,7 @@ interface LessonViewerProps {
   user: any;
 }
 export default function LessonViewer({ lesson, course, modules = [], quiz, assessment, progress, user }: LessonViewerProps) {
+  const { t } = useTranslation();
   const [expandedModules, setExpandedModules] = useState<number[]>(
     (modules || []).map(m => m.moduleId)
   );
@@ -79,11 +81,11 @@ export default function LessonViewer({ lesson, course, modules = [], quiz, asses
           <div className="aspect-video bg-black rounded-lg overflow-hidden">
             {videoUrl ? (
               <video src={videoUrl} controls className="w-full h-full" controlsList="nodownload">
-                Your Browser Does Not Support Video Playback!
+                {t('yourBrowserDoesNotSupportVideo')}
               </video>
             ) : (
               <div className="w-full h-full flex items-center justify-center text-zinc-400">
-                <p>No Video Available!</p>
+                <p>{t('noVideoAvailable')}</p>
               </div>
             )}
           </div>
@@ -95,7 +97,7 @@ export default function LessonViewer({ lesson, course, modules = [], quiz, asses
             {htmlContent ? (
               <div className="text-black dark:text-white" dangerouslySetInnerHTML={{ __html: htmlContent }} />
             ) : (
-              <p className="text-zinc-500">No Content Available!</p>
+              <p className="text-zinc-500">{t('noContentAvailable')}</p>
             )}
           </div>
         );
@@ -104,7 +106,7 @@ export default function LessonViewer({ lesson, course, modules = [], quiz, asses
         return (
           <div className="text-center py-12">
             <FileText className="w-20 h-20 text-zinc-400 mx-auto mb-4" />
-            <p className="text-lg font-medium text-zinc-700 dark:text-zinc-300 mb-6">PDF Document</p>
+            <p className="text-lg font-medium text-zinc-700 dark:text-zinc-300 mb-6">{t('pdfDocument')}</p>
             {pdfUrl ? (
               <div className="flex items-center justify-center gap-4">
                 <a
@@ -114,7 +116,7 @@ export default function LessonViewer({ lesson, course, modules = [], quiz, asses
                   className="inline-flex items-center gap-2 px-6 py-3 bg-black dark:bg-white text-white dark:text-black font-medium hover:opacity-80 transition-opacity"
                 >
                   <FileText className="w-5 h-5" />
-                  View PDF
+                  {t('viewPdf')}
                 </a>
                 <a
                   href={pdfUrl}
@@ -122,16 +124,16 @@ export default function LessonViewer({ lesson, course, modules = [], quiz, asses
                   className="inline-flex items-center gap-2 px-6 py-3 border border-zinc-300 dark:border-zinc-600 text-zinc-700 dark:text-zinc-300 font-medium hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
                 >
                   <Download className="w-5 h-5" />
-                  Download
+                  {t('download')}
                 </a>
               </div>
             ) : (
-              <p className="text-zinc-500">No PDF Available!</p>
+              <p className="text-zinc-500">{t('noPdfAvailable')}</p>
             )}
           </div>
         );
       default:
-        return <p className="text-zinc-500">Unknown Content Type: {lesson.contentType}</p>;
+        return <p className="text-zinc-500">{t('unknownContentType', { type: lesson.contentType })}</p>;
     }
   };
   return (
@@ -141,7 +143,7 @@ export default function LessonViewer({ lesson, course, modules = [], quiz, asses
         <aside className="w-80 bg-white dark:bg-zinc-900 border-r border-zinc-200 dark:border-zinc-800 overflow-y-auto flex-shrink-0">
           <div className="p-4 border-b border-zinc-200 dark:border-zinc-800">
             <Link href={`/courses/${course.courseId}`} className="text-sm text-zinc-500 hover:text-black dark:hover:text-white">
-              ← Back To Course
+              {t('backToCourse')}
             </Link>
             <h2 className="font-bold text-black dark:text-white mt-2 line-clamp-2">{course.courseTitle}</h2>
           </div>
@@ -215,12 +217,12 @@ export default function LessonViewer({ lesson, course, modules = [], quiz, asses
               <div className="flex items-center gap-4 text-sm text-zinc-600 dark:text-zinc-400">
                 <span className="flex items-center gap-1">
                   <Clock className="w-4 h-4" />
-                  {lesson.durationMinutes || 0} Min
+                  {lesson.durationMinutes || 0} {t('minutes')}
                 </span>
                 {progress?.isCompleted && (
                   <span className="flex items-center gap-1 text-green-600">
                     <CheckCircle className="w-4 h-4" />
-                    Completed
+                    {t('completed')}
                   </span>
                 )}
               </div>
@@ -235,7 +237,7 @@ export default function LessonViewer({ lesson, course, modules = [], quiz, asses
                 className="px-8 py-3 bg-black dark:bg-white text-white dark:text-black font-medium hover:opacity-80 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer flex items-center gap-2"
               >
                 <CheckCircle className="w-5 h-5" />
-                {progress?.isCompleted ? 'Completed' : 'Mark As Complete'}
+                {progress?.isCompleted ? t('completed') : t('markAsComplete')}
               </button>
             </div>
           </div>

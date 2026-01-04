@@ -1,5 +1,6 @@
 import { X } from 'lucide-react';
 import { useState, FormEvent, useEffect } from 'react';
+import useTranslation from '../../hooks/useTranslation';
 interface Field {
   name: string;
   label: string;
@@ -20,7 +21,9 @@ interface Props {
   initialData?: Record<string, any>;
   submitLabel?: string;
 }
-export default function ModalForm({ isOpen, onClose, onSubmit, title, fields, initialData = {}, submitLabel = 'Submit' }: Props) {
+export default function ModalForm({ isOpen, onClose, onSubmit, title, fields, initialData = {}, submitLabel }: Props) {
+  const { t } = useTranslation();
+  const finalSubmitLabel = submitLabel || t('submit');
   const [formData, setFormData] = useState<Record<string, any>>(initialData);
   useEffect(() => {
     if (isOpen) {
@@ -58,7 +61,7 @@ export default function ModalForm({ isOpen, onClose, onSubmit, title, fields, in
                 )}
                 {field.type === 'select' ? (
                   <select value={formData[field.name] || ''} onChange={(e) => handleChange(field.name, e.target.value)} required={field.required} className="w-full px-4 py-2 border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 focus:outline-none focus:border-black dark:focus:border-white cursor-pointer">
-                    <option value="" disabled>Select {field.label}</option>
+                    <option value="" disabled>{t('select')} {field.label}</option>
                     {field.options?.map((opt) => (
                       <option key={opt.value} value={opt.value}>
                         {opt.label}
@@ -103,10 +106,10 @@ export default function ModalForm({ isOpen, onClose, onSubmit, title, fields, in
           </div>
           <div className="flex items-center gap-4 mt-6">
             <button type="submit" className="flex-1 px-6 py-3 bg-black dark:bg-white text-white dark:text-black font-medium hover:bg-zinc-800 dark:hover:bg-zinc-200 cursor-pointer">
-              {submitLabel}
+              {finalSubmitLabel}
             </button>
             <button type="button" onClick={onClose} className="flex-1 px-6 py-3 border border-zinc-300 dark:border-zinc-700 text-zinc-900 dark:text-zinc-100 font-medium hover:bg-zinc-100 dark:hover:bg-zinc-800 cursor-pointer">
-              Cancel
+              {t('cancel')}
             </button>
           </div>
         </form>

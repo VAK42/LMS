@@ -3,6 +3,7 @@ import { Head, router } from '@inertiajs/react'
 import { useState } from 'react'
 import { useToast } from '../../contexts/ToastContext'
 import Layout from '../../components/Layout'
+import useTranslation from '../../hooks/useTranslation'
 interface Question {
   questionText: string
   maxScore: number
@@ -29,13 +30,14 @@ interface Props {
 }
 export default function Essay({ assessment, submission, user }: Props) {
   const { showToast } = useToast()
+  const { t } = useTranslation()
   const [answers, setAnswers] = useState<{ [key: number]: string }>(submission?.answers || {})
   const [submitting, setSubmitting] = useState(false)
   const [submitted, setSubmitted] = useState(!!submission)
   const handleSubmit = async () => {
     const allAnswered = assessment.questionData.every((_, idx) => answers[idx]?.trim())
     if (!allAnswered) {
-      showToast('Please Answer All Questions!', 'error')
+      showToast(t('pleaseAnswerAllQuestions'), 'error')
       return
     }
     setSubmitting(true)
@@ -53,9 +55,9 @@ export default function Essay({ assessment, submission, user }: Props) {
       if (response.status === 419) { window.location.reload(); return }
       if (!response.ok) throw new Error('Failed!')
       setSubmitted(true)
-      showToast('Essay Submitted! Instructor Will Grade It Soon!', 'success')
+      showToast(t('essaySubmitted'), 'success')
     } catch (error) {
-      showToast('Failed To Submit!', 'error')
+      showToast(t('failedToSubmit'), 'error')
     } finally {
       setSubmitting(false)
     }
@@ -74,12 +76,12 @@ export default function Essay({ assessment, submission, user }: Props) {
               <div className="text-center mb-8">
                 <CheckCircle className="w-16 h-16 text-green-500 mx-auto mb-4" />
                 <h2 className="text-2xl font-bold text-black dark:text-white mb-2">
-                  {submission?.isGraded ? 'Graded!' : 'Submitted Successfully!'}
+                  {submission?.isGraded ? t('graded') : t('submittedSuccessfully')}
                 </h2>
                 <p className="text-zinc-600 dark:text-zinc-400">
                   {submission?.isGraded
-                    ? `You Scored ${Math.round(submission.score || 0)} Points!`
-                    : 'Your Essay Has Been Submitted! The Instructor Will Grade It & Provide Feedback!'
+                    ? t('youScoredPoints', { score: Math.round(submission.score || 0) })
+                    : t('essaySubmittedWait')
                   }
                 </p>
               </div>
@@ -87,32 +89,32 @@ export default function Essay({ assessment, submission, user }: Props) {
                 <div className="space-y-6">
                   <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg p-4">
                     <div className="flex items-center gap-2 mb-2">
-                      <span className="text-green-700 dark:text-green-400 font-bold">Score:</span>
+                      <span className="text-green-700 dark:text-green-400 font-bold">{t('scoreLabel')}</span>
                       <span className="text-2xl font-bold text-green-700 dark:text-green-400">{Math.round(submission.score || 0)}</span>
                       <span className="text-green-600 dark:text-green-500">/ {Math.round(assessment.questionData.reduce((sum, q) => sum + q.maxScore, 0))}</span>
                     </div>
                     {submission.score !== null && submission.score >= assessment.passingScore && (
-                      <p className="text-green-600 dark:text-green-400 text-sm">✓ Passed!</p>
+                      <p className="text-green-600 dark:text-green-400 text-sm">{t('passedLabel')}</p>
                     )}
                     {submission.score !== null && submission.score < assessment.passingScore && (
-                      <p className="text-red-600 dark:text-red-400 text-sm">✗ Below Passing Score ({assessment.passingScore})</p>
+                      <p className="text-red-600 dark:text-red-400 text-sm">{t('belowPassingScore', { score: assessment.passingScore })}</p>
                     )}
                   </div>
                   {submission.feedback && (
                     <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
                       <div className="flex items-center gap-2 mb-2">
                         <MessageSquare className="w-5 h-5 text-blue-600 dark:text-blue-400" />
-                        <span className="font-bold text-blue-700 dark:text-blue-400">Instructor Feedback:</span>
+                        <span className="font-bold text-blue-700 dark:text-blue-400">{t('instructorFeedback')}</span>
                       </div>
                       <p className="text-blue-800 dark:text-blue-300 whitespace-pre-wrap">{submission.feedback}</p>
                     </div>
                   )}
                   <div className="space-y-4">
-                    <h3 className="font-bold text-black dark:text-white">Your Answers:</h3>
+                    <h3 className="font-bold text-black dark:text-white">{t('yourAnswers')}</h3>
                     {assessment.questionData.map((question, idx) => (
                       <div key={idx} className="p-4 bg-zinc-50 dark:bg-zinc-800 rounded-lg">
                         <p className="font-medium text-black dark:text-white mb-2">{idx + 1}. {question.questionText}</p>
-                        <p className="text-zinc-700 dark:text-zinc-300 whitespace-pre-wrap">{submission.answers[idx] || 'No answer'}</p>
+                        <p className="text-zinc-700 dark:text-zinc-300 whitespace-pre-wrap">{submission.answers[idx] || t('noAnswer')}</p>
                       </div>
                     ))}
                   </div>
@@ -120,7 +122,7 @@ export default function Essay({ assessment, submission, user }: Props) {
               )}
               <div className="mt-8 text-center">
                 <button onClick={() => router.visit(`/courses/${assessment.lesson.module.course.courseId}`)} className="px-6 py-3 border border-green-600 text-green-600 dark:border-green-500 dark:text-green-500 rounded hover:bg-green-50 dark:hover:bg-green-900/20 cursor-pointer">
-                  Back To Course
+                  {t('backToCourseSimple')}
                 </button>
               </div>
             </div>
@@ -131,13 +133,13 @@ export default function Essay({ assessment, submission, user }: Props) {
                   <div key={idx} className="space-y-3">
                     <div className="flex items-start justify-between">
                       <p className="font-medium text-black dark:text-white">{idx + 1}. {question.questionText}</p>
-                      <span className="text-sm text-zinc-500 whitespace-nowrap ml-4">{question.maxScore} Points</span>
+                      <span className="text-sm text-zinc-500 whitespace-nowrap ml-4">{question.maxScore} {t('points')}</span>
                     </div>
                     <textarea
                       value={answers[idx] || ''}
                       onChange={e => setAnswers({ ...answers, [idx]: e.target.value })}
                       className="w-full px-4 py-3 rounded-lg border border-zinc-300 dark:border-zinc-600 bg-white dark:bg-zinc-800 dark:text-white min-h-[150px]"
-                      placeholder="Write Your Answer Here..."
+                      placeholder={t('writeYourAnswerHere')}
                     />
                   </div>
                 ))}
@@ -145,7 +147,7 @@ export default function Essay({ assessment, submission, user }: Props) {
               <div className="p-6 border-t border-zinc-200 dark:border-zinc-700 flex justify-end">
                 <button onClick={handleSubmit} disabled={submitting} className="flex items-center gap-2 px-6 py-3 bg-green-600 text-white rounded hover:bg-green-700 disabled:opacity-50 cursor-pointer">
                   <Send className="w-4 h-4" />
-                  {submitting ? 'Submitting...' : 'Submit Essay'}
+                  {submitting ? t('submitting') : t('submitEssay')}
                 </button>
               </div>
             </>

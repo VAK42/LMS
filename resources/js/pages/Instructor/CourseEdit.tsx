@@ -6,6 +6,7 @@ import LessonContentEditor from '../../components/Editor/LessonContentEditor';
 import AssessmentEditor from '../../components/Editor/AssessmentEditor';
 import QuizEditor from '../../components/Editor/QuizEditor';
 import Layout from '../../components/Layout';
+import useTranslation from '../../hooks/useTranslation';
 interface Lesson {
   lessonId: number;
   lessonTitle: string;
@@ -38,6 +39,7 @@ interface Props {
 }
 export default function CourseEdit({ course, categories, user }: Props) {
   const { showToast } = useToast();
+  const { t } = useTranslation();
   const [courseData, setCourseData] = useState({
     courseTitle: course.courseTitle,
     courseDescription: course.courseDescription,
@@ -45,10 +47,10 @@ export default function CourseEdit({ course, categories, user }: Props) {
     categoryId: course.categoryId,
     courseMeta: course.courseMeta ?? {
       whatYouLearn: [
-        'Master Core Concepts & Practical Applications',
-        'Build Real-World Projects From Scratch',
-        'Develop Professional Skills For Career Growth',
-        'Get Hands-On Experience With Industry Tools',
+        t('defaultLearn1'),
+        t('defaultLearn2'),
+        t('defaultLearn3'),
+        t('defaultLearn4'),
       ]
     }
   });
@@ -85,9 +87,9 @@ export default function CourseEdit({ course, categories, user }: Props) {
       });
       if (response.status === 419) { window.location.reload(); return; }
       if (!response.ok) throw new Error('Failed To Save');
-      showToast('Course Saved Successfully!', 'success');
+      showToast(t('courseSavedSuccess'), 'success');
     } catch (error) {
-      showToast('Failed To Save Course!', 'error');
+      showToast(t('courseSaveFailed'), 'error');
     } finally {
       setSaving(false);
     }
@@ -114,9 +116,9 @@ export default function CourseEdit({ course, categories, user }: Props) {
       const newModule = await response.json();
       setModules([...modules, { ...newModule, lessons: [] }]);
       setNewModuleTitle('');
-      showToast('Module Added!', 'success');
+      showToast(t('moduleAddedSuccess'), 'success');
     } catch (error) {
-      showToast('Failed To Add Module!', 'error');
+      showToast(t('moduleAddFailed'), 'error');
     }
   };
   const handleRenameModule = async (moduleId: number) => {
@@ -136,9 +138,9 @@ export default function CourseEdit({ course, categories, user }: Props) {
       if (!response.ok) throw new Error('Failed To Rename Module!');
       setModules(modules.map(m => m.moduleId === moduleId ? { ...m, moduleTitle: editingModuleTitle } : m));
       setEditingModuleId(null);
-      showToast('Module Renamed!', 'success');
+      showToast(t('moduleRenamedSuccess'), 'success');
     } catch (error) {
-      showToast('Failed To Rename Module!', 'error');
+      showToast(t('moduleRenameFailed'), 'error');
     }
   };
   const handleMoveModule = async (moduleId: number, direction: 'up' | 'down') => {
@@ -162,11 +164,11 @@ export default function CourseEdit({ course, categories, user }: Props) {
       });
       if (response.status === 419) { window.location.reload(); return; }
     } catch (error) {
-      showToast('Failed To Reorder!', 'error');
+      showToast(t('reorderFailed'), 'error');
     }
   };
   const handleDeleteModule = async (moduleId: number) => {
-    if (!confirm('Delete This Module And All Its Lessons?')) return;
+    if (!confirm(t('deleteModuleConfirm'))) return;
     try {
       const response = await fetch(`/api/instructor/modules/${moduleId}`, {
         method: 'DELETE',
@@ -179,9 +181,9 @@ export default function CourseEdit({ course, categories, user }: Props) {
       if (response.status === 419) { window.location.reload(); return; }
       if (!response.ok) throw new Error('Failed To Delete Module!');
       setModules(modules.filter(m => m.moduleId !== moduleId));
-      showToast('Module Deleted!', 'success');
+      showToast(t('moduleDeletedSuccess'), 'success');
     } catch (error) {
-      showToast('Failed To Delete Module!', 'error');
+      showToast(t('moduleDeleteFailed'), 'error');
     }
   };
   const handleAddLesson = async (moduleId: number) => {
@@ -212,13 +214,13 @@ export default function CourseEdit({ course, categories, user }: Props) {
       setAddingLesson(null);
       setNewLessonTitle('');
       setNewLessonType('video');
-      showToast('Lesson Added!', 'success');
+      showToast(t('lessonAddedSuccess'), 'success');
     } catch (error) {
-      showToast('Failed To Add Lesson!', 'error');
+      showToast(t('lessonAddFailed'), 'error');
     }
   };
   const handleDeleteLesson = async (moduleId: number, lessonId: number) => {
-    if (!confirm('Delete This Lesson?')) return;
+    if (!confirm(t('deleteLessonConfirm'))) return;
     try {
       const response = await fetch(`/api/instructor/lessons/${lessonId}`, {
         method: 'DELETE',
@@ -233,9 +235,9 @@ export default function CourseEdit({ course, categories, user }: Props) {
       setModules(modules.map(m =>
         m.moduleId === moduleId ? { ...m, lessons: m.lessons.filter(l => l.lessonId !== lessonId) } : m
       ));
-      showToast('Lesson Deleted!', 'success');
+      showToast(t('lessonDeletedSuccess'), 'success');
     } catch (error) {
-      showToast('Failed To Delete Lesson!', 'error');
+      showToast(t('lessonDeleteFailed'), 'error');
     }
   };
   const getContentIcon = (type: string) => {
@@ -247,7 +249,7 @@ export default function CourseEdit({ course, categories, user }: Props) {
   };
   return (
     <Layout user={user}>
-      <Head title={`Edit: ${course.courseTitle}`} />
+      <Head title={t('editCourseWithTitle', { title: course.courseTitle })} />
       <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="flex items-center justify-between mb-8">
           <div className="flex items-center gap-4">
@@ -255,39 +257,39 @@ export default function CourseEdit({ course, categories, user }: Props) {
               <ChevronLeft className="w-6 h-6 text-zinc-600 dark:text-zinc-400" />
             </Link>
             <div>
-              <h1 className="text-2xl font-bold text-black dark:text-white">Edit Course</h1>
+              <h1 className="text-2xl font-bold text-black dark:text-white">{t('editCourseTitle')}</h1>
               <p className="text-zinc-600 dark:text-zinc-400">{course.courseTitle}</p>
             </div>
           </div>
           <div className="flex items-center gap-3">
             <button onClick={() => setShowQuizEditor(true)} className="flex items-center gap-2 px-4 py-3 border border-blue-500 text-blue-600 rounded-lg font-medium hover:bg-blue-900 hover:text-white cursor-pointer">
               <ClipboardList className="w-5 h-5" />
-              Quiz
+              {t('quizButton')}
             </button>
             <button onClick={() => setShowAssessmentEditor(true)} className="flex items-center gap-2 px-4 py-3 border border-orange-500 text-orange-600 rounded-lg font-medium hover:bg-orange-900 hover:text-white cursor-pointer">
               <FileEdit className="w-5 h-5" />
-              Essay
+              {t('essayButton')}
             </button>
             <button onClick={handleSaveCourse} disabled={saving} className="flex items-center gap-2 px-6 py-3 text-green-600 border-green-600 border rounded-lg font-medium hover:bg-green-900 hover:text-white disabled:opacity-50 cursor-pointer">
               <Save className="w-5 h-5" />
-              {saving ? 'Saving...' : 'Save Course'}
+              {saving ? t('saving') : t('saveCourse')}
             </button>
           </div>
         </div>
         <div className="space-y-8">
           <div className="bg-white dark:bg-zinc-900 rounded-xl border border-zinc-200 dark:border-zinc-800 p-6">
-            <h2 className="text-lg font-bold text-black dark:text-white mb-4">Course Details</h2>
+            <h2 className="text-lg font-bold text-black dark:text-white mb-4">{t('courseDetails')}</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="md:col-span-2">
-                <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2">Course Title</label>
+                <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2">{t('courseTitleLabel')}</label>
                 <input type="text" value={courseData.courseTitle} onChange={e => setCourseData({ ...courseData, courseTitle: e.target.value })} className="w-full px-4 py-3 rounded-lg border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-blue-500" />
               </div>
               <div className="md:col-span-2">
-                <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2">Description</label>
+                <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2">{t('descriptionLabel')}</label>
                 <textarea value={courseData.courseDescription} onChange={e => setCourseData({ ...courseData, courseDescription: e.target.value })} rows={4} className="w-full px-4 py-3 rounded-lg border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-blue-500" />
               </div>
               <div>
-                <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2">Category</label>
+                <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2">{t('categoryLabel')}</label>
                 <select value={courseData.categoryId} onChange={e => setCourseData({ ...courseData, categoryId: parseInt(e.target.value) })} className="w-full px-4 py-3 rounded-lg border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer">
                   {categories?.map(cat => (
                     <option key={cat.categoryId} value={cat.categoryId}>{cat.categoryName}</option>
@@ -295,15 +297,15 @@ export default function CourseEdit({ course, categories, user }: Props) {
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2">Price ($)</label>
+                <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2">{t('priceLabel')}</label>
                 <input type="number" value={courseData.simulatedPrice} onChange={e => setCourseData({ ...courseData, simulatedPrice: parseFloat(e.target.value) || 0 })} min="0" step="0.01" className="w-full px-4 py-3 rounded-lg border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-blue-500" />
               </div>
             </div>
           </div>
           <div className="bg-white dark:bg-zinc-900 rounded-xl border border-zinc-200 dark:border-zinc-800 p-6">
             <div className="flex items-center justify-between mb-6">
-              <h2 className="text-lg font-bold text-black dark:text-white">Course Content</h2>
-              <span className="text-sm text-zinc-500">{modules.length} Modules • {modules.reduce((acc, m) => acc + m.lessons.length, 0)} Lessons</span>
+              <h2 className="text-lg font-bold text-black dark:text-white">{t('courseContent')}</h2>
+              <span className="text-sm text-zinc-500">{t('modulesCount', { count: modules.length })} • {t('lessonsCount', { count: modules.reduce((acc, m) => acc + m.lessons.length, 0) })}</span>
             </div>
             <div className="space-y-4">
               {modules.map((module, mIndex) => (
@@ -331,21 +333,21 @@ export default function CourseEdit({ course, categories, user }: Props) {
                         <>
                           <GripVertical className="w-5 h-5 text-zinc-400 cursor-pointer" />
                           <span className="font-medium text-black dark:text-white cursor-pointer">{module.moduleTitle}</span>
-                          <span className="text-sm text-zinc-500">({module.lessons.length} Lessons)</span>
+                          <span className="text-sm text-zinc-500">({t('lessonsCount', { count: module.lessons.length })})</span>
                         </>
                       )}
                     </div>
                     <div className="flex items-center gap-1">
-                      <button onClick={(e) => { e.stopPropagation(); handleMoveModule(module.moduleId, 'up'); }} disabled={mIndex === 0} className="p-1.5 text-zinc-500 hover:bg-zinc-200 dark:hover:bg-zinc-700 rounded disabled:opacity-30 cursor-pointer" title="Move Up">
+                      <button onClick={(e) => { e.stopPropagation(); handleMoveModule(module.moduleId, 'up'); }} disabled={mIndex === 0} className="p-1.5 text-zinc-500 hover:bg-zinc-200 dark:hover:bg-zinc-700 rounded disabled:opacity-30 cursor-pointer" title={t('moveUp')}>
                         <ArrowUp className="w-4 h-4" />
                       </button>
-                      <button onClick={(e) => { e.stopPropagation(); handleMoveModule(module.moduleId, 'down'); }} disabled={mIndex === modules.length - 1} className="p-1.5 text-zinc-500 hover:bg-zinc-200 dark:hover:bg-zinc-700 rounded disabled:opacity-30 cursor-pointer" title="Move Down">
+                      <button onClick={(e) => { e.stopPropagation(); handleMoveModule(module.moduleId, 'down'); }} disabled={mIndex === modules.length - 1} className="p-1.5 text-zinc-500 hover:bg-zinc-200 dark:hover:bg-zinc-700 rounded disabled:opacity-30 cursor-pointer" title={t('moveDown')}>
                         <ArrowDown className="w-4 h-4" />
                       </button>
-                      <button onClick={(e) => { e.stopPropagation(); setEditingModuleId(module.moduleId); setEditingModuleTitle(module.moduleTitle); }} className="p-1.5 text-blue-500 hover:bg-blue-100 dark:hover:bg-blue-900/30 rounded cursor-pointer" title="Rename">
+                      <button onClick={(e) => { e.stopPropagation(); setEditingModuleId(module.moduleId); setEditingModuleTitle(module.moduleTitle); }} className="p-1.5 text-blue-500 hover:bg-blue-100 dark:hover:bg-blue-900/30 rounded cursor-pointer" title={t('rename')}>
                         <Pencil className="w-4 h-4" />
                       </button>
-                      <button onClick={(e) => { e.stopPropagation(); handleDeleteModule(module.moduleId); }} className="p-1.5 text-red-500 hover:bg-red-100 dark:hover:bg-red-900/30 rounded cursor-pointer" title="Delete">
+                      <button onClick={(e) => { e.stopPropagation(); handleDeleteModule(module.moduleId); }} className="p-1.5 text-red-500 hover:bg-red-100 dark:hover:bg-red-900/30 rounded cursor-pointer" title={t('delete')}>
                         <Trash2 className="w-4 h-4" />
                       </button>
                       <div onClick={() => toggleModule(module.moduleId)} className="p-1.5 cursor-pointer">
@@ -362,10 +364,10 @@ export default function CourseEdit({ course, categories, user }: Props) {
                             <span className="text-zinc-700 dark:text-zinc-300">{lesson.lessonTitle}</span>
                           </div>
                           <div className="flex items-center gap-2">
-                            <button onClick={() => setEditingLesson(lesson)} className="p-1.5 text-blue-500 hover:bg-blue-100 dark:hover:bg-blue-900/30 rounded cursor-pointer" title={lesson.contentData?.path || lesson.contentData?.html || lesson.contentData?.uploaded ? 'Edit Content' : 'Upload Content'}>
+                            <button onClick={() => setEditingLesson(lesson)} className="p-1.5 text-blue-500 hover:bg-blue-100 dark:hover:bg-blue-900/30 rounded cursor-pointer" title={lesson.contentData?.path || lesson.contentData?.html || lesson.contentData?.uploaded ? t('editContent') : t('uploadContent')}>
                               {lesson.contentData?.path || lesson.contentData?.html || lesson.contentData?.uploaded ? <Edit className="w-4 h-4" /> : <Upload className="w-4 h-4" />}
                             </button>
-                            <button onClick={() => handleDeleteLesson(module.moduleId, lesson.lessonId)} className="p-1.5 text-red-500 hover:bg-red-100 dark:hover:bg-red-900/30 rounded cursor-pointer" title="Delete">
+                            <button onClick={() => handleDeleteLesson(module.moduleId, lesson.lessonId)} className="p-1.5 text-red-500 hover:bg-red-100 dark:hover:bg-red-900/30 rounded cursor-pointer" title={t('delete')}>
                               <Trash2 className="w-4 h-4" />
                             </button>
                           </div>
@@ -373,19 +375,19 @@ export default function CourseEdit({ course, categories, user }: Props) {
                       ))}
                       {addingLesson === module.moduleId ? (
                         <div className="flex flex-wrap items-center gap-2 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
-                          <input type="text" value={newLessonTitle} onChange={e => setNewLessonTitle(e.target.value)} placeholder="Lesson Title..." className="flex-1 min-w-[200px] px-3 py-2 rounded border border-zinc-300 dark:border-zinc-600 bg-white dark:bg-zinc-800 dark:text-white text-sm" />
+                          <input type="text" value={newLessonTitle} onChange={e => setNewLessonTitle(e.target.value)} placeholder={t('lessonTitlePlaceholder')} className="flex-1 min-w-[200px] px-3 py-2 rounded border border-zinc-300 dark:border-zinc-600 bg-white dark:bg-zinc-800 dark:text-white text-sm" />
                           <select value={newLessonType} onChange={e => setNewLessonType(e.target.value)} className="px-3 py-2 rounded border border-zinc-300 dark:border-zinc-600 bg-white dark:bg-zinc-800 dark:text-white text-sm cursor-pointer">
-                            <option value="video">Video</option>
-                            <option value="text">Text</option>
-                            <option value="pdf">PDF</option>
+                            <option value="video">{t('video')}</option>
+                            <option value="text">{t('text')}</option>
+                            <option value="pdf">{t('pdf')}</option>
                           </select>
-                          <button onClick={() => handleAddLesson(module.moduleId)} className="px-4 py-2 text-green-600 border-green-600 border rounded text-sm hover:bg-green-900 hover:text-white cursor-pointer">Add</button>
-                          <button onClick={() => setAddingLesson(null)} className="px-4 py-2 bg-zinc-200 dark:bg-zinc-700 text-zinc-700 dark:text-zinc-300 rounded text-sm cursor-pointer">Cancel</button>
+                          <button onClick={() => handleAddLesson(module.moduleId)} className="px-4 py-2 text-green-600 border-green-600 border rounded text-sm hover:bg-green-900 hover:text-white cursor-pointer">{t('add')}</button>
+                          <button onClick={() => setAddingLesson(null)} className="px-4 py-2 bg-zinc-200 dark:bg-zinc-700 text-zinc-700 dark:text-zinc-300 rounded text-sm cursor-pointer">{t('cancel')}</button>
                         </div>
                       ) : (
                         <button onClick={() => setAddingLesson(module.moduleId)} className="flex items-center gap-2 w-full p-3 text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg cursor-pointer">
                           <Plus className="w-4 h-4" />
-                          Add Lesson
+                          {t('addLesson')}
                         </button>
                       )}
                     </div>
@@ -393,10 +395,10 @@ export default function CourseEdit({ course, categories, user }: Props) {
                 </div>
               ))}
               <div className="flex items-center gap-2 p-4 border-2 border-dashed border-zinc-300 dark:border-zinc-700 rounded-lg">
-                <input type="text" value={newModuleTitle} onChange={e => setNewModuleTitle(e.target.value)} placeholder="New Module Title..." className="flex-1 px-4 py-2 rounded-lg border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100" />
+                <input type="text" value={newModuleTitle} onChange={e => setNewModuleTitle(e.target.value)} placeholder={t('newModuleTitlePlaceholder')} className="flex-1 px-4 py-2 rounded-lg border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100" />
                 <button onClick={handleAddModule} disabled={!newModuleTitle.trim()} className="flex items-center gap-2 px-6 py-2 text-green-600 border-green-600 border rounded-lg font-medium hover:bg-green-900 hover:text-white disabled:opacity-50 cursor-pointer">
                   <Plus className="w-5 h-5" />
-                  Add Module
+                  {t('addModule')}
                 </button>
               </div>
             </div>

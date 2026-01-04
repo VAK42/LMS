@@ -6,6 +6,7 @@ import AdminSidebar from '../../components/Admin/Sidebar';
 import DataTable from '../../components/Admin/DataTable';
 import ModalForm from '../../components/Admin/ModalForm';
 import Layout from '../../components/Layout';
+import useTranslation from '../../hooks/useTranslation';
 interface Enrollment {
   userId: number;
   courseId: number;
@@ -34,6 +35,8 @@ interface Props {
     data: Enrollment[];
     current_page: number;
     last_page: number;
+    per_page: number;
+    total: number;
   };
   users: User[];
   courses: Course[];
@@ -42,6 +45,7 @@ interface Props {
 }
 export default function EnrollmentManagement({ enrollments, users, courses, filters, user }: Props) {
   const { showToast } = useToast();
+  const { t } = useTranslation();
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [selectedEnrollment, setSelectedEnrollment] = useState<Enrollment | null>(null);
@@ -73,10 +77,10 @@ export default function EnrollmentManagement({ enrollments, users, courses, filt
       preserveState: true,
       onSuccess: (page: any) => {
         setIsCreateModalOpen(false);
-        showToast(page.props.success || 'Enrollment Created Successfully!', 'success');
+        showToast(page.props.success || t('enrollmentCreatedSuccess'), 'success');
       },
       onError: (errors) => {
-        const errorMsg = Object.values(errors)[0] as string || 'Failed To Create Enrollment!';
+        const errorMsg = Object.values(errors)[0] as string || t('enrollmentCreateFailed');
         showToast(errorMsg, 'error');
       }
     });
@@ -90,28 +94,28 @@ export default function EnrollmentManagement({ enrollments, users, courses, filt
     };
     router.post(`/admin/enrollments/${selectedEnrollment.userId}/${selectedEnrollment.courseId}`, payload, {
       onSuccess: (page) => {
-        const successMsg = (page.props as any).success || 'Enrollment Updated Successfully!';
+        const successMsg = (page.props as any).success || t('enrollmentUpdatedSuccess');
         setIsEditModalOpen(false);
         setSelectedEnrollment(null);
         showToast(successMsg, 'success');
       },
       onError: (errors) => {
-        const errorMsg = Object.values(errors)[0] as string || 'Failed To Update Enrollment!';
+        const errorMsg = Object.values(errors)[0] as string || t('enrollmentUpdateFailed');
         showToast(errorMsg, 'error');
       }
     });
   };
   const handleDelete = (userId: number, courseId: number) => {
-    if (confirm('Are You Sure You Want To Delete This Enrollment?')) {
+    if (confirm(t('deleteEnrollmentConfirm'))) {
       router.post(`/admin/enrollments/${userId}/${courseId}`, {
         _method: 'DELETE'
       }, {
         onSuccess: (page) => {
-          const successMsg = (page.props as any).success || 'Enrollment Deleted Successfully!';
+          const successMsg = (page.props as any).success || t('enrollmentDeletedSuccess');
           showToast(successMsg, 'success');
         },
         onError: (errors) => {
-          const errorMsg = Object.values(errors)[0] as string || 'Failed To Delete Enrollment!';
+          const errorMsg = Object.values(errors)[0] as string || t('enrollmentDeleteFailed');
           showToast(errorMsg, 'error');
         }
       });
@@ -147,37 +151,37 @@ export default function EnrollmentManagement({ enrollments, users, courses, filt
       link.download = 'Enrollments.csv';
       link.click();
       URL.revokeObjectURL(url);
-      showToast('Enrollments Exported Successfully!', 'success');
+      showToast(t('enrollmentsExportedSuccess'), 'success');
     } catch (error) {
-      showToast('Failed To Export Enrollments!', 'error');
+      showToast(t('exportEnrollmentsFailed'), 'error');
     }
   };
   const columns = [
     {
       key: 'user',
-      label: 'Student',
+      label: t('student'),
       render: (_: any, row: Enrollment) => row.user.userName
     },
     {
       key: 'course',
-      label: 'Course',
+      label: t('course'),
       render: (_: any, row: Enrollment) => (
         <p className="font-medium text-black dark:text-white">{row.course.courseTitle}</p>
       )
     },
     {
       key: 'isPaid',
-      label: 'Status',
+      label: t('status'),
       sortable: true,
       render: (value: boolean) => (
         <span className={`px-2 py-1 rounded text-xs font-medium ${value ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' : 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400'}`}>
-          {value ? 'Paid' : 'Unpaid'}
+          {value ? t('paid') : t('unpaid')}
         </span>
       )
     },
     {
       key: 'completionPercent',
-      label: 'Progress',
+      label: t('progress'),
       sortable: true,
       render: (value: number) => (
         <div className="w-full">
@@ -192,13 +196,13 @@ export default function EnrollmentManagement({ enrollments, users, courses, filt
     },
     {
       key: 'enrollmentDate',
-      label: 'Enrolled',
+      label: t('enrolled'),
       sortable: true,
-      render: (value: string) => value ? new Date(value).toLocaleDateString() : 'N/A'
+      render: (value: string) => value ? new Date(value).toLocaleDateString() : t('notAvailable')
     },
     {
       key: 'actions',
-      label: 'Actions',
+      label: t('actions'),
       render: (_: any, row: Enrollment) => (
         <div className="flex items-center gap-2">
           <button onClick={() => openEditModal(row)} className="p-2 hover:bg-zinc-100 dark:hover:bg-zinc-800 cursor-pointer">
@@ -214,31 +218,31 @@ export default function EnrollmentManagement({ enrollments, users, courses, filt
   const createFormFields = [
     {
       name: 'userId',
-      label: 'Student',
+      label: t('student'),
       type: 'select' as const,
       required: true,
       options: users.map(u => ({ value: u.userId, label: u.userName }))
     },
     {
       name: 'courseId',
-      label: 'Course',
+      label: t('course'),
       type: 'select' as const,
       required: true,
       options: courses.map(c => ({ value: c.courseId, label: c.courseTitle }))
     },
     {
       name: 'isPaid',
-      label: 'Payment Status',
+      label: t('paymentStatus'),
       type: 'select' as const,
       required: true,
       options: [
-        { value: '1', label: 'Paid' },
-        { value: '0', label: 'Unpaid' }
+        { value: '1', label: t('paid') },
+        { value: '0', label: t('unpaid') }
       ]
     },
     {
       name: 'completionPercent',
-      label: 'Completion Percent',
+      label: t('completionPercent'),
       type: 'number' as const,
       required: true,
       min: 0,
@@ -248,31 +252,31 @@ export default function EnrollmentManagement({ enrollments, users, courses, filt
   const editFormFields = [
     {
       name: 'student',
-      label: 'Student',
+      label: t('student'),
       type: 'text' as const,
       required: false,
       disabled: true
     },
     {
       name: 'course',
-      label: 'Course',
+      label: t('course'),
       type: 'text' as const,
       required: false,
       disabled: true
     },
     {
       name: 'isPaid',
-      label: 'Payment Status',
+      label: t('paymentStatus'),
       type: 'select' as const,
       required: true,
       options: [
-        { value: '1', label: 'Paid' },
-        { value: '0', label: 'Unpaid' }
+        { value: '1', label: t('paid') },
+        { value: '0', label: t('unpaid') }
       ]
     },
     {
       name: 'completionPercent',
-      label: 'Completion Percent',
+      label: t('completionPercent'),
       type: 'number' as const,
       required: true,
       min: 0,
@@ -281,44 +285,44 @@ export default function EnrollmentManagement({ enrollments, users, courses, filt
   ];
   return (
     <Layout user={user}>
-      <Head title="Enrollment Management" />
+      <Head title={t('enrollmentManagement')} />
       <div className="flex bg-zinc-50 dark:bg-black min-h-screen">
         <AdminSidebar currentPath="/admin/enrollments" />
         <div className="flex-1">
           <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 py-8">
             <div className="flex items-center justify-between mb-8">
               <div>
-                <h1 className="text-4xl font-bold text-black dark:text-white mb-2">Enrollment Management</h1>
-                <p className="text-zinc-600 dark:text-zinc-400">Manage Student Enrollments & Progress</p>
+                <h1 className="text-4xl font-bold text-black dark:text-white mb-2">{t('enrollmentManagement')}</h1>
+                <p className="text-zinc-600 dark:text-zinc-400">{t('manageEnrollmentsSubtitle')}</p>
               </div>
               <button onClick={() => setIsCreateModalOpen(true)} className="flex items-center gap-2 px-6 py-3 bg-black dark:bg-white text-white dark:text-black font-medium hover:bg-zinc-800 dark:hover:bg-zinc-200 cursor-pointer">
                 <Plus className="w-5 h-5" />
-                Add Enrollment
+                {t('addEnrollment')}
               </button>
             </div>
             <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 p-6 mb-6">
               <div className="flex items-center gap-4">
                 <div className="flex-1">
-                  <input type="text" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} onKeyPress={(e) => e.key === 'Enter' && handleSearch()} placeholder="Search By Student Or Course..." className="w-full px-4 py-2 border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 focus:outline-none focus:border-black dark:focus:border-white" />
+                  <input type="text" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} onKeyPress={(e) => e.key === 'Enter' && handleSearch()} placeholder={t('searchEnrollments')} className="w-full px-4 py-2 border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 focus:outline-none focus:border-black dark:focus:border-white" />
                 </div>
                 <select value={paymentFilter} onChange={(e) => setPaymentFilter(e.target.value)} className="px-4 py-2 border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 focus:outline-none focus:border-black dark:focus:border-white cursor-pointer">
-                  <option value="">All Payment Status</option>
-                  <option value="paid">Paid</option>
-                  <option value="unpaid">Unpaid</option>
+                  <option value="">{t('allPaymentStatus')}</option>
+                  <option value="paid">{t('paid')}</option>
+                  <option value="unpaid">{t('unpaid')}</option>
                 </select>
                 <button onClick={handleSearch} className="flex items-center gap-2 px-6 py-2 bg-black dark:bg-white text-white dark:text-black hover:bg-zinc-800 dark:hover:bg-zinc-200 cursor-pointer">
                   <Filter className="w-4 h-4" />
-                  Filter
+                  {t('filter')}
                 </button>
               </div>
             </div>
             <DataTable columns={columns} data={enrollments.data.map((e, idx) => ({ ...e, _key: `${e.userId}-${e.courseId}` }))} exportable={true} keyField="_key" onExport={handleExportAllEnrollments} />
             {enrollments.last_page > 1 && (
               <div className="mt-6 flex justify-center items-center gap-2">
-                <button onClick={() => router.get('/admin/enrollments', buildPaginationParams(1), { preserveState: true, only: ['enrollments'] })} disabled={enrollments.current_page === 1} className="px-3 py-2 border border-zinc-300 dark:border-zinc-700 text-zinc-700 dark:text-zinc-300 hover:border-black dark:hover:border-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer" aria-label="First Page">
+                <button onClick={() => router.get('/admin/enrollments', buildPaginationParams(1), { preserveState: true, only: ['enrollments'] })} disabled={enrollments.current_page === 1} className="px-3 py-2 border border-zinc-300 dark:border-zinc-700 text-zinc-700 dark:text-zinc-300 hover:border-black dark:hover:border-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer" aria-label={t('firstPage')}>
                   <ChevronsLeft className="w-4 h-4" />
                 </button>
-                <button onClick={() => router.get('/admin/enrollments', buildPaginationParams(enrollments.current_page - 1), { preserveState: true, only: ['enrollments'] })} disabled={enrollments.current_page === 1} className="px-3 py-2 border border-zinc-300 dark:border-zinc-700 text-zinc-700 dark:text-zinc-300 hover:border-black dark:hover:border-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer" aria-label="Previous Page">
+                <button onClick={() => router.get('/admin/enrollments', buildPaginationParams(enrollments.current_page - 1), { preserveState: true, only: ['enrollments'] })} disabled={enrollments.current_page === 1} className="px-3 py-2 border border-zinc-300 dark:border-zinc-700 text-zinc-700 dark:text-zinc-300 hover:border-black dark:hover:border-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer" aria-label={t('previousPage')}>
                   <ChevronLeft className="w-4 h-4" />
                 </button>
                 {enrollments.current_page > 2 && (
@@ -340,16 +344,16 @@ export default function EnrollmentManagement({ enrollments, users, courses, filt
                 {enrollments.current_page < enrollments.last_page - 1 && (
                   <span className="px-2 text-zinc-500 dark:text-zinc-400">...</span>
                 )}
-                <button onClick={() => router.get('/admin/enrollments', buildPaginationParams(enrollments.current_page + 1), { preserveState: true, only: ['enrollments'] })} disabled={enrollments.current_page === enrollments.last_page} className="px-3 py-2 border border-zinc-300 dark:border-zinc-700 text-zinc-700 dark:text-zinc-300 hover:border-black dark:hover:border-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer" aria-label="Next Page">
+                <button onClick={() => router.get('/admin/enrollments', buildPaginationParams(enrollments.current_page + 1), { preserveState: true, only: ['enrollments'] })} disabled={enrollments.current_page === enrollments.last_page} className="px-3 py-2 border border-zinc-300 dark:border-zinc-700 text-zinc-700 dark:text-zinc-300 hover:border-black dark:hover:border-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer" aria-label={t('nextPage')}>
                   <ChevronRight className="w-4 h-4" />
                 </button>
-                <button onClick={() => router.get('/admin/enrollments', buildPaginationParams(enrollments.last_page), { preserveState: true, only: ['enrollments'] })} disabled={enrollments.current_page === enrollments.last_page} className="px-3 py-2 border border-zinc-300 dark:border-zinc-700 text-zinc-700 dark:text-zinc-300 hover:border-black dark:hover:border-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer" aria-label="Last Page">
+                <button onClick={() => router.get('/admin/enrollments', buildPaginationParams(enrollments.last_page), { preserveState: true, only: ['enrollments'] })} disabled={enrollments.current_page === enrollments.last_page} className="px-3 py-2 border border-zinc-300 dark:border-zinc-700 text-zinc-700 dark:text-zinc-300 hover:border-black dark:hover:border-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer" aria-label={t('lastPage')}>
                   <ChevronsRight className="w-4 h-4" />
                 </button>
               </div>
             )}
-            <ModalForm isOpen={isCreateModalOpen} onClose={() => setIsCreateModalOpen(false)} onSubmit={handleCreate} title="Create New Enrollment" fields={createFormFields} submitLabel="Create Enrollment" />
-            <ModalForm isOpen={isEditModalOpen} onClose={() => { setIsEditModalOpen(false); setSelectedEnrollment(null); }} onSubmit={handleEdit} title="Edit Enrollment" fields={editFormFields} initialData={selectedEnrollment ? { student: selectedEnrollment.user.userName, course: selectedEnrollment.course.courseTitle, isPaid: selectedEnrollment.isPaid ? '1' : '0', completionPercent: selectedEnrollment.completionPercent } : {}} submitLabel="Update Enrollment" />
+            <ModalForm isOpen={isCreateModalOpen} onClose={() => setIsCreateModalOpen(false)} onSubmit={handleCreate} title={t('createNewEnrollment')} fields={createFormFields} submitLabel={t('createEnrollment')} />
+            <ModalForm isOpen={isEditModalOpen} onClose={() => { setIsEditModalOpen(false); setSelectedEnrollment(null); }} onSubmit={handleEdit} title={t('editEnrollment')} fields={editFormFields} initialData={selectedEnrollment ? { student: selectedEnrollment.user.userName, course: selectedEnrollment.course.courseTitle, isPaid: selectedEnrollment.isPaid ? '1' : '0', completionPercent: selectedEnrollment.completionPercent } : {}} submitLabel={t('updateEnrollment')} />
           </div>
         </div>
       </div>

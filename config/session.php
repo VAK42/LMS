@@ -1,7 +1,7 @@
 <?php
 use Illuminate\Support\Str;
 return [
-  'driver' => env('sessionDriver', 'database'),
+  'driver' => env('sessionDriver', 'file'),
   'lifetime' => (int) env('sessionLifetime', 120),
   'expire_on_close' => env('sessionExpireOnClose', true),
   'encrypt' => env('sessionEncrypt', false),

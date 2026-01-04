@@ -1,17 +1,10 @@
 <?php
 return [
-  'default' => env('cacheStore', 'database'),
+  'default' => env('cacheStore', 'file'),
   'stores' => [
     'array' => [
       'driver' => 'array',
       'serialize' => false,
-    ],
-    'database' => [
-      'driver' => 'database',
-      'connection' => env('dbCacheConnection'),
-      'table' => env('dbCacheTable', 'cache'),
-      'lock_connection' => env('dbCacheLockConnection'),
-      'lock_table' => env('dbCacheLockTable'),
     ],
     'file' => [
       'driver' => 'file',

@@ -137,3 +137,4 @@ Route::prefix('admin')->middleware(['auth', 'role:admin'])->group(function () {
   Route::post('/payouts/{payoutId}/process', [Admin\PayoutController::class, 'process']);
   Route::post('/payouts/{payoutId}/cancel', [Admin\PayoutController::class, 'cancel']);
 });
+Route::post('/language', [Shared\LanguageController::class, 'update'])->name('language.update');

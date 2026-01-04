@@ -1,6 +1,7 @@
 import { ArrowLeft, Clock, Send, User } from 'lucide-react';
 import { Head, useForm, Link } from '@inertiajs/react';
 import Layout from '../../components/Layout';
+import useTranslation from '../../hooks/useTranslation';
 interface Reply {
   replyId: number;
   message: string;
@@ -24,6 +25,7 @@ interface Props {
   user: any;
 }
 export default function SupportTicketDetail({ ticket, user }: Props) {
+  const { t } = useTranslation();
   const { data, setData, post, processing, reset } = useForm({
     message: '',
   });
@@ -51,7 +53,7 @@ export default function SupportTicketDetail({ ticket, user }: Props) {
           className="inline-flex items-center gap-2 text-zinc-600 dark:text-zinc-400 hover:text-black dark:hover:text-white transition-colors mb-8"
         >
           <ArrowLeft className="w-4 h-4" />
-          Back To Tickets
+          {t('backToTickets')}
         </Link>
         <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 p-8 mb-8">
           <div className="flex items-start justify-between mb-6">
@@ -63,7 +65,7 @@ export default function SupportTicketDetail({ ticket, user }: Props) {
                   {new Date(ticket.createdAt).toLocaleDateString()}
                 </span>
                 <span className={`px-3 py-1 text-xs font-medium ${getStatusStyle(ticket.status)}`}>
-                  {ticket.status.replace('_', ' ').toUpperCase()}
+                  {t(ticket.status)}
                 </span>
               </div>
             </div>
@@ -73,7 +75,7 @@ export default function SupportTicketDetail({ ticket, user }: Props) {
           </div>
         </div>
         <div className="space-y-4 mb-8">
-          <h2 className="text-xl font-serif font-bold text-black dark:text-white">Replies ({ticket.replies?.length || 0})</h2>
+          <h2 className="text-xl font-serif font-bold text-black dark:text-white">{t('repliesHeader', { count: ticket.replies?.length || 0 })}</h2>
           {ticket.replies && ticket.replies.length > 0 ? (
             ticket.replies.map((reply) => (
               <div
@@ -83,7 +85,7 @@ export default function SupportTicketDetail({ ticket, user }: Props) {
                 <div className="flex items-center gap-2 mb-3">
                   <User className="w-4 h-4 text-zinc-500" />
                   <span className="font-medium text-black dark:text-white">
-                    {reply.isStaffReply ? 'Support Staff' : reply.user?.name || 'You'}
+                    {reply.isStaffReply ? t('supportStaff') : reply.user?.name || t('you')}
                   </span>
                   <span className="text-xs text-zinc-500">
                     {new Date(reply.createdAt).toLocaleString()}
@@ -93,18 +95,18 @@ export default function SupportTicketDetail({ ticket, user }: Props) {
               </div>
             ))
           ) : (
-            <p className="text-zinc-500 dark:text-zinc-400">No Replies Yet</p>
+            <p className="text-zinc-500 dark:text-zinc-400">{t('noRepliesYet')}</p>
           )}
         </div>
         {ticket.status !== 'closed' && (
           <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 p-6">
-            <h3 className="text-lg font-serif font-bold text-black dark:text-white mb-4">Add Reply</h3>
+            <h3 className="text-lg font-serif font-bold text-black dark:text-white mb-4">{t('addReply')}</h3>
             <form onSubmit={handleSubmit} className="space-y-4">
               <textarea
                 value={data.message}
                 onChange={(e) => setData('message', e.target.value)}
                 rows={4}
-                placeholder="Type Your Message Here..."
+                placeholder={t('typeYourMessage')}
                 className="w-full px-4 py-3 border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-black dark:text-white focus:outline-none focus:border-black dark:focus:border-white resize-none"
                 required
               />
@@ -114,7 +116,7 @@ export default function SupportTicketDetail({ ticket, user }: Props) {
                 className="flex items-center gap-2 px-6 py-3 bg-black dark:bg-white text-white dark:text-black font-medium hover:bg-zinc-800 dark:hover:bg-zinc-200 transition-colors cursor-pointer disabled:opacity-50"
               >
                 <Send className="w-4 h-4" />
-                Send Reply
+                {t('sendReply')}
               </button>
             </form>
           </div>

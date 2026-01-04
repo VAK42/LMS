@@ -6,6 +6,7 @@ import AdminSidebar from '../../components/Admin/Sidebar';
 import DataTable from '../../components/Admin/DataTable';
 import ModalForm from '../../components/Admin/ModalForm';
 import Layout from '../../components/Layout';
+import useTranslation from '../../hooks/useTranslation';
 interface Certificate {
   certificateId: number;
   user: { userId: number; userName: string };
@@ -30,6 +31,7 @@ interface Props {
 }
 export default function CertificateManagement({ certificates, users, courses, filters, user }: Props) {
   const { showToast } = useToast();
+  const { t } = useTranslation();
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [selectedCertificate, setSelectedCertificate] = useState<Certificate | null>(null);
@@ -53,12 +55,12 @@ export default function CertificateManagement({ certificates, users, courses, fi
   const handleCreate = (data: Record<string, any>) => {
     router.post('/admin/certificates', data, {
       onSuccess: (page) => {
-        const successMsg = (page.props as any).success || 'Certificate Created Successfully!';
+        const successMsg = (page.props as any).success || t('certificateCreatedSuccess');
         setIsCreateModalOpen(false);
         showToast(successMsg, 'success');
       },
       onError: (errors) => {
-        const errorMsg = Object.values(errors)[0] as string || 'Failed To Create Certificate!';
+        const errorMsg = Object.values(errors)[0] as string || t('certificateCreateFailed');
         showToast(errorMsg, 'error');
       }
     });
@@ -67,28 +69,28 @@ export default function CertificateManagement({ certificates, users, courses, fi
     if (!selectedCertificate) return;
     router.post(`/admin/certificates/${selectedCertificate.certificateId}`, { ...data, _method: 'PUT' }, {
       onSuccess: (page) => {
-        const successMsg = (page.props as any).success || 'Certificate Updated Successfully!';
+        const successMsg = (page.props as any).success || t('certificateUpdatedSuccess');
         setIsEditModalOpen(false);
         setSelectedCertificate(null);
         showToast(successMsg, 'success');
       },
       onError: (errors) => {
-        const errorMsg = Object.values(errors)[0] as string || 'Failed To Update Certificate!';
+        const errorMsg = Object.values(errors)[0] as string || t('certificateUpdateFailed');
         showToast(errorMsg, 'error');
       }
     });
   };
   const handleDelete = (certificateId: number) => {
-    if (confirm('Are You Sure You Want To Delete This Certificate?')) {
+    if (confirm(t('deleteCertificateConfirm'))) {
       router.post(`/admin/certificates/${certificateId}`, {
         _method: 'DELETE'
       }, {
         onSuccess: (page) => {
-          const successMsg = (page.props as any).success || 'Certificate Deleted Successfully!';
+          const successMsg = (page.props as any).success || t('certificateDeletedSuccess');
           showToast(successMsg, 'success');
         },
         onError: (errors) => {
-          const errorMsg = Object.values(errors)[0] as string || 'Failed To Delete Certificate!';
+          const errorMsg = Object.values(errors)[0] as string || t('certificateDeleteFailed');
           showToast(errorMsg, 'error');
         }
       });
@@ -115,15 +117,15 @@ export default function CertificateManagement({ certificates, users, courses, fi
       link.download = 'Certificates.csv';
       link.click();
       URL.revokeObjectURL(url);
-      showToast('Certificates Exported Successfully!', 'success');
+      showToast(t('certificatesExportedSuccess'), 'success');
     } catch (error) {
-      showToast('Failed To Export Certificates!', 'error');
+      showToast(t('exportCertificatesFailed'), 'error');
     }
   };
   const columns = [
     {
       key: 'certificateId',
-      label: 'ID',
+      label: t('id'),
       render: (value: number) => (
         <div className="flex items-center gap-2">
           <Award className="w-4 h-4 text-yellow-600" />
@@ -133,19 +135,19 @@ export default function CertificateManagement({ certificates, users, courses, fi
     },
     {
       key: 'user',
-      label: 'Student',
+      label: t('student'),
       render: (_: any, row: Certificate) => row.user.userName
     },
     {
       key: 'course',
-      label: 'Course',
+      label: t('course'),
       render: (_: any, row: Certificate) => (
         <p className="font-medium text-black dark:text-white">{row.course.courseTitle}</p>
       )
     },
     {
       key: 'issuedAt',
-      label: 'Issued Date',
+      label: t('issuedDate'),
       sortable: true,
       render: (value: string) => (
         <div className="flex items-center gap-2">
@@ -156,28 +158,28 @@ export default function CertificateManagement({ certificates, users, courses, fi
     },
     {
       key: 'certificateUrl',
-      label: 'Certificate',
+      label: t('certificate'),
       render: (value: string | null) => {
         if (!value) {
-          return <span className="text-zinc-500">Not Generated</span>;
+          return <span className="text-zinc-500">{t('notGenerated')}</span>;
         }
         return (
           <a href={value} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-blue-600 hover:text-blue-700 dark:text-blue-400">
             <Download className="w-4 h-4" />
-            Download
+            {t('download')}
           </a>
         );
       }
     },
     {
       key: 'actions',
-      label: 'Actions',
+      label: t('actions'),
       render: (_: any, row: Certificate) => (
         <div className="flex items-center gap-2">
-          <button onClick={() => openEditModal(row)} title="Edit" className="p-2 hover:bg-zinc-100 dark:hover:bg-zinc-800 cursor-pointer">
+          <button onClick={() => openEditModal(row)} title={t('editUser')} className="p-2 hover:bg-zinc-100 dark:hover:bg-zinc-800 cursor-pointer">
             <Edit className="w-4 h-4" />
           </button>
-          <button onClick={() => handleDelete(row.certificateId)} title="Delete" className="p-2 hover:bg-zinc-100 dark:hover:bg-zinc-800 text-red-600 cursor-pointer">
+          <button onClick={() => handleDelete(row.certificateId)} title={t('delete')} className="p-2 hover:bg-zinc-100 dark:hover:bg-zinc-800 text-red-600 cursor-pointer">
             <Trash2 className="w-4 h-4" />
           </button>
         </div>
@@ -187,57 +189,57 @@ export default function CertificateManagement({ certificates, users, courses, fi
   const formFields = [
     {
       name: 'userId',
-      label: 'User',
+      label: t('user'),
       type: 'select' as const,
       required: true,
       options: users.map(u => ({ value: u.userId.toString(), label: `${u.userName} (${u.userEmail})` }))
     },
     {
       name: 'courseId',
-      label: 'Course',
+      label: t('course'),
       type: 'select' as const,
       required: true,
       options: courses.map(c => ({ value: c.courseId.toString(), label: c.courseTitle }))
     },
-    { name: 'uniqueCode', label: 'Unique Code', type: 'text' as const, required: true },
-    { name: 'pdfPath', label: 'PDF Path', type: 'text' as const, required: false },
-    { name: 'issuedAt', label: 'Issued Date', type: 'date' as const, required: true }
+    { name: 'uniqueCode', label: t('uniqueCode'), type: 'text' as const, required: true },
+    { name: 'pdfPath', label: t('pdfPath'), type: 'text' as const, required: false },
+    { name: 'issuedAt', label: t('issuedDate'), type: 'date' as const, required: true }
   ];
   return (
     <Layout user={user}>
-      <Head title="Certificate Management" />
+      <Head title={t('certificateManagement')} />
       <div className="flex bg-zinc-50 dark:bg-black min-h-screen">
         <AdminSidebar currentPath="/admin/certificates" />
         <div className="flex-1">
           <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 py-8">
             <div className="mb-8 flex justify-between items-center">
               <div>
-                <h1 className="text-4xl font-bold text-black dark:text-white mb-2">Certificate Management</h1>
-                <p className="text-zinc-600 dark:text-zinc-400">View & Manage Course Completion Certificates</p>
+                <h1 className="text-4xl font-bold text-black dark:text-white mb-2">{t('certificateManagement')}</h1>
+                <p className="text-zinc-600 dark:text-zinc-400">{t('manageCertificatesSubtitle')}</p>
               </div>
               <button onClick={() => setIsCreateModalOpen(true)} className="flex items-center gap-2 px-6 py-3 bg-black dark:bg-white text-white dark:text-black hover:bg-zinc-800 dark:hover:bg-zinc-200 font-medium cursor-pointer">
                 <Award className="w-5 h-5" />
-                Create Certificate
+                {t('createCertificate')}
               </button>
             </div>
             <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 p-6 mb-6">
               <div className="flex items-center gap-4">
                 <div className="flex-1">
-                  <input type="text" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} onKeyPress={(e) => e.key === 'Enter' && handleSearch()} placeholder="Search By Student Or Course..." className="w-full px-4 py-2 border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 focus:outline-none focus:border-black dark:focus:border-white" />
+                  <input type="text" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} onKeyPress={(e) => e.key === 'Enter' && handleSearch()} placeholder={t('searchCertificates')} className="w-full px-4 py-2 border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 focus:outline-none focus:border-black dark:focus:border-white" />
                 </div>
                 <button onClick={handleSearch} className="flex items-center gap-2 px-6 py-2 bg-black dark:bg-white text-white dark:text-black hover:bg-zinc-800 dark:hover:bg-zinc-200 cursor-pointer">
                   <Filter className="w-4 h-4" />
-                  Filter
+                  {t('filter')}
                 </button>
               </div>
             </div>
             <DataTable columns={columns} data={certificates.data} exportable={true} keyField="certificateId" onExport={handleExportAllCertificates} />
             {certificates.last_page > 1 && (
               <div className="mt-6 flex justify-center items-center gap-2">
-                <button onClick={() => router.get('/admin/certificates', buildPaginationParams(1), { preserveState: true, only: ['certificates'] })} disabled={certificates.current_page === 1} className="px-3 py-2 border border-zinc-300 dark:border-zinc-700 text-zinc-700 dark:text-zinc-300 hover:border-black dark:hover:border-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer" aria-label="First Page">
+                <button onClick={() => router.get('/admin/certificates', buildPaginationParams(1), { preserveState: true, only: ['certificates'] })} disabled={certificates.current_page === 1} className="px-3 py-2 border border-zinc-300 dark:border-zinc-700 text-zinc-700 dark:text-zinc-300 hover:border-black dark:hover:border-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer" aria-label={t('firstPage')}>
                   <ChevronsLeft className="w-4 h-4" />
                 </button>
-                <button onClick={() => router.get('/admin/certificates', buildPaginationParams(certificates.current_page - 1), { preserveState: true, only: ['certificates'] })} disabled={certificates.current_page === 1} className="px-3 py-2 border border-zinc-300 dark:border-zinc-700 text-zinc-700 dark:text-zinc-300 hover:border-black dark:hover:border-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer" aria-label="Previous Page">
+                <button onClick={() => router.get('/admin/certificates', buildPaginationParams(certificates.current_page - 1), { preserveState: true, only: ['certificates'] })} disabled={certificates.current_page === 1} className="px-3 py-2 border border-zinc-300 dark:border-zinc-700 text-zinc-700 dark:text-zinc-300 hover:border-black dark:hover:border-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer" aria-label={t('previousPage')}>
                   <ChevronLeft className="w-4 h-4" />
                 </button>
                 {certificates.current_page > 2 && (
@@ -259,16 +261,16 @@ export default function CertificateManagement({ certificates, users, courses, fi
                 {certificates.current_page < certificates.last_page - 1 && (
                   <span className="px-2 text-zinc-500 dark:text-zinc-400">...</span>
                 )}
-                <button onClick={() => router.get('/admin/certificates', buildPaginationParams(certificates.current_page + 1), { preserveState: true, only: ['certificates'] })} disabled={certificates.current_page === certificates.last_page} className="px-3 py-2 border border-zinc-300 dark:border-zinc-700 text-zinc-700 dark:text-zinc-300 hover:border-black dark:hover:border-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer" aria-label="Next Page">
+                <button onClick={() => router.get('/admin/certificates', buildPaginationParams(certificates.current_page + 1), { preserveState: true, only: ['certificates'] })} disabled={certificates.current_page === certificates.last_page} className="px-3 py-2 border border-zinc-300 dark:border-zinc-700 text-zinc-700 dark:text-zinc-300 hover:border-black dark:hover:border-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer" aria-label={t('nextPage')}>
                   <ChevronRight className="w-4 h-4" />
                 </button>
-                <button onClick={() => router.get('/admin/certificates', buildPaginationParams(certificates.last_page), { preserveState: true, only: ['certificates'] })} disabled={certificates.current_page === certificates.last_page} className="px-3 py-2 border border-zinc-300 dark:border-zinc-700 text-zinc-700 dark:text-zinc-300 hover:border-black dark:hover:border-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer" aria-label="Last Page">
+                <button onClick={() => router.get('/admin/certificates', buildPaginationParams(certificates.last_page), { preserveState: true, only: ['certificates'] })} disabled={certificates.current_page === certificates.last_page} className="px-3 py-2 border border-zinc-300 dark:border-zinc-700 text-zinc-700 dark:text-zinc-300 hover:border-black dark:hover:border-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer" aria-label={t('lastPage')}>
                   <ChevronsRight className="w-4 h-4" />
                 </button>
               </div>
             )}
-            <ModalForm isOpen={isCreateModalOpen} onClose={() => setIsCreateModalOpen(false)} onSubmit={handleCreate} title="Create New Certificate" fields={formFields} submitLabel="Create Certificate" />
-            <ModalForm isOpen={isEditModalOpen} onClose={() => { setIsEditModalOpen(false); setSelectedCertificate(null); }} onSubmit={handleEdit} title={`Edit Certificate #${selectedCertificate?.certificateId || ''}`} fields={formFields} initialData={selectedCertificate ? { userId: selectedCertificate.user.userId.toString(), courseId: selectedCertificate.course.courseId.toString(), uniqueCode: selectedCertificate.certificateUrl || '', pdfPath: selectedCertificate.certificateUrl || '', issuedAt: new Date(selectedCertificate.issuedAt).toISOString().split('T')[0] } : {}} submitLabel="Update Certificate" />
+            <ModalForm isOpen={isCreateModalOpen} onClose={() => setIsCreateModalOpen(false)} onSubmit={handleCreate} title={t('createNewCertificate')} fields={formFields} submitLabel={t('createCertificate')} />
+            <ModalForm isOpen={isEditModalOpen} onClose={() => { setIsEditModalOpen(false); setSelectedCertificate(null); }} onSubmit={handleEdit} title={t('editCertificateWithId', { id: selectedCertificate?.certificateId?.toString() || '' })} fields={formFields} initialData={selectedCertificate ? { userId: selectedCertificate.user.userId.toString(), courseId: selectedCertificate.course.courseId.toString(), uniqueCode: selectedCertificate.certificateUrl || '', pdfPath: selectedCertificate.certificateUrl || '', issuedAt: new Date(selectedCertificate.issuedAt).toISOString().split('T')[0] } : {}} submitLabel={t('updateCertificate')} />
           </div>
         </div>
       </div>

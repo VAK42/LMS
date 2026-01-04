@@ -2,6 +2,7 @@ import { MessageSquare, Plus, Clock, ChevronRight } from 'lucide-react';
 import { Head, useForm, Link } from '@inertiajs/react';
 import { useState } from 'react';
 import Layout from '../../components/Layout';
+import useTranslation from '../../hooks/useTranslation';
 interface Ticket {
   ticketId: number;
   subject: string;
@@ -15,6 +16,7 @@ interface Props {
   user: any;
 }
 export default function SupportTickets({ tickets, user }: Props) {
+  const { t } = useTranslation();
   const [showNewTicket, setShowNewTicket] = useState(false);
   const { data, setData, post, processing } = useForm({
     subject: '',
@@ -50,27 +52,27 @@ export default function SupportTickets({ tickets, user }: Props) {
   };
   return (
     <Layout user={user}>
-      <Head title="Support Tickets" />
+      <Head title={t('supportTickets')} />
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="flex items-center justify-between mb-8">
           <div>
-            <h1 className="text-4xl font-serif font-bold text-black dark:text-white mb-2">Support Tickets</h1>
-            <p className="text-zinc-600 dark:text-zinc-400">Get Help From Our Support Team</p>
+            <h1 className="text-4xl font-serif font-bold text-black dark:text-white mb-2">{t('supportTickets')}</h1>
+            <p className="text-zinc-600 dark:text-zinc-400">{t('getHelp')}</p>
           </div>
           <button
             onClick={() => setShowNewTicket(!showNewTicket)}
             className="flex items-center gap-2 px-6 py-3 bg-black dark:bg-white text-white dark:text-black font-medium hover:bg-zinc-800 dark:hover:bg-zinc-200 transition-colors cursor-pointer"
           >
             <Plus className="w-5 h-5" />
-            New Ticket
+            {t('newTicket')}
           </button>
         </div>
         {showNewTicket && (
           <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 p-8 mb-8">
-            <h2 className="text-2xl font-serif font-bold text-black dark:text-white mb-6">Create New Ticket</h2>
+            <h2 className="text-2xl font-serif font-bold text-black dark:text-white mb-6">{t('createNewTicket')}</h2>
             <form onSubmit={handleSubmit} className="space-y-6">
               <div>
-                <label className="block text-sm font-medium text-black dark:text-white mb-2">Subject</label>
+                <label className="block text-sm font-medium text-black dark:text-white mb-2">{t('subject')}</label>
                 <input
                   type="text"
                   value={data.subject}
@@ -80,20 +82,20 @@ export default function SupportTickets({ tickets, user }: Props) {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-black dark:text-white mb-2">Priority</label>
+                <label className="block text-sm font-medium text-black dark:text-white mb-2">{t('priority')}</label>
                 <select
                   value={data.priority}
                   onChange={(e) => setData('priority', e.target.value)}
                   className="w-full px-4 py-3 border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-black dark:text-white focus:outline-none focus:border-black dark:focus:border-white"
                 >
-                  <option value="low">Low</option>
-                  <option value="medium">Medium</option>
-                  <option value="high">High</option>
-                  <option value="urgent">Urgent</option>
+                  <option value="low">{t('low')}</option>
+                  <option value="medium">{t('medium')}</option>
+                  <option value="high">{t('high')}</option>
+                  <option value="urgent">{t('urgent')}</option>
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-medium text-black dark:text-white mb-2">Message</label>
+                <label className="block text-sm font-medium text-black dark:text-white mb-2">{t('message')}</label>
                 <textarea
                   value={data.message}
                   onChange={(e) => setData('message', e.target.value)}
@@ -108,14 +110,14 @@ export default function SupportTickets({ tickets, user }: Props) {
                   disabled={processing}
                   className="px-8 py-3 bg-black dark:bg-white text-white dark:text-black font-medium hover:bg-zinc-800 dark:hover:bg-zinc-200 transition-colors cursor-pointer disabled:opacity-50"
                 >
-                  Submit Ticket
+                  {t('submitTicket')}
                 </button>
                 <button
                   type="button"
                   onClick={() => setShowNewTicket(false)}
                   className="px-8 py-3 border border-zinc-300 dark:border-zinc-600 text-black dark:text-white hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors cursor-pointer"
                 >
-                  Cancel
+                  {t('cancel')}
                 </button>
               </div>
             </form>
@@ -137,16 +139,16 @@ export default function SupportTickets({ tickets, user }: Props) {
                       {new Date(ticket.createdAt).toLocaleDateString()}
                     </span>
                     <span className={`px-3 py-1 text-xs font-medium ${getStatusStyle(ticket.status)}`}>
-                      {ticket.status.replace('_', ' ').toUpperCase()}
+                      {t(ticket.status)}
                     </span>
                     <span className={`text-xs ${getPriorityStyle(ticket.priority)}`}>
-                      {ticket.priority.toUpperCase()}
+                      {t(ticket.priority)}
                     </span>
                   </div>
                 </div>
                 <div className="flex items-center gap-4">
                   <span className="text-sm text-zinc-600 dark:text-zinc-400">
-                    {ticket.replies?.length || 0} Replies
+                    {t('repliesCount', { count: ticket.replies?.length || 0 })}
                   </span>
                   <ChevronRight className="w-5 h-5 text-zinc-400 group-hover:text-black dark:group-hover:text-white transition-colors" />
                 </div>
@@ -156,8 +158,8 @@ export default function SupportTickets({ tickets, user }: Props) {
           {tickets.length === 0 && (
             <div className="text-center py-20 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800">
               <MessageSquare className="w-16 h-16 mx-auto text-zinc-300 dark:text-zinc-600 mb-4" />
-              <h3 className="text-xl font-serif font-bold text-black dark:text-white mb-2">No Support Tickets Yet</h3>
-              <p className="text-zinc-600 dark:text-zinc-400">Create A Ticket To Get Help From Our Team</p>
+              <h3 className="text-xl font-serif font-bold text-black dark:text-white mb-2">{t('noSupportTickets')}</h3>
+              <p className="text-zinc-600 dark:text-zinc-400">{t('createTicketToGetHelp')}</p>
             </div>
           )}
         </div>

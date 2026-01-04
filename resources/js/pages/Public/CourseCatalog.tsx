@@ -2,6 +2,7 @@ import { Search, Users, Star, BookOpen, ChevronLeft, ChevronRight, ChevronsLeft,
 import { Head, Link, router } from '@inertiajs/react';
 import { useState } from 'react';
 import Layout from '../../components/Layout';
+import useTranslation from '../../hooks/useTranslation';
 interface Course {
   courseId: number;
   courseTitle: string;
@@ -34,6 +35,7 @@ interface CourseCatalogProps {
   user?: any;
 }
 export default function CourseCatalog({ courses, categories, filters, user }: CourseCatalogProps) {
+  const { t } = useTranslation();
   const [search, setSearch] = useState(filters?.search || '');
   const [selectedCategory, setSelectedCategory] = useState(filters?.category || '');
   const handleSearch = () => {
@@ -56,14 +58,14 @@ export default function CourseCatalog({ courses, categories, filters, user }: Co
   };
   return (
     <Layout user={user}>
-      <Head title="Browse Courses" />
+      <Head title={t('browseCourses')} />
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="mb-12">
           <h1 className="text-4xl md:text-5xl font-serif font-bold text-black dark:text-white mb-4">
-            Explore Courses
+            {t('exploreCourses')}
           </h1>
           <p className="text-lg text-zinc-600 dark:text-zinc-400">
-            Discover Your Next Learning Adventure From Our Extensive Catalog
+            {t('catalogSubtitle')}
           </p>
         </div>
         <div className="mb-8 space-y-4">
@@ -75,7 +77,7 @@ export default function CourseCatalog({ courses, categories, filters, user }: Co
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
-                placeholder="Search Courses..."
+                placeholder={t('searchPlaceholder')}
                 className="w-full pl-12 pr-4 py-3 border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 focus:outline-none focus:border-black dark:focus:border-white transition-colors"
               />
             </div>
@@ -84,7 +86,7 @@ export default function CourseCatalog({ courses, categories, filters, user }: Co
               onChange={(e) => setSelectedCategory(e.target.value)}
               className="px-4 py-3 border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 focus:outline-none focus:border-black dark:focus:border-white transition-colors cursor-pointer"
             >
-              <option value="">All Categories</option>
+              <option value="">{t('allCategories')}</option>
               {categories.map((cat) => (
                 <option key={cat.categoryId} value={cat.categoryId}>
                   {cat.categoryName}
@@ -95,14 +97,14 @@ export default function CourseCatalog({ courses, categories, filters, user }: Co
               onClick={handleSearch}
               className="px-6 py-3 bg-black dark:bg-white text-white dark:text-black font-medium hover:bg-zinc-800 dark:hover:bg-zinc-200 transition-colors cursor-pointer"
             >
-              Search
+              {t('searchButton')}
             </button>
           </div>
         </div>
         {courses.data.length === 0 ? (
           <div className="text-center py-20">
             <p className="text-lg text-zinc-600 dark:text-zinc-400">
-              No Courses Found! Try Adjusting Your Filters!
+              {t('noCoursesFound')}
             </p>
           </div>
         ) : (
@@ -145,10 +147,10 @@ export default function CourseCatalog({ courses, categories, filters, user }: Co
                     </div>
                     <div className="flex items-center justify-between pt-4 border-t border-zinc-200 dark:border-zinc-800">
                       <div className="text-sm text-zinc-600 dark:text-zinc-400">
-                        By {course.instructor.userName}
+                        {t('by')} {course.instructor.userName}
                       </div>
                       <div className="text-xl font-serif font-bold text-black dark:text-white">
-                        {!course.simulatedPrice || course.simulatedPrice <= 0 ? 'Free' : `$${course.simulatedPrice}`}
+                        {!course.simulatedPrice || course.simulatedPrice <= 0 ? t('free') : `$${course.simulatedPrice}`}
                       </div>
                     </div>
                   </div>
@@ -163,7 +165,7 @@ export default function CourseCatalog({ courses, categories, filters, user }: Co
               onClick={() => router.get('/courses', buildPaginationParams(1))}
               disabled={courses.current_page === 1}
               className="px-3 py-2 border border-zinc-300 dark:border-zinc-700 text-zinc-700 dark:text-zinc-300 hover:border-black dark:hover:border-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
-              aria-label="First Page"
+              aria-label={t('firstPage')}
             >
               <ChevronsLeft className="w-4 h-4" />
             </button>
@@ -171,7 +173,7 @@ export default function CourseCatalog({ courses, categories, filters, user }: Co
               onClick={() => router.get('/courses', buildPaginationParams(courses.current_page - 1))}
               disabled={courses.current_page === 1}
               className="px-3 py-2 border border-zinc-300 dark:border-zinc-700 text-zinc-700 dark:text-zinc-300 hover:border-black dark:hover:border-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
-              aria-label="Previous Page"
+              aria-label={t('previousPage')}
             >
               <ChevronLeft className="w-4 h-4" />
             </button>
@@ -206,7 +208,7 @@ export default function CourseCatalog({ courses, categories, filters, user }: Co
               onClick={() => router.get('/courses', buildPaginationParams(courses.current_page + 1))}
               disabled={courses.current_page === courses.last_page}
               className="px-3 py-2 border border-zinc-300 dark:border-zinc-700 text-zinc-700 dark:text-zinc-300 hover:border-black dark:hover:border-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
-              aria-label="Next Page"
+              aria-label={t('nextPage')}
             >
               <ChevronRight className="w-4 h-4" />
             </button>
@@ -214,7 +216,7 @@ export default function CourseCatalog({ courses, categories, filters, user }: Co
               onClick={() => router.get('/courses', buildPaginationParams(courses.last_page))}
               disabled={courses.current_page === courses.last_page}
               className="px-3 py-2 border border-zinc-300 dark:border-zinc-700 text-zinc-700 dark:text-zinc-300 hover:border-black dark:hover:border-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
-              aria-label="Last Page"
+              aria-label={t('lastPage')}
             >
               <ChevronsRight className="w-4 h-4" />
             </button>
