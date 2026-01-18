@@ -24,7 +24,7 @@ interface DashboardProps {
 export default function LearnerDashboard({ enrolledCourses, user }: DashboardProps) {
   const { t } = useTranslation();
   const [activeTab, setActiveTab] = useState<'recent' | 'inProgress' | 'completed'>('recent');
-  const recentCourses = [...enrolledCourses].slice(0, 6);
+  const recentCourses = enrolledCourses;
   const inProgressCourses = enrolledCourses.filter(c => c.progressPercent > 0 && c.progressPercent < 100);
   const completedCourses = enrolledCourses.filter(c => c.progressPercent === 100);
   const displayedCourses = activeTab === 'recent' ? recentCourses : activeTab === 'inProgress' ? inProgressCourses : completedCourses;

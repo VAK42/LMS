@@ -336,6 +336,37 @@ return new class extends Migration
       $table->foreign('quizId')->references('quizId')->on('quizzes')->onDelete('cascade');
       $table->foreign('userId')->references('userId')->on('users')->onDelete('cascade');
     });
+    Schema::create('courseDiscussions', function (Blueprint $table) {
+      $table->id('discussionId');
+      $table->foreignId('courseId')->constrained('courses', 'courseId')->onDelete('cascade');
+      $table->foreignId('userId')->constrained('users', 'userId')->onDelete('cascade');
+      $table->unsignedBigInteger('parentId')->nullable();
+      $table->string('title')->nullable();
+      $table->text('content');
+      $table->boolean('isPinned')->default(false);
+      $table->boolean('isInstructorReply')->default(false);
+      $table->timestamp('createdAt')->useCurrent();
+      $table->timestamp('updatedAt')->useCurrent()->useCurrentOnUpdate();
+      $table->foreign('parentId')->references('discussionId')->on('courseDiscussions')->onDelete('cascade');
+      $table->index('courseId');
+      $table->index('parentId');
+    });
+    Schema::create('blogs', function (Blueprint $table) {
+      $table->id('blogId');
+      $table->foreignId('instructorId')->constrained('users', 'userId')->onDelete('cascade');
+      $table->string('title');
+      $table->string('slug')->unique();
+      $table->text('content');
+      $table->string('thumbnail')->nullable();
+      $table->boolean('isPublished')->default(false);
+      $table->timestamp('publishedAt')->nullable();
+      $table->integer('viewCount')->default(0);
+      $table->timestamp('createdAt')->useCurrent();
+      $table->timestamp('updatedAt')->useCurrent()->useCurrentOnUpdate();
+      $table->index('instructorId');
+      $table->index('slug');
+      $table->index('isPublished');
+    });
   }
   public function down(): void
   {
@@ -364,5 +395,7 @@ return new class extends Migration
     Schema::dropIfExists('categories');
     Schema::dropIfExists('passwordResetTokens');
     Schema::dropIfExists('users');
+    Schema::dropIfExists('blogs');
+    Schema::dropIfExists('courseDiscussions');
   }
 };

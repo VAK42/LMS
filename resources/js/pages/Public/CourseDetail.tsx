@@ -156,11 +156,30 @@ export default function CourseDetail({ course, adminQrPath, isEnrolled, isInWish
                   <Share2 className="w-6 h-6" />
                 </button>
                 <button
-                  onClick={() => router.visit(`/courses/${course.courseId}/reviews`)}
-                  className="p-2 rounded-full bg-white/10 hover:bg-white/20 transition-colors cursor-pointer"
-                  title={t('reviews')}
+                  onClick={() => {
+                    if (isEnrolled) {
+                      router.visit(`/courses/${course.courseId}/discussions`);
+                    } else {
+                      showToast(t('enrollToDiscuss'), 'error');
+                    }
+                  }}
+                  className={`p-2 rounded-full transition-colors cursor-pointer ${isEnrolled ? 'bg-white/10 hover:bg-white/20' : 'bg-white/5 opacity-50 cursor-not-allowed'}`}
+                  title={isEnrolled ? t('discussions') : t('enrollToDiscuss')}
                 >
                   <MessageSquare className="w-6 h-6" />
+                </button>
+                <button
+                  onClick={() => {
+                    if (isEnrolled) {
+                      router.visit(`/courses/${course.courseId}/reviews`)
+                    } else {
+                      showToast(t('enrollToReview'), 'error');
+                    }
+                  }}
+                  className={`p-2 rounded-full transition-colors cursor-pointer ${isEnrolled ? 'bg-white/10 hover:bg-white/20' : 'bg-white/5 opacity-50 cursor-not-allowed'}`}
+                  title={isEnrolled ? t('reviews') : t('enrollToReview')}
+                >
+                  <Star className="w-6 h-6" />
                 </button>
               </div>
             </div>
