@@ -1,5 +1,5 @@
 import { Link } from '@inertiajs/react';
-import { LayoutDashboard, Users, BookOpen, FolderTree, Star, GraduationCap, Award, Bell, CreditCard, LifeBuoy, Wallet, MessageSquare } from 'lucide-react';
+import { LayoutDashboard, Users, BookOpen, FolderTree, Star, GraduationCap, Award, Bell, CreditCard, LifeBuoy, Wallet, MessageSquare, FileText } from 'lucide-react';
 import useTranslation from '../../hooks/useTranslation';
 interface Props {
   currentPath: string;
@@ -15,6 +15,7 @@ export default function AdminSidebar({ currentPath }: Props) {
     { path: '/admin/enrollments', icon: GraduationCap, label: t('enrollmentManagement') },
     { path: '/admin/support', icon: LifeBuoy, label: t('supportTicketManagement') },
     { path: '/admin/discussions', icon: MessageSquare, label: t('discussionManagement') },
+    { path: '/admin/blogs', icon: FileText, label: t('blogManagement') },
     { path: '/admin/certificates', icon: Award, label: t('certificateManagement') },
     { path: '/admin/notifications', icon: Bell, label: t('notificationManagement') },
     { path: '/admin/transactions', icon: CreditCard, label: t('transactionManagement') },

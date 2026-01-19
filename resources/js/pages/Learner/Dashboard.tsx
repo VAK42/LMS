@@ -128,7 +128,7 @@ export default function LearnerDashboard({ enrolledCourses, user }: DashboardPro
                 >
                   <div className="aspect-video bg-zinc-100 dark:bg-zinc-800 relative">
                     {item.course.courseImage ? (
-                      <img src={item.course.courseImage} alt={item.course.courseTitle} className="w-full h-full object-cover" />
+                      <img src={`/storage/${item.course.courseImage}`} alt={item.course.courseTitle} className="w-full h-full object-cover" />
                     ) : (
                       <div className="absolute inset-0 flex items-center justify-center">
                         <BookOpen className="w-16 h-16 text-zinc-300 dark:text-zinc-600" />

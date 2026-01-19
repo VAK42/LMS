@@ -1,12 +1,13 @@
 import { Plus, Edit, Trash2, Eye, EyeOff, BookOpen, Wallet, Users, GraduationCap, DollarSign, FileText } from 'lucide-react';
-import { Head, Link, router } from '@inertiajs/react';
 import { useToast } from '../../contexts/ToastContext';
+import { Head, Link, router } from '@inertiajs/react';
 import Layout from '../../components/Layout';
 import useTranslation from '../../hooks/useTranslation';
 interface Course {
   courseId: number;
   courseTitle: string;
   courseDescription: string;
+  courseImage: string | null;
   simulatedPrice: number;
   isPublished: boolean;
   totalEnrollments: number;
@@ -104,7 +105,7 @@ export default function InstructorDashboard({ courses, stats, user }: Props) {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-zinc-500">{t('totalEarnings')}</p>
-                <p className="text-2xl font-bold text-green-600">${statsData.totalEarnings.toFixed(2)}</p>
+                <p className="text-2xl font-bold text-green-600">{t('currencySymbol')}{statsData.totalEarnings.toFixed(2)}</p>
               </div>
               <div className="p-3 bg-green-100 dark:bg-green-900/30 rounded-lg"><DollarSign className="w-5 h-5 text-green-600" /></div>
             </div>
@@ -127,7 +128,14 @@ export default function InstructorDashboard({ courses, stats, user }: Props) {
           <div className="space-y-4">
             {courses.data.map((course) => (
               <div key={course.courseId} className="bg-white dark:bg-zinc-900 rounded-xl border border-zinc-200 dark:border-zinc-800 p-5 hover:border-zinc-300 dark:hover:border-zinc-700 transition-colors">
-                <div className="flex items-start justify-between gap-6">
+                <div className="flex items-start gap-6">
+                  <div className="flex-shrink-0 w-32 h-20 rounded-lg overflow-hidden bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center border border-zinc-200 dark:border-zinc-700">
+                    {course.courseImage ? (
+                      <img src={`/storage/${course.courseImage}`} alt={course.courseTitle} className="w-full h-full object-cover" />
+                    ) : (
+                      <BookOpen className="w-8 h-8 text-zinc-400 dark:text-zinc-500" />
+                    )}
+                  </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-3 mb-2">
                       <h3 className="text-lg font-bold text-black dark:text-white truncate">{course.courseTitle}</h3>
@@ -151,7 +159,7 @@ export default function InstructorDashboard({ courses, stats, user }: Props) {
                       <span>•</span>
                       <span>{course.totalEnrollments || 0} {t('students')}</span>
                       <span>•</span>
-                      <span className="font-medium text-green-600">{course.simulatedPrice > 0 ? `$${course.simulatedPrice}` : t('free')}</span>
+                      <span className="font-medium text-green-600">{course.simulatedPrice > 0 ? `${t('currencySymbol')}${course.simulatedPrice}` : t('free')}</span>
                     </div>
                   </div>
                   <div className="flex items-center gap-2 shrink-0">

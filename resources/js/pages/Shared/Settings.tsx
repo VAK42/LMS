@@ -427,7 +427,7 @@ export default function Settings({ user }: SettingsProps) {
                           value={confirmCode}
                           onChange={(e) => setConfirmCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
                           className="w-32 px-4 py-2 border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 text-center font-mono focus:outline-none focus:border-black dark:focus:border-white"
-                          placeholder="000000"
+                          placeholder={t('verificationCodePlaceholder')}
                           maxLength={6}
                         />
                         <button
@@ -461,7 +461,7 @@ export default function Settings({ user }: SettingsProps) {
                           const url = URL.createObjectURL(blob);
                           const a = document.createElement('a');
                           a.href = url;
-                          a.download = '2FARecoveryCodes.txt';
+                          a.download = `${t('recoveryCodesFilename')}.txt`;
                           a.click();
                           showToast(t('recoveryCodesDownloaded'), 'success');
                         }}

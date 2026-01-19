@@ -66,7 +66,7 @@ export default function Grading({ submissions, user }: Props) {
         body: JSON.stringify({ score: grade, feedback }),
       });
       if (response.status === 419) { window.location.reload(); return; }
-      if (!response.ok) throw new Error('Failed To Save');
+      if (!response.ok) throw new Error(t('failedToSave'));
       showToast(t('gradeSavedSuccess'), 'success');
       setSelectedSubmission({ ...selectedSubmission, score: grade, feedback });
       router.reload();

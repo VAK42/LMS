@@ -20,6 +20,7 @@ class HomeController extends Controller
           'instructor' => $course->instructor,
           'price' => (float) $course->simulatedPrice,
           'rating' => (float) $course->averageRating,
+          'courseImage' => $course->courseImage,
         ];
       });
     return Inertia::render('Public/Home', [

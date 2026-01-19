@@ -55,7 +55,7 @@ export default function InstructorEarnings({ wallet, recentTransactions, payoutS
         body: JSON.stringify({ bankName, bankAccountNumber, bankAccountName }),
       });
       if (response.status === 419) { window.location.reload(); return; }
-      if (!response.ok) throw new Error('Failed To Update!');
+      if (!response.ok) throw new Error(t('failedToUpdate'));
       setDisplayedBankInfo({ ...displayedBankInfo, bankName, bankAccountNumber, bankAccountName });
       showToast(t('bankInfoUpdated'), 'success');
       setIsEditingBank(false);
@@ -80,7 +80,7 @@ export default function InstructorEarnings({ wallet, recentTransactions, payoutS
         body: formData,
       });
       if (response.status === 419) { window.location.reload(); return; }
-      if (!response.ok) throw new Error('Failed To Upload!');
+      if (!response.ok) throw new Error(t('failedToUpload'));
       const data = await response.json();
       setDisplayedBankInfo({ ...displayedBankInfo, bankQrPath: data.path });
       showToast(t('bankQrUploaded'), 'success');
@@ -117,7 +117,7 @@ export default function InstructorEarnings({ wallet, recentTransactions, payoutS
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-zinc-600 dark:text-zinc-400">{t('availableBalance')}</p>
-                <p className="text-3xl font-bold text-green-600 dark:text-green-400 mt-2">${wallet.balance.toFixed(2)}</p>
+                <p className="text-3xl font-bold text-green-600 dark:text-green-400 mt-2">{t('currencySymbol')}{wallet.balance.toFixed(2)}</p>
               </div>
               <div className="p-3 bg-green-50 dark:bg-green-900/20 rounded-lg"><Wallet className="w-6 h-6 text-green-600 dark:text-green-400" /></div>
             </div>
@@ -126,7 +126,7 @@ export default function InstructorEarnings({ wallet, recentTransactions, payoutS
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-zinc-600 dark:text-zinc-400">{t('totalEarnings')}</p>
-                <p className="text-3xl font-bold text-black dark:text-white mt-2">${wallet.totalEarnings.toFixed(2)}</p>
+                <p className="text-3xl font-bold text-black dark:text-white mt-2">{t('currencySymbol')}{wallet.totalEarnings.toFixed(2)}</p>
               </div>
               <div className="p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg"><TrendingUp className="w-6 h-6 text-blue-600 dark:text-blue-400" /></div>
             </div>
@@ -135,7 +135,7 @@ export default function InstructorEarnings({ wallet, recentTransactions, payoutS
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-zinc-600 dark:text-zinc-400">{t('pendingPayouts')}</p>
-                <p className="text-3xl font-bold text-yellow-600 dark:text-yellow-400 mt-2">${payoutStats.pending.toFixed(2)}</p>
+                <p className="text-3xl font-bold text-yellow-600 dark:text-yellow-400 mt-2">{t('currencySymbol')}{payoutStats.pending.toFixed(2)}</p>
               </div>
               <div className="p-3 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg"><Clock className="w-6 h-6 text-yellow-600 dark:text-yellow-400" /></div>
             </div>
@@ -144,7 +144,7 @@ export default function InstructorEarnings({ wallet, recentTransactions, payoutS
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-zinc-600 dark:text-zinc-400">{t('totalPaidOut')}</p>
-                <p className="text-3xl font-bold text-black dark:text-white mt-2">${payoutStats.completed.toFixed(2)}</p>
+                <p className="text-3xl font-bold text-black dark:text-white mt-2">{t('currencySymbol')}{payoutStats.completed.toFixed(2)}</p>
               </div>
               <div className="p-3 bg-zinc-100 dark:bg-zinc-800 rounded-lg"><DollarSign className="w-6 h-6 text-zinc-600 dark:text-zinc-400" /></div>
             </div>
@@ -165,8 +165,8 @@ export default function InstructorEarnings({ wallet, recentTransactions, payoutS
                         <p className="text-sm text-zinc-500">{new Date(entry.createdAt).toLocaleDateString()}</p>
                       </div>
                       <div className="text-right">
-                        <p className={`font-bold ${getTypeColor(entry.type)}`}>{getTypeIcon(entry.type)}${Number(entry.amount).toFixed(2)}</p>
-                        <p className="text-xs text-zinc-500">{t('balanceLabel')} ${Number(entry.balanceAfter).toFixed(2)}</p>
+                        <p className={`font-bold ${getTypeColor(entry.type)}`}>{getTypeIcon(entry.type)}{t('currencySymbol')}{Number(entry.amount).toFixed(2)}</p>
+                        <p className="text-xs text-zinc-500">{t('balanceLabel')} {t('currencySymbol')}{Number(entry.balanceAfter).toFixed(2)}</p>
                       </div>
                     </div>
                   ))}

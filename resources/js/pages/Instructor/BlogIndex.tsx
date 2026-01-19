@@ -47,7 +47,7 @@ export default function BlogIndex({ blogs, filters }: Props) {
   const handleDelete = (id: number) => {
     if (confirm(t('confirmDeleteBlog'))) {
       router.delete(`/instructor/blogs/${id}`, {
-        onSuccess: () => showToast(t('blogDeleted'), 'success'),
+        onSuccess: () => showToast(t('blogDeletedSuccess'), 'success'),
       });
     }
   };

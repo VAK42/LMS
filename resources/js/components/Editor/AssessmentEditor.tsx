@@ -24,14 +24,14 @@ export default function AssessmentEditor({ isOpen, onClose, courseId }: Props) {
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [assessment, setAssessment] = useState<Assessment>({
-    assessmentTitle: 'Essay Assignment',
+    assessmentTitle: t('defaultAssessmentTitle'),
     passingScore: 70,
     questions: []
   })
   const [newQuestion, setNewQuestion] = useState({ questionText: '', maxScore: 10 })
   useEffect(() => {
     if (isOpen) {
-      setAssessment({ assessmentTitle: 'Essay Assignment', passingScore: 70, questions: [] })
+      setAssessment({ assessmentTitle: t('defaultAssessmentTitle'), passingScore: 70, questions: [] })
       fetchAssessment()
     }
   }, [isOpen, courseId])

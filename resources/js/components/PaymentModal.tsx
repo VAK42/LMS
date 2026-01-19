@@ -78,7 +78,7 @@ export default function PaymentModal({ isOpen, onClose, course, adminQrPath }: P
             <>
               <div className="text-center mb-6">
                 <p className="text-zinc-600 dark:text-zinc-400 mb-2">{t('scanQrToTransfer')}</p>
-                <p className="text-3xl font-bold text-black dark:text-white">${course.price.toFixed(2)}</p>
+                <p className="text-3xl font-bold text-black dark:text-white">{t('currencySymbol')}{course.price.toFixed(2)}</p>
                 <p className="text-sm text-zinc-500 mt-1">{t('for')}: {course.courseTitle}</p>
               </div>
               <div className="bg-zinc-100 dark:bg-zinc-800 rounded-xl p-4 mb-6">

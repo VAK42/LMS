@@ -129,7 +129,7 @@ export default function CategoryManagement({ categories, filters, user }: Props)
     try {
       const response = await fetch('/admin/categories/export', { credentials: 'same-origin', headers: { 'Accept': 'application/json' } });
       if (response.status === 419) { window.location.reload(); return; }
-      if (!response.ok) throw new Error('Export Failed');
+      if (!response.ok) throw new Error(t('exportFailed'));
       const allCategories = await response.json();
       const exportColumns = columns.filter(col => col.key !== 'actions');
       const headers = exportColumns.map(col => col.label).join(',');
@@ -147,7 +147,7 @@ export default function CategoryManagement({ categories, filters, user }: Props)
       const url = URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
-      link.download = 'Categories.csv';
+      link.download = `${t('categoriesExportFilename')}.csv`;
       link.click();
       URL.revokeObjectURL(url);
       showToast(t('categoriesExportedSuccess'), 'success');

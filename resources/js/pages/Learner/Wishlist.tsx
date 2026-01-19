@@ -73,7 +73,7 @@ export default function WishlistPage({ wishlists, user }: WishlistProps) {
                   </div>
                   <div className="flex items-center justify-between pt-2">
                     <span className="text-xl font-bold text-black dark:text-white">
-                      ${item.course.simulatedPrice}
+                      {t('currencySymbol')}{item.course.simulatedPrice}
                     </span>
                     <Link
                       href={`/courses/${item.course.courseId}`}

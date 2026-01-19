@@ -53,7 +53,7 @@ export default function Essay({ assessment, submission, user }: Props) {
         body: JSON.stringify({ answers })
       })
       if (response.status === 419) { window.location.reload(); return }
-      if (!response.ok) throw new Error('Failed!')
+      if (!response.ok) throw new Error(t('failed'));
       setSubmitted(true)
       showToast(t('essaySubmitted'), 'success')
     } catch (error) {

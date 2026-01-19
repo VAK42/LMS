@@ -6,6 +6,9 @@ use App\Models\Category;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\ValidationException;
 class CourseController extends Controller
 {
   public function index(Request $request)
@@ -34,7 +37,7 @@ class CourseController extends Controller
   }
   public function store(Request $request)
   {
-    $validator = \Illuminate\Support\Facades\Validator::make($request->all(), [
+    $validator = Validator::make($request->all(), [
       'courseTitle' => 'required|string|max:255',
       'courseDescription' => 'required|string',
       'categoryId' => 'required|exists:categories,categoryId',
@@ -42,6 +45,7 @@ class CourseController extends Controller
       'simulatedPrice' => 'required|numeric|min:0',
       'isPublished' => 'required|boolean',
       'courseMeta' => 'nullable|json',
+      'courseImage' => 'nullable|image|max:2048',
     ]);
     $validator->after(function ($validator) use ($request) {
       $exists = Course::where('courseTitle', $request->courseTitle)->exists();
@@ -50,15 +54,20 @@ class CourseController extends Controller
       }
     });
     if ($validator->fails()) {
-      throw new \Illuminate\Validation\ValidationException($validator);
+      throw new ValidationException($validator);
     }
-    Course::create($request->only(['courseTitle', 'courseDescription', 'categoryId', 'instructorId', 'simulatedPrice', 'isPublished', 'courseMeta']));
+    $data = $request->only(['courseTitle', 'courseDescription', 'categoryId', 'instructorId', 'simulatedPrice', 'isPublished', 'courseMeta']);
+    if ($request->hasFile('courseImage')) {
+      $path = $request->file('courseImage')->store('courses', 'public');
+      $data['courseImage'] = $path;
+    }
+    Course::create($data);
     return redirect()->back()->with('success', 'Course Created Successfully!');
   }
   public function update(Request $request, $courseId)
   {
     $course = Course::findOrFail($courseId);
-    $validator = \Illuminate\Support\Facades\Validator::make($request->all(), [
+    $validator = Validator::make($request->all(), [
       'courseTitle' => 'required|string|max:255',
       'courseDescription' => 'required|string',
       'categoryId' => 'required|exists:categories,categoryId',
@@ -66,6 +75,7 @@ class CourseController extends Controller
       'simulatedPrice' => 'required|numeric|min:0',
       'isPublished' => 'required|boolean',
       'courseMeta' => 'nullable|json',
+      'courseImage' => 'nullable|image|max:2048',
     ]);
     $validator->after(function ($validator) use ($request, $courseId) {
       $exists = Course::where('courseTitle', $request->courseTitle)
@@ -76,9 +86,17 @@ class CourseController extends Controller
       }
     });
     if ($validator->fails()) {
-      throw new \Illuminate\Validation\ValidationException($validator);
+      throw new ValidationException($validator);
     }
-    $course->update($request->only(['courseTitle', 'courseDescription', 'categoryId', 'instructorId', 'simulatedPrice', 'isPublished', 'courseMeta']));
+    $data = $request->only(['courseTitle', 'courseDescription', 'categoryId', 'instructorId', 'simulatedPrice', 'isPublished', 'courseMeta']);
+    if ($request->hasFile('courseImage')) {
+      if ($course->courseImage && Storage::disk('public')->exists($course->courseImage)) {
+        Storage::disk('public')->delete($course->courseImage);
+      }
+      $path = $request->file('courseImage')->store('courses', 'public');
+      $data['courseImage'] = $path;
+    }
+    $course->update($data);
     return redirect()->back()->with('success', 'Course Updated Successfully!');
   }
   public function destroy($courseId)

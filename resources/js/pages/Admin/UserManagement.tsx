@@ -116,7 +116,7 @@ export default function UserManagement({ users, filters, user }: Props) {
     try {
       const response = await fetch('/admin/users/export', { credentials: 'same-origin', headers: { 'Accept': 'application/json' } });
       if (response.status === 419) { window.location.reload(); return; }
-      if (!response.ok) throw new Error('Export Failed');
+      if (!response.ok) throw new Error(t('exportFailed'));
       const allUsers = await response.json();
       const exportColumns = columns.filter(col => col.key !== 'actions');
       const headers = exportColumns.map(col => col.label).join(',');
@@ -136,7 +136,7 @@ export default function UserManagement({ users, filters, user }: Props) {
       const url = URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
-      link.download = 'Users.csv';
+      link.download = `${t('usersExportFilename')}.csv`;
       link.click();
       URL.revokeObjectURL(url);
       showToast(t('usersExportedSuccess'), 'success');

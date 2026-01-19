@@ -49,7 +49,7 @@ export default function CourseCreate({ categories, user }: Props) {
         body: JSON.stringify(formData),
       });
       if (response.status === 419) { window.location.reload(); return; }
-      if (!response.ok) throw new Error('Failed To Create Course!');
+      if (!response.ok) throw new Error(t('failedToCreateCourse'));
       const data = await response.json();
       showToast(t('courseCreatedSuccess'), 'success');
       router.visit(`/instructor/courses/${data.courseId}/edit`);
@@ -94,7 +94,7 @@ export default function CourseCreate({ categories, user }: Props) {
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2">{t('priceLabel')}</label>
-                  <input type="number" value={formData.simulatedPrice} onChange={e => setFormData({ ...formData, simulatedPrice: parseFloat(e.target.value) || 0 })} min="0" step="0.01" className="w-full px-4 py-3 rounded-lg border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="0.00" />
+                  <input type="number" value={formData.simulatedPrice} onChange={e => setFormData({ ...formData, simulatedPrice: parseFloat(e.target.value) || 0 })} min="0" step="0.01" className="w-full px-4 py-3 rounded-lg border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder={t('pricePlaceholder')} />
                 </div>
               </div>
             </div>

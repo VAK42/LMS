@@ -254,7 +254,7 @@ export default function Dashboard({ metrics, charts, recentActivities, recentUse
                           </td>
                           <td className="py-3">
                             <span className={`px-2 py-1 rounded text-xs font-medium ${user.role === 'admin' ? 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400' : user.role === 'instructor' ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400' : 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'}`}>
-                              {user.role.charAt(0).toUpperCase() + user.role.slice(1)}
+                              {t(user.role)}
                             </span>
                           </td>
                           <td className="py-3 text-sm text-zinc-600 dark:text-zinc-400">

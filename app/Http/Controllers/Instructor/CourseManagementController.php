@@ -2,6 +2,7 @@
 namespace App\Http\Controllers\Instructor;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
 use App\Models\Course;
 use App\Models\Module;
@@ -42,13 +43,24 @@ class CourseManagementController extends Controller
   public function update(Request $request, $courseId)
   {
     $course = Course::where('courseId', $courseId)->where('instructorId', $request->user()->userId)->firstOrFail();
+    if ($request->has('courseMeta') && is_string($request->courseMeta)) {
+      $request->merge(['courseMeta' => json_decode($request->courseMeta, true)]);
+    }
     $validated = $request->validate([
       'courseTitle' => 'required|string',
       'courseDescription' => 'required|string',
       'categoryId' => 'required|exists:categories,categoryId',
       'simulatedPrice' => 'required|numeric|min:0',
       'courseMeta' => 'nullable|array',
+      'courseImage' => 'nullable|image|max:2048',
     ]);
+    if ($request->hasFile('courseImage')) {
+      if ($course->courseImage && Storage::disk('public')->exists($course->courseImage)) {
+        Storage::disk('public')->delete($course->courseImage);
+      }
+      $path = $request->file('courseImage')->store('courses', 'public');
+      $validated['courseImage'] = $path;
+    }
     $course->update($validated);
     return response()->json(['message' => 'Course Updated!']);
   }

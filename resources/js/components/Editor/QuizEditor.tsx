@@ -26,7 +26,7 @@ export default function QuizEditor({ isOpen, onClose, courseId }: Props) {
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [quiz, setQuiz] = useState<Quiz>({
-    quizTitle: 'Final Exam',
+    quizTitle: t('defaultQuizTitle'),
     passingScore: 70,
     timeLimitMinutes: null,
     questions: []
@@ -38,7 +38,7 @@ export default function QuizEditor({ isOpen, onClose, courseId }: Props) {
   })
   useEffect(() => {
     if (isOpen) {
-      setQuiz({ quizTitle: 'Final Exam', passingScore: 70, timeLimitMinutes: null, questions: [] })
+      setQuiz({ quizTitle: t('defaultQuizTitle'), passingScore: 70, timeLimitMinutes: null, questions: [] })
       fetchQuiz()
     }
   }, [isOpen, courseId])
@@ -195,7 +195,7 @@ export default function QuizEditor({ isOpen, onClose, courseId }: Props) {
                         <button onClick={() => setNewQuestion({ ...newQuestion, correctAnswer: i })} className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium cursor-pointer ${i === newQuestion.correctAnswer ? 'bg-green-500 text-white' : 'bg-zinc-200 dark:bg-zinc-700 text-zinc-600 dark:text-zinc-300'}`}>
                           {String.fromCharCode(65 + i)}
                         </button>
-                        <input type="text" value={opt} onChange={e => { const opts = [...newQuestion.options]; opts[i] = e.target.value; setNewQuestion({ ...newQuestion, options: opts }) }} className="flex-1 px-3 py-2 rounded border border-zinc-300 dark:border-zinc-600 bg-white dark:bg-zinc-800 dark:text-white text-sm" placeholder={`Option ${String.fromCharCode(65 + i)}`} />
+                        <input type="text" value={opt} onChange={e => { const opts = [...newQuestion.options]; opts[i] = e.target.value; setNewQuestion({ ...newQuestion, options: opts }) }} className="flex-1 px-3 py-2 rounded border border-zinc-300 dark:border-zinc-600 bg-white dark:bg-zinc-800 dark:text-white text-sm" placeholder={`${t('optionPlaceholder')} ${String.fromCharCode(65 + i)}`} />
                       </div>
                     ))}
                   </div>

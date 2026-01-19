@@ -1,10 +1,11 @@
 import { ChevronLeft, Save, Plus, Trash2, GripVertical, ChevronDown, ChevronUp, FileText, Video, File, Edit, Upload, ArrowUp, ArrowDown, Pencil, Check, X, ClipboardList, FileEdit } from 'lucide-react';
-import { Head, Link } from '@inertiajs/react';
+import { Head, Link, router } from '@inertiajs/react';
 import { useState } from 'react';
 import { useToast } from '../../contexts/ToastContext';
 import LessonContentEditor from '../../components/Editor/LessonContentEditor';
 import AssessmentEditor from '../../components/Editor/AssessmentEditor';
 import QuizEditor from '../../components/Editor/QuizEditor';
+import ImageUpload from '../../components/ImageUpload';
 import Layout from '../../components/Layout';
 import useTranslation from '../../hooks/useTranslation';
 interface Lesson {
@@ -27,6 +28,7 @@ interface Course {
   courseTitle: string;
   courseDescription: string;
   simulatedPrice: number;
+  courseImage: string | null;
   categoryId: number;
   isPublished: boolean;
   courseMeta: any;
@@ -72,22 +74,36 @@ export default function CourseEdit({ course, categories, user }: Props) {
       prev.includes(moduleId) ? prev.filter(id => id !== moduleId) : [...prev, moduleId]
     );
   };
+  const [selectedImage, setSelectedImage] = useState<File | null>(null);
   const handleSaveCourse = async () => {
     setSaving(true);
+    const formData = new FormData();
+    formData.append('_method', 'PUT');
+    formData.append('courseTitle', courseData.courseTitle);
+    formData.append('courseDescription', courseData.courseDescription);
+    formData.append('categoryId', courseData.categoryId.toString());
+    formData.append('simulatedPrice', courseData.simulatedPrice.toString());
+    formData.append('courseMeta', JSON.stringify(courseData.courseMeta));
+    if (selectedImage) {
+      formData.append('courseImage', selectedImage);
+    }
+
     try {
       const response = await fetch(`/api/instructor/courses/${course.courseId}`, {
-        method: 'PUT',
+        method: 'POST',
         credentials: 'same-origin',
         headers: {
-          'Content-Type': 'application/json',
           'Accept': 'application/json',
           'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
         },
-        body: JSON.stringify(courseData),
+        body: formData,
       });
+
       if (response.status === 419) { window.location.reload(); return; }
-      if (!response.ok) throw new Error('Failed To Save');
+      if (!response.ok) throw new Error(t('failedToSave'));
+
       showToast(t('courseSavedSuccess'), 'success');
+      router.reload();
     } catch (error) {
       showToast(t('courseSaveFailed'), 'error');
     } finally {
@@ -112,7 +128,7 @@ export default function CourseEdit({ course, categories, user }: Props) {
         }),
       });
       if (response.status === 419) { window.location.reload(); return; }
-      if (!response.ok) throw new Error('Failed To Add Module!');
+      if (!response.ok) throw new Error(t('failedToAddModule'));
       const newModule = await response.json();
       setModules([...modules, { ...newModule, lessons: [] }]);
       setNewModuleTitle('');
@@ -135,7 +151,7 @@ export default function CourseEdit({ course, categories, user }: Props) {
         body: JSON.stringify({ moduleTitle: editingModuleTitle }),
       });
       if (response.status === 419) { window.location.reload(); return; }
-      if (!response.ok) throw new Error('Failed To Rename Module!');
+      if (!response.ok) throw new Error(t('failedToRenameModule'));
       setModules(modules.map(m => m.moduleId === moduleId ? { ...m, moduleTitle: editingModuleTitle } : m));
       setEditingModuleId(null);
       showToast(t('moduleRenamedSuccess'), 'success');
@@ -179,7 +195,7 @@ export default function CourseEdit({ course, categories, user }: Props) {
         },
       });
       if (response.status === 419) { window.location.reload(); return; }
-      if (!response.ok) throw new Error('Failed To Delete Module!');
+      if (!response.ok) throw new Error(t('failedToDeleteModule'));
       setModules(modules.filter(m => m.moduleId !== moduleId));
       showToast(t('moduleDeletedSuccess'), 'success');
     } catch (error) {
@@ -206,7 +222,7 @@ export default function CourseEdit({ course, categories, user }: Props) {
         }),
       });
       if (response.status === 419) { window.location.reload(); return; }
-      if (!response.ok) throw new Error('Failed To Add Lesson!');
+      if (!response.ok) throw new Error(t('failedToAddLesson'));
       const newLesson = await response.json();
       setModules(modules.map(m =>
         m.moduleId === moduleId ? { ...m, lessons: [...m.lessons, newLesson] } : m
@@ -231,7 +247,7 @@ export default function CourseEdit({ course, categories, user }: Props) {
         },
       });
       if (response.status === 419) { window.location.reload(); return; }
-      if (!response.ok) throw new Error('Failed To Delete Lesson!');
+      if (!response.ok) throw new Error(t('failedToDeleteLesson'));
       setModules(modules.map(m =>
         m.moduleId === moduleId ? { ...m, lessons: m.lessons.filter(l => l.lessonId !== lessonId) } : m
       ));
@@ -299,6 +315,14 @@ export default function CourseEdit({ course, categories, user }: Props) {
               <div>
                 <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2">{t('priceLabel')}</label>
                 <input type="number" value={courseData.simulatedPrice} onChange={e => setCourseData({ ...courseData, simulatedPrice: parseFloat(e.target.value) || 0 })} min="0" step="0.01" className="w-full px-4 py-3 rounded-lg border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-blue-500" />
+              </div>
+              <div className="md:col-span-2">
+                <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2">{t('thumbnail')}</label>
+                <ImageUpload
+                  currentImage={course.courseImage}
+                  onImageSelected={setSelectedImage}
+                  label=""
+                />
               </div>
             </div>
           </div>

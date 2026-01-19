@@ -1,11 +1,10 @@
-import { Save, ArrowLeft, Image as ImageIcon, Bold, Italic, Heading } from 'lucide-react';
 import { Head, useForm, Link, router, usePage } from '@inertiajs/react';
+import { Save, ArrowLeft, Bold, Italic, Heading } from 'lucide-react';
 import { useEditor, EditorContent } from '@tiptap/react';
 import { useToast } from '../../contexts/ToastContext';
-import { useState } from 'react';
+import ImageUpload from '../../components/ImageUpload';
 import StarterKit from '@tiptap/starter-kit';
 import Layout from '../../components/Layout';
-import Image from '@tiptap/extension-image';
 import useTranslation from '../../hooks/useTranslation';
 interface Props {
   blog?: {
@@ -20,9 +19,6 @@ export default function BlogEditor({ blog }: Props) {
   const { t } = useTranslation();
   const { showToast } = useToast();
   const { auth } = usePage().props as any;
-  const [thumbnailPreview, setThumbnailPreview] = useState<string | null>(
-    blog?.thumbnail ? `/storage/${blog.thumbnail}` : null
-  );
   const { data, setData, processing, errors } = useForm({
     title: blog?.title || '',
     content: blog?.content || '',
@@ -32,10 +28,6 @@ export default function BlogEditor({ blog }: Props) {
   const editor = useEditor({
     extensions: [
       StarterKit,
-      Image.configure({
-        inline: true,
-        allowBase64: true,
-      }),
     ],
     editorProps: {
       attributes: {
@@ -47,45 +39,6 @@ export default function BlogEditor({ blog }: Props) {
       setData('content', editor.getHTML());
     },
   });
-  const handleThumbnailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
-      const file = e.target.files[0];
-      setData('thumbnail', file);
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        setThumbnailPreview(e.target?.result as string);
-      };
-      reader.readAsDataURL(file);
-    }
-  };
-  const addImage = () => {
-    const input = document.createElement('input');
-    input.type = 'file';
-    input.accept = 'image/*';
-    input.onchange = async (event) => {
-      const file = (event.target as HTMLInputElement).files?.[0];
-      if (file) {
-        const formData = new FormData();
-        formData.append('image', file);
-        try {
-          const response = await fetch('/instructor/blogs/uploadImage', {
-            method: 'POST',
-            body: formData,
-            headers: {
-              'X-CSRF-TOKEN': (document.querySelector('meta[name="csrf-token"]') as HTMLMetaElement)?.content || '',
-            },
-          });
-          const data = await response.json();
-          if (data.url && editor) {
-            editor.chain().focus().setImage({ src: data.url }).run();
-          }
-        } catch (error) {
-          showToast(t('errorUploadingImage'), 'error');
-        }
-      }
-    };
-    input.click();
-  };
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (blog) {
@@ -93,12 +46,12 @@ export default function BlogEditor({ blog }: Props) {
         _method: 'put',
         ...data,
       }, {
-        onSuccess: () => showToast(t('blogUpdated'), 'success'),
+        onSuccess: () => showToast(t('blogUpdatedSuccess'), 'success'),
         onError: () => showToast(t('pleaseFixErrors'), 'error'),
       });
     } else {
       router.post('/instructor/blogs', data, {
-        onSuccess: () => showToast(t('blogCreated'), 'success'),
+        onSuccess: () => showToast(t('blogCreatedSuccess'), 'success'),
         onError: () => showToast(t('pleaseFixErrors'), 'error'),
       });
     }
@@ -149,17 +102,11 @@ export default function BlogEditor({ blog }: Props) {
               {errors.title && <div className="text-red-500 text-sm mt-1">{errors.title}</div>}
             </div>
             <div className="mb-6">
-              <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2">{t('thumbnail')}</label>
-              <div className="flex items-center gap-4">
-                {thumbnailPreview && (
-                  <img src={thumbnailPreview} alt={t('preview')} className="h-32 w-32 object-cover border border-zinc-200 dark:border-zinc-700 rounded" />
-                )}
-                <label className="cursor-pointer flex items-center px-4 py-2 border border-zinc-300 dark:border-zinc-700 hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors rounded">
-                  <ImageIcon className="w-5 h-5 mr-2 text-zinc-500" />
-                  <span className="text-zinc-700 dark:text-zinc-300">{t('uploadThumbnail')}</span>
-                  <input type="file" className="hidden" accept="image/*" onChange={handleThumbnailChange} />
-                </label>
-              </div>
+              <ImageUpload
+                currentImage={data.thumbnail || blog?.thumbnail}
+                onImageSelected={(file) => setData('thumbnail', file)}
+                label={t('thumbnail')}
+              />
               {errors.thumbnail && <div className="text-red-500 text-sm mt-1">{errors.thumbnail}</div>}
             </div>
             <div>
@@ -169,7 +116,6 @@ export default function BlogEditor({ blog }: Props) {
                   <button type="button" onClick={() => editor?.chain().focus().toggleBold().run()} className={`p-2 hover:bg-zinc-200 dark:hover:bg-zinc-600 cursor-pointer rounded ${editor?.isActive('bold') ? 'bg-zinc-200 dark:bg-zinc-600' : ''}`}><Bold className="w-4 h-4" /></button>
                   <button type="button" onClick={() => editor?.chain().focus().toggleItalic().run()} className={`p-2 hover:bg-zinc-200 dark:hover:bg-zinc-600 cursor-pointer rounded ${editor?.isActive('italic') ? 'bg-zinc-200 dark:bg-zinc-600' : ''}`}><Italic className="w-4 h-4" /></button>
                   <button type="button" onClick={() => editor?.chain().focus().toggleHeading({ level: 2 }).run()} className={`p-2 hover:bg-zinc-200 dark:hover:bg-zinc-600 cursor-pointer rounded ${editor?.isActive('heading', { level: 2 }) ? 'bg-zinc-200 dark:bg-zinc-600' : ''}`}><Heading className="w-4 h-4" /></button>
-                  <button type="button" onClick={addImage} className="p-2 hover:bg-zinc-200 dark:hover:bg-zinc-600 cursor-pointer rounded"><ImageIcon className="w-4 h-4" /></button>
                 </div>
                 <div className="min-h-[60vh] cursor-text" onClick={() => editor?.commands.focus()}>
                   <EditorContent editor={editor} className="h-full focus:outline-none" />

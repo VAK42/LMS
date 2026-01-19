@@ -128,7 +128,7 @@ export default function NotificationManagement({ notifications, filters, user }:
     try {
       const response = await fetch('/admin/notifications/export', { credentials: 'same-origin', headers: { 'Accept': 'application/json' } });
       if (response.status === 419) { window.location.reload(); return; }
-      if (!response.ok) throw new Error('Export Failed');
+      if (!response.ok) throw new Error(t('exportFailed'));
       const allNotifications = await response.json();
       const exportColumns = columns.filter(col => col.key !== 'actions');
       const headers = exportColumns.map(col => col.label).join(',');
@@ -142,7 +142,7 @@ export default function NotificationManagement({ notifications, filters, user }:
       const url = URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
-      link.download = 'Notifications.csv';
+      link.download = `${t('notificationsExportFilename')}.csv`;
       link.click();
       URL.revokeObjectURL(url);
       showToast(t('notificationsExportedSuccess'), 'success');

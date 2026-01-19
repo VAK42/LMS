@@ -1,7 +1,7 @@
-import { Edit, Trash2, ToggleLeft, ToggleRight, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, Filter } from 'lucide-react';
+import { Edit, Trash2, ToggleLeft, ToggleRight, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, Filter, BookOpen } from 'lucide-react';
+import { useToast } from '../../contexts/ToastContext';
 import { Head, router } from '@inertiajs/react';
 import { useState } from 'react';
-import { useToast } from '../../contexts/ToastContext';
 import AdminSidebar from '../../components/Admin/Sidebar';
 import DataTable from '../../components/Admin/DataTable';
 import ModalForm from '../../components/Admin/ModalForm';
@@ -16,6 +16,7 @@ interface Course {
   simulatedPrice: number;
   isPublished: boolean;
   createdAt: string;
+  courseImage: string | null;
 }
 interface Category {
   categoryId: number;
@@ -143,6 +144,21 @@ export default function CourseManagement({ courses, categories, instructors, fil
     setIsEditModalOpen(true);
   };
   const columns = [
+    {
+      key: 'courseImage',
+      label: t('thumbnail'),
+      render: (value: string | null) => (
+        <div className="w-16 h-10 rounded overflow-hidden bg-zinc-100 dark:bg-zinc-800">
+          {value ? (
+            <img src={`/storage/${value}`} alt={t('thumbnail')} className="w-full h-full object-cover" />
+          ) : (
+            <div className="flex items-center justify-center w-full h-full text-zinc-300 dark:text-zinc-600">
+              <BookOpen className="w-4 h-4" />
+            </div>
+          )}
+        </div>
+      )
+    },
     { key: 'courseTitle', label: t('courseTitleLabel'), sortable: true },
     {
       key: 'instructor',
@@ -158,7 +174,7 @@ export default function CourseManagement({ courses, categories, instructors, fil
       key: 'simulatedPrice',
       label: t('simulatedPrice'),
       sortable: true,
-      render: (value: number | string) => Number(value) === 0 ? t('free') : (value != null ? `$${Number(value).toFixed(2)}` : '$0.00')
+      render: (value: number | string) => Number(value) === 0 ? t('free') : (value != null ? `${t('currencySymbol')}${Number(value).toFixed(2)}` : `${t('currencySymbol')}0.00`)
     },
     {
       key: 'isPublished',
@@ -196,7 +212,7 @@ export default function CourseManagement({ courses, categories, instructors, fil
     try {
       const response = await fetch('/admin/courses/export', { credentials: 'same-origin', headers: { 'Accept': 'application/json' } });
       if (response.status === 419) { window.location.reload(); return; }
-      if (!response.ok) throw new Error('Export Failed');
+      if (!response.ok) throw new Error(t('exportFailed'));
       const allCourses = await response.json();
       const exportColumns = columns.filter(col => col.key !== 'actions');
       const headers = exportColumns.map(col => col.label).join(',');
@@ -220,7 +236,7 @@ export default function CourseManagement({ courses, categories, instructors, fil
       const url = URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
-      link.download = 'Courses.csv';
+      link.download = `${t('coursesExportFilename')}.csv`;
       link.click();
       URL.revokeObjectURL(url);
       showToast(t('coursesExportedSuccess'), 'success');
@@ -255,7 +271,8 @@ export default function CourseManagement({ courses, categories, instructors, fil
         { value: '1', label: t('published') },
         { value: '0', label: t('draft') }
       ]
-    }
+    },
+    { name: 'courseImage', label: t('thumbnail'), type: 'image' as const, required: false }
   ];
   return (
     <Layout user={user}>
@@ -331,7 +348,7 @@ export default function CourseManagement({ courses, categories, instructors, fil
               </div>
             )}
             <ModalForm isOpen={isCreateModalOpen} onClose={() => setIsCreateModalOpen(false)} onSubmit={handleCreate} title={t('createNewCourse')} fields={formFields} submitLabel={t('createCourse')} />
-            <ModalForm isOpen={isEditModalOpen} onClose={() => { setIsEditModalOpen(false); setSelectedCourse(null); }} onSubmit={handleEdit} title={t('editCourse')} fields={formFields} initialData={selectedCourse ? { courseTitle: selectedCourse.courseTitle, courseDescription: selectedCourse.courseDescription, categoryId: selectedCourse.category.categoryId, instructorId: selectedCourse.instructor.userId, simulatedPrice: selectedCourse.simulatedPrice, isPublished: selectedCourse.isPublished } : {}} submitLabel={t('updateCourse')} />
+            <ModalForm isOpen={isEditModalOpen} onClose={() => { setIsEditModalOpen(false); setSelectedCourse(null); }} onSubmit={handleEdit} title={t('editCourse')} fields={formFields} initialData={selectedCourse ? { courseTitle: selectedCourse.courseTitle, courseDescription: selectedCourse.courseDescription, categoryId: selectedCourse.category.categoryId, instructorId: selectedCourse.instructor.userId, simulatedPrice: selectedCourse.simulatedPrice, isPublished: selectedCourse.isPublished ? '1' : '0', courseImage: selectedCourse.courseImage } : {}} submitLabel={t('updateCourse')} />
           </div>
         </div>
       </div>

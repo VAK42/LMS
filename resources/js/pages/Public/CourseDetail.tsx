@@ -1,7 +1,7 @@
 import { PlayCircle, Clock, Star, CheckCircle, Users, Share2, Heart, FileText, Download, Award, MessageSquare } from 'lucide-react';
 import { Head, Link, router, usePage } from '@inertiajs/react';
-import { useState } from 'react';
 import { useToast } from '../../contexts/ToastContext';
+import { useState } from 'react';
 import PaymentModal from '../../components/PaymentModal';
 import Layout from '../../components/Layout';
 import useTranslation from '../../hooks/useTranslation';
@@ -37,6 +37,7 @@ interface CourseDetailProps {
     articlesCount?: number;
     resourcesCount?: number;
     hasCertificate?: boolean;
+    courseImage?: string | null;
   };
   adminQrPath?: string;
   quiz?: { quizId: number; quizTitle: string } | null;
@@ -234,14 +235,18 @@ export default function CourseDetail({ course, adminQrPath, isEnrolled, isInWish
           <div className="lg:col-span-1">
             <div className="sticky top-8 space-y-6">
               <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-lg border border-slate-200 dark:border-slate-700 overflow-hidden transform lg:-translate-y-32">
-                <div className="aspect-video bg-zinc-900 relative grayscale">
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <PlayCircle className="w-16 h-16 text-white opacity-60" />
-                  </div>
+                <div className="aspect-video bg-zinc-100 dark:bg-zinc-800 relative overflow-hidden flex items-center justify-center">
+                  {course.courseImage ? (
+                    <img src={`/storage/${course.courseImage}`} alt={course.courseTitle} className="w-full h-full object-cover" />
+                  ) : (
+                    <div className="bg-zinc-900 w-full h-full flex items-center justify-center grayscale">
+                      <PlayCircle className="w-16 h-16 text-white opacity-60" />
+                    </div>
+                  )}
                 </div>
                 <div className="p-6">
                   <div className="text-3xl font-bold text-slate-900 dark:text-white mb-4">
-                    {course.price === 0 ? t('free') : `$${course.price.toFixed(2)}`}
+                    {course.price === 0 ? t('free') : <>{t('currencySymbol')}{course.price.toFixed(2)}</>}
                   </div>
                   {isEnrolled ? (
                     <div className="w-full py-4 bg-zinc-800 dark:bg-white text-white dark:text-black font-bold text-center rounded flex items-center justify-center gap-2">

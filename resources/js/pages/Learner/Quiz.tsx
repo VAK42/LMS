@@ -66,7 +66,7 @@ export default function Quiz({ quiz, lastAttempt, user }: Props) {
         body: JSON.stringify({ answers })
       })
       if (response.status === 419) { window.location.reload(); return }
-      if (!response.ok) throw new Error('Failed')
+      if (!response.ok) throw new Error(t('failed'))
       const data = await response.json()
       setResult(data)
       showToast(data.passed ? t('congratulationsPassed') : t('tryAgain'), data.passed ? 'success' : 'error')

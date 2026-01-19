@@ -100,7 +100,7 @@ export default function CertificateManagement({ certificates, users, courses, fi
     try {
       const response = await fetch('/admin/certificates/export', { credentials: 'same-origin', headers: { 'Accept': 'application/json' } });
       if (response.status === 419) { window.location.reload(); return; }
-      if (!response.ok) throw new Error('Export Failed');
+      if (!response.ok) throw new Error(t('exportFailed'));
       const allCertificates = await response.json();
       const exportColumns = columns.filter(col => col.key !== 'actions');
       const headers = exportColumns.map(col => col.label).join(',');
@@ -114,7 +114,7 @@ export default function CertificateManagement({ certificates, users, courses, fi
       const url = URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
-      link.download = 'Certificates.csv';
+      link.download = `${t('certificatesExportFilename')}.csv`;
       link.click();
       URL.revokeObjectURL(url);
       showToast(t('certificatesExportedSuccess'), 'success');

@@ -1,6 +1,7 @@
 import StarterKit from '@tiptap/starter-kit';
-import { useEditor, EditorContent } from '@tiptap/react';
 import { Bold, Italic, List, ListOrdered, Heading1, Heading2, Quote, Undo, Redo } from 'lucide-react';
+import { useEditor, EditorContent } from '@tiptap/react';
+import { useEffect } from 'react';
 import useTranslation from '../../hooks/useTranslation';
 interface Props {
   content: string;
@@ -15,6 +16,11 @@ export default function TiptapEditor({ content, onChange }: Props) {
       onChange(editor.getHTML());
     },
   });
+  useEffect(() => {
+    if (editor && content && content !== editor.getHTML()) {
+      editor.commands.setContent(content);
+    }
+  }, [content, editor]);
   if (!editor) return null;
   return (
     <div className="border border-zinc-300 dark:border-zinc-700 rounded-lg overflow-hidden">

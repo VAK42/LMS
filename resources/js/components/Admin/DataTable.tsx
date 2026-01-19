@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Download, ArrowUpDown } from 'lucide-react';
+import useTranslation from '../../hooks/useTranslation';
 interface Column {
   key: string;
   label: string;
@@ -14,6 +15,7 @@ interface Props {
   onExport?: () => void;
 }
 export default function DataTable({ columns, data, exportable = true, keyField = 'id', onExport }: Props) {
+  const { t } = useTranslation();
   const [sortColumn, setSortColumn] = useState<string | null>(null);
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
   const handleSort = (columnKey: string) => {
@@ -42,7 +44,7 @@ export default function DataTable({ columns, data, exportable = true, keyField =
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
-    link.download = 'LMS.csv';
+    link.download = `${t('exportFilename')}.csv`;
     link.click();
     URL.revokeObjectURL(url);
   };
@@ -52,7 +54,7 @@ export default function DataTable({ columns, data, exportable = true, keyField =
         <div className="p-4 border-b border-zinc-200 dark:border-zinc-800 flex items-center justify-end">
           <button onClick={onExport || exportToCSV} className="flex items-center gap-2 px-4 py-2 bg-black dark:bg-white text-white dark:text-black hover:bg-zinc-800 dark:hover:bg-zinc-200 cursor-pointer">
             <Download className="w-4 h-4" />
-            Export CSV
+            {t('exportCsv')}
           </button>
         </div>
       )}
@@ -76,7 +78,7 @@ export default function DataTable({ columns, data, exportable = true, keyField =
             {sortedData.length === 0 ? (
               <tr>
                 <td colSpan={columns.length} className="px-6 py-8 text-center text-zinc-500 dark:text-zinc-400">
-                  No Data Available
+                  {t('noDataAvailable')}
                 </td>
               </tr>
             ) : (

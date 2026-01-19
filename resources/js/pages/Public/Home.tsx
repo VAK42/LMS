@@ -13,6 +13,7 @@ interface Course {
   };
   price: number;
   rating: number;
+  courseImage: string | null;
 }
 interface HomeProps {
   featuredCourses: Course[];
@@ -59,28 +60,28 @@ export default function Home({ featuredCourses, user }: HomeProps) {
               <div className="inline-flex p-4 bg-zinc-100 dark:bg-zinc-800 mb-4">
                 <BookOpen className="w-8 h-8 text-black dark:text-white" />
               </div>
-              <h3 className="text-3xl font-serif font-bold text-black dark:text-white mb-2">500+</h3>
+              <h3 className="text-3xl font-serif font-bold text-black dark:text-white mb-2">{t('stats.expertCoursesCount')}</h3>
               <p className="text-zinc-600 dark:text-zinc-400">{t('expertCourses')}</p>
             </div>
             <div className="text-center p-8 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800">
               <div className="inline-flex p-4 bg-zinc-100 dark:bg-zinc-800 mb-4">
                 <Users className="w-8 h-8 text-black dark:text-white" />
               </div>
-              <h3 className="text-3xl font-serif font-bold text-black dark:text-white mb-2">50K+</h3>
+              <h3 className="text-3xl font-serif font-bold text-black dark:text-white mb-2">{t('stats.activeLearnersCount')}</h3>
               <p className="text-zinc-600 dark:text-zinc-400">{t('activeLearners')}</p>
             </div>
             <div className="text-center p-8 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800">
               <div className="inline-flex p-4 bg-zinc-100 dark:bg-zinc-800 mb-4">
                 <Award className="w-8 h-8 text-black dark:text-white" />
               </div>
-              <h3 className="text-3xl font-serif font-bold text-black dark:text-white mb-2">30K+</h3>
+              <h3 className="text-3xl font-serif font-bold text-black dark:text-white mb-2">{t('stats.certificatesIssuedCount')}</h3>
               <p className="text-zinc-600 dark:text-zinc-400">{t('certificatesIssued')}</p>
             </div>
             <div className="text-center p-8 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800">
               <div className="inline-flex p-4 bg-zinc-100 dark:bg-zinc-800 mb-4">
                 <TrendingUp className="w-8 h-8 text-black dark:text-white" />
               </div>
-              <h3 className="text-3xl font-serif font-bold text-black dark:text-white mb-2">95%</h3>
+              <h3 className="text-3xl font-serif font-bold text-black dark:text-white mb-2">{t('stats.successRatePercent')}</h3>
               <p className="text-zinc-600 dark:text-zinc-400">{t('successRate')}</p>
             </div>
           </div>
@@ -112,7 +113,11 @@ export default function Home({ featuredCourses, user }: HomeProps) {
                 className="group bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 overflow-hidden hover:border-black dark:hover:border-white transition-colors"
               >
                 <div className="aspect-video bg-zinc-100 dark:bg-zinc-800 relative overflow-hidden flex items-center justify-center">
-                  <BookOpen className="w-24 h-24 text-zinc-300 dark:text-zinc-600" />
+                  {course.courseImage ? (
+                    <img src={`/storage/${course.courseImage}`} alt={course.courseTitle} className="w-full h-full object-cover" />
+                  ) : (
+                    <BookOpen className="w-24 h-24 text-zinc-300 dark:text-zinc-600" />
+                  )}
                   <div className="absolute bottom-4 left-4">
                     <span className="px-3 py-1 bg-black dark:bg-white text-white dark:text-black text-xs font-bold uppercase tracking-wider">
                       {course.category.categoryName}
@@ -139,7 +144,7 @@ export default function Home({ featuredCourses, user }: HomeProps) {
                       </span>
                     </div>
                     <span className="font-bold text-black dark:text-white">
-                      {!course.price || course.price === 0 ? t('free') : `$${course.price.toFixed(2)}`}
+                      {!course.price || course.price === 0 ? t('free') : <>{t('currencySymbol')}{course.price.toFixed(2)}</>}
                     </span>
                   </div>
                 </div>

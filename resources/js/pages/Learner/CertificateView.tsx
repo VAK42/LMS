@@ -29,8 +29,8 @@ export default function CertificateView({ certificate, user }: CertificateProps)
   const handleShare = async () => {
     if (navigator.share) {
       await navigator.share({
-        title: `Certificate - ${course.courseTitle}`,
-        text: `I Completed ${course.courseTitle}!`,
+        title: t('certificateTitle', { title: course.courseTitle }),
+        text: t('iCompletedCourse', { title: course.courseTitle }),
         url: shareUrl,
       });
     } else {
@@ -40,7 +40,7 @@ export default function CertificateView({ certificate, user }: CertificateProps)
   };
   return (
     <Layout user={user}>
-      <Head title={`Certificate - ${course.courseTitle}`} />
+      <Head title={t('certificateTitle', { title: course.courseTitle })} />
       <div className="min-h-screen bg-gradient-to-br from-zinc-50 to-white dark:from-zinc-900 dark:to-black py-12 px-4">
         <div className="max-w-5xl mx-auto">
           <div className="text-center mb-8">

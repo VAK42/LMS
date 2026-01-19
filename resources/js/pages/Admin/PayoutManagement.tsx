@@ -95,7 +95,7 @@ export default function PayoutManagement({ payouts, filters, stats, user }: Prop
         body: JSON.stringify({ instructorId: selectedInstructor.userId, amount: parseFloat(payoutAmount) }),
       });
       if (response.status === 419) { window.location.reload(); return; }
-      if (!response.ok) throw new Error('Failed To Create Payout');
+      if (!response.ok) throw new Error(t('failedToCreatePayout'));
       showToast(t('payoutCreatedSuccess'), 'success');
       setShowCreateModal(false);
       setSelectedInstructor(null);
@@ -119,7 +119,7 @@ export default function PayoutManagement({ payouts, filters, stats, user }: Prop
         body: JSON.stringify({ adminNotes }),
       });
       if (response.status === 419) { window.location.reload(); return; }
-      if (!response.ok) throw new Error('Failed To Process Payout');
+      if (!response.ok) throw new Error(t('failedToProcessPayout'));
       showToast(t('payoutProcessedSuccess'), 'success');
       setProcessingPayout(null);
       setAdminNotes('');
@@ -140,7 +140,7 @@ export default function PayoutManagement({ payouts, filters, stats, user }: Prop
         },
       });
       if (response.status === 419) { window.location.reload(); return; }
-      if (!response.ok) throw new Error('Failed To Cancel Payout');
+      if (!response.ok) throw new Error(t('failedToCancelPayout'));
       showToast(t('payoutCancelled'), 'success');
       router.reload();
     } catch (error) {
@@ -175,7 +175,7 @@ export default function PayoutManagement({ payouts, filters, stats, user }: Prop
         </div>
       )
     },
-    { key: 'amount', label: t('amount'), render: (value: number) => <span className="font-semibold text-black dark:text-white">${Number(value).toFixed(2)}</span> },
+    { key: 'amount', label: t('amount'), render: (value: number) => <span className="font-semibold text-black dark:text-white">{t('currencySymbol')}{Number(value).toFixed(2)}</span> },
     {
       key: 'status', label: t('status'), render: (value: string) => (
         <div className="flex items-center gap-2">
@@ -223,7 +223,7 @@ export default function PayoutManagement({ payouts, filters, stats, user }: Prop
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm font-medium text-zinc-600 dark:text-zinc-400">{t('pendingPayouts')}</p>
-                    <p className="text-3xl font-bold text-black dark:text-white mt-2">${Number(stats.pendingPayouts || 0).toFixed(2)}</p>
+                    <p className="text-3xl font-bold text-black dark:text-white mt-2">{t('currencySymbol')}{Number(stats.pendingPayouts || 0).toFixed(2)}</p>
                   </div>
                   <div className="p-3 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg"><Clock className="w-6 h-6 text-yellow-600 dark:text-yellow-400" /></div>
                 </div>
@@ -232,7 +232,7 @@ export default function PayoutManagement({ payouts, filters, stats, user }: Prop
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm font-medium text-zinc-600 dark:text-zinc-400">{t('completedPayouts')}</p>
-                    <p className="text-3xl font-bold text-black dark:text-white mt-2">${Number(stats.completedPayouts || 0).toFixed(2)}</p>
+                    <p className="text-3xl font-bold text-black dark:text-white mt-2">{t('currencySymbol')}{Number(stats.completedPayouts || 0).toFixed(2)}</p>
                   </div>
                   <div className="p-3 bg-green-50 dark:bg-green-900/20 rounded-lg"><CheckCircle className="w-6 h-6 text-green-600 dark:text-green-400" /></div>
                 </div>
@@ -286,14 +286,14 @@ export default function PayoutManagement({ payouts, filters, stats, user }: Prop
                 <select value={selectedInstructor?.userId || ''} onChange={(e) => { const inst = instructorBalances.find(i => i.userId === parseInt(e.target.value)) || null; setSelectedInstructor(inst); if (inst) setPayoutAmount(inst.balance.toString()); }} className="w-full px-4 py-2 border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 cursor-pointer">
                   <option value="">{t('selectInstructorPlaceholder')}</option>
                   {instructorBalances.map(instructor => (
-                    <option key={instructor.userId} value={instructor.userId}>{instructor.userName} - {t('balanceLabel')} ${instructor.balance.toFixed(2)}</option>
+                    <option key={instructor.userId} value={instructor.userId}>{instructor.userName} - {t('balanceLabel')} {t('currencySymbol')}{instructor.balance.toFixed(2)}</option>
                   ))}
                 </select>
               </div>
               {selectedInstructor && (
                 <div className="border border-green-200 dark:border-green-800 p-4 rounded">
                   <p className="text-sm text-green-700 dark:text-green-300">{t('payoutAmount')}</p>
-                  <p className="text-3xl font-bold text-green-600">${selectedInstructor.balance.toFixed(2)}</p>
+                  <p className="text-3xl font-bold text-green-600">{t('currencySymbol')}{selectedInstructor.balance.toFixed(2)}</p>
                   <p className="text-xs text-green-600 dark:text-green-400 mt-1">{t('fullBalancePaidOut')}</p>
                 </div>
               )}
@@ -326,7 +326,7 @@ export default function PayoutManagement({ payouts, filters, stats, user }: Prop
                 </div>
                 <div className="bg-zinc-100 dark:bg-zinc-800 p-4 rounded mb-4">
                   <p className="text-sm text-zinc-600 dark:text-zinc-400">{t('amountToTransfer')}</p>
-                  <p className="text-3xl font-bold text-green-600">${Number(processingPayout.amount).toFixed(2)}</p>
+                  <p className="text-3xl font-bold text-green-600">{t('currencySymbol')}{Number(processingPayout.amount).toFixed(2)}</p>
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2">{t('adminNotesOptional')}</label>

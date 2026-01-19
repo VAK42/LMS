@@ -147,7 +147,7 @@ export default function SupportTicketManagement({ tickets, users, filters, user 
     try {
       const response = await fetch('/admin/support/export', { credentials: 'same-origin', headers: { 'Accept': 'application/json' } });
       if (response.status === 419) { window.location.reload(); return; }
-      if (!response.ok) throw new Error('Export Failed');
+      if (!response.ok) throw new Error(t('exportFailed'));
       const allTickets = await response.json();
       const exportColumns = columns.filter(col => col.key !== 'actions');
       const headers = exportColumns.map(col => col.label).join(',');
@@ -161,7 +161,7 @@ export default function SupportTicketManagement({ tickets, users, filters, user 
       const url = URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
-      link.download = 'Tickets.csv';
+      link.download = `${t('ticketsExportFilename')}.csv`;
       link.click();
       URL.revokeObjectURL(url);
       showToast(t('supportTicketsExportedSuccess'), 'success');

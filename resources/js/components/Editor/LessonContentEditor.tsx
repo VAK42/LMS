@@ -66,7 +66,7 @@ export default function LessonContentEditor({ isOpen, onClose, lesson, onSaved }
         body: JSON.stringify({ htmlContent }),
       });
       if (response.status === 419) { window.location.reload(); return; }
-      if (!response.ok) throw new Error('Failed To Save Content!');
+      if (!response.ok) throw new Error(t('contentSaveFailed'));
       showToast(t('contentSavedSuccess'), 'success');
       onSaved(lesson.lessonId);
       onClose();

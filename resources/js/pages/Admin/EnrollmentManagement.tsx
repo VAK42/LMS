@@ -129,7 +129,7 @@ export default function EnrollmentManagement({ enrollments, users, courses, filt
     try {
       const response = await fetch('/admin/enrollments/export', { credentials: 'same-origin', headers: { 'Accept': 'application/json' } });
       if (response.status === 419) { window.location.reload(); return; }
-      if (!response.ok) throw new Error('Export Failed');
+      if (!response.ok) throw new Error(t('exportFailed'));
       const allEnrollments = await response.json();
       const exportColumns = columns.filter(col => col.key !== 'actions');
       const headers = exportColumns.map(col => col.label).join(',');
@@ -139,7 +139,7 @@ export default function EnrollmentManagement({ enrollments, users, courses, filt
         else if (col.key === 'course') value = enrollment.course.courseTitle;
         else if (col.key === 'enrollmentDate') value = new Date(enrollment.enrollmentDate).toLocaleDateString();
         else if (col.key === 'completionPercent') value = `${enrollment.completionPercent}%`;
-        else if (col.key === 'isPaid') value = enrollment.isPaid ? 'Yes' : 'No';
+        else if (col.key === 'isPaid') value = enrollment.isPaid ? t('paid') : t('unpaid');
         else value = enrollment[col.key as keyof Enrollment];
         return typeof value === 'string' && value.includes(',') ? `"${value}"` : (value ?? '');
       }).join(',')).join('\n');
@@ -148,7 +148,7 @@ export default function EnrollmentManagement({ enrollments, users, courses, filt
       const url = URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
-      link.download = 'Enrollments.csv';
+      link.download = `${t('enrollmentsExportFilename')}.csv`;
       link.click();
       URL.revokeObjectURL(url);
       showToast(t('enrollmentsExportedSuccess'), 'success');

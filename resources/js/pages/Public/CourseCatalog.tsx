@@ -39,10 +39,14 @@ export default function CourseCatalog({ courses, categories, filters, user }: Co
   const [search, setSearch] = useState(filters?.search || '');
   const [selectedCategory, setSelectedCategory] = useState(filters?.category || '');
   const handleSearch = () => {
-    router.get('/courses', {
-      search,
-      category: selectedCategory,
-    }, {
+    const params: any = {};
+    if (search && search.trim()) {
+      params.search = search;
+    }
+    if (selectedCategory && selectedCategory.trim()) {
+      params.category = selectedCategory;
+    }
+    router.get('/courses', params, {
       preserveState: true,
     });
   };
@@ -118,7 +122,7 @@ export default function CourseCatalog({ courses, categories, filters, user }: Co
                 <div className="overflow-hidden bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 hover:border-black dark:hover:border-white transition-colors">
                   <div className="aspect-video bg-zinc-100 dark:bg-zinc-800 relative overflow-hidden flex items-center justify-center">
                     {course.courseImage ? (
-                      <img src={course.courseImage} alt={course.courseTitle} className="w-full h-full object-cover" />
+                      <img src={`/storage/${course.courseImage}`} alt={course.courseTitle} className="w-full h-full object-cover" />
                     ) : (
                       <BookOpen className="w-24 h-24 text-zinc-300 dark:text-zinc-600" />
                     )}
@@ -150,7 +154,7 @@ export default function CourseCatalog({ courses, categories, filters, user }: Co
                         {t('by')} {course.instructor.userName}
                       </div>
                       <div className="text-xl font-serif font-bold text-black dark:text-white">
-                        {!course.simulatedPrice || course.simulatedPrice <= 0 ? t('free') : `$${course.simulatedPrice}`}
+                        {!course.simulatedPrice || course.simulatedPrice <= 0 ? t('free') : <>{t('currencySymbol')}{course.simulatedPrice}</>}
                       </div>
                     </div>
                   </div>

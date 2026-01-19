@@ -101,6 +101,11 @@ Route::prefix('admin')->middleware(['auth', 'role:admin'])->group(function () {
   Route::delete('/categories/{categoryId}', [Admin\CategoryController::class, 'destroy']);
   Route::put('/categories/{categoryId}', [Admin\CategoryController::class, 'update']);
   Route::get('/categories/export', [Admin\CategoryController::class, 'export']);
+  Route::get('/blogs', [Admin\BlogController::class, 'index']);
+  Route::post('/blogs', [Admin\BlogController::class, 'store']);
+  Route::put('/blogs/{blogId}', [Admin\BlogController::class, 'update']);
+  Route::delete('/blogs/{blogId}', [Admin\BlogController::class, 'destroy']);
+  Route::get('/blogs/export', [Admin\BlogController::class, 'export']);
   Route::get('/certificates', [Admin\CertificateController::class, 'index']);
   Route::post('/certificates', [Admin\CertificateController::class, 'store']);
   Route::delete('/certificates/{certificateId}', [Admin\CertificateController::class, 'destroy']);
