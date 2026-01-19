@@ -351,6 +351,22 @@ return new class extends Migration
       $table->index('courseId');
       $table->index('parentId');
     });
+    Schema::create('blogs', function (Blueprint $table) {
+      $table->id('blogId');
+      $table->foreignId('instructorId')->constrained('users', 'userId')->onDelete('cascade');
+      $table->string('title');
+      $table->string('slug')->unique();
+      $table->text('content');
+      $table->string('thumbnail')->nullable();
+      $table->boolean('isPublished')->default(false);
+      $table->timestamp('publishedAt')->nullable();
+      $table->integer('viewCount')->default(0);
+      $table->timestamp('createdAt')->useCurrent();
+      $table->timestamp('updatedAt')->useCurrent()->useCurrentOnUpdate();
+      $table->index('instructorId');
+      $table->index('slug');
+      $table->index('isPublished');
+    });
   }
   public function down(): void
   {
@@ -379,6 +395,7 @@ return new class extends Migration
     Schema::dropIfExists('categories');
     Schema::dropIfExists('passwordResetTokens');
     Schema::dropIfExists('users');
+    Schema::dropIfExists('blogs');
     Schema::dropIfExists('courseDiscussions');
   }
 };

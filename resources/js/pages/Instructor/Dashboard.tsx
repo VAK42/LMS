@@ -1,4 +1,4 @@
-import { Plus, Edit, Trash2, Eye, EyeOff, BookOpen, Wallet, Users, GraduationCap, DollarSign } from 'lucide-react';
+import { Plus, Edit, Trash2, Eye, EyeOff, BookOpen, Wallet, Users, GraduationCap, DollarSign, FileText } from 'lucide-react';
 import { Head, Link, router } from '@inertiajs/react';
 import { useToast } from '../../contexts/ToastContext';
 import Layout from '../../components/Layout';
@@ -61,6 +61,10 @@ export default function InstructorDashboard({ courses, stats, user }: Props) {
             <Link href="/instructor/grading" className="flex items-center gap-2 px-5 py-2.5 rounded-lg bg-zinc-200 dark:bg-zinc-800 text-zinc-800 dark:text-zinc-200 font-medium hover:bg-zinc-300 dark:hover:bg-zinc-700 transition-colors">
               <GraduationCap className="w-4 h-4" />
               {t('grading')}
+            </Link>
+            <Link href="/instructor/blogs" className="flex items-center gap-2 px-5 py-2.5 rounded-lg bg-zinc-200 dark:bg-zinc-800 text-zinc-800 dark:text-zinc-200 font-medium hover:bg-zinc-300 dark:hover:bg-zinc-700 transition-colors">
+              <FileText className="w-4 h-4" />
+              {t('myBlogs')}
             </Link>
             <Link href="/instructor/courses/create" className="flex items-center gap-2 px-5 py-2.5 rounded-lg text-green-600 border-green-600 border font-medium hover:bg-green-900 hover:text-white transition-colors">
               <Plus className="w-4 h-4" />

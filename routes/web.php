@@ -8,6 +8,8 @@ use App\Http\Controllers\Shared;
 use App\Http\Controllers\Admin;
 use App\Http\Middleware\AdminRouteMiddleware;
 Route::get('/', [Public\HomeController::class, 'index']);
+Route::get('/blogs', [Public\BlogController::class, 'index'])->name('blogs.index');
+Route::get('/blogs/{slug}', [Public\BlogController::class, 'show'])->name('blogs.show');
 Route::get('/courses', [Public\CourseController::class, 'index']);
 Route::get('/courses/{courseId}', [Public\CourseController::class, 'show']);
 Route::get('/email/verify/{token}', [Auth\EmailVerificationController::class, 'verify'])->name('verification.verify');
@@ -84,6 +86,8 @@ Route::middleware(['auth', 'role:instructor'])->group(function () {
   Route::put('/api/instructor/questions/{questionId}', [Instructor\QuizController::class, 'updateQuestion']);
   Route::post('/api/instructor/quizzes/{quizId}/questions', [Instructor\QuizController::class, 'addQuestion']);
   Route::post('/api/instructor/submissions/{submissionId}/grade', [Instructor\GradingController::class, 'grade']);
+  Route::resource('instructor/blogs', Instructor\BlogController::class);
+  Route::post('/instructor/blogs/uploadImage', [Instructor\BlogController::class, 'uploadImage'])->name('instructor.blogs.uploadImage');
   Route::get('/instructor/courses/create', [Instructor\CourseManagementController::class, 'create']);
   Route::get('/instructor/courses/{courseId}/edit', [Instructor\CourseManagementController::class, 'edit']);
   Route::get('/instructor/dashboard', [Instructor\DashboardController::class, 'index']);

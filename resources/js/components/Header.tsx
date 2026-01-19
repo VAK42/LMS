@@ -62,6 +62,9 @@ export default function Header({ user }: HeaderProps) {
               <Link href="/courses" className="text-zinc-700 dark:text-zinc-300 hover:text-black dark:hover:text-white transition-colors">
                 {t('courses')}
               </Link>
+              <Link href="/blogs" className="text-zinc-700 dark:text-zinc-300 hover:text-black dark:hover:text-white transition-colors">
+                {t('blog')}
+              </Link>
             </div>
           </div>
           <div className="hidden md:flex items-center gap-4 flex-1 max-w-md mx-8">
