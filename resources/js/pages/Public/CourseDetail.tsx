@@ -98,88 +98,51 @@ export default function CourseDetail({ course, adminQrPath, isEnrolled, isInWish
   return (
     <Layout user={user}>
       <Head title={course.courseTitle} />
-      <div className="bg-slate-900 text-white">
+      <div className="bg-green-950 text-white dark:bg-white dark:text-green-950">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-16">
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
             <div className="lg:col-span-2 space-y-6">
-              <div className="flex items-center gap-2 text-zinc-100 text-sm font-medium">
-                <Link href={`/courses?category=${course.category.categoryId}`} className="hover:text-white transition-colors">{course.category.categoryName}</Link>
+              <div className="flex items-center gap-2 text-zinc-300 dark:text-zinc-600 text-sm font-medium">
+                <Link href={`/courses?category=${course.category.categoryId}`} className="hover:text-white dark:hover:text-green-950 transition-colors">{course.category.categoryName}</Link>
               </div>
-              <h1 className="text-3xl md:text-5xl font-bold leading-tight">
+              <h1 className="text-3xl md:text-5xl font-serif text-white dark:text-green-950 leading-tight">
                 {course.courseTitle}
               </h1>
-              <p className="text-lg text-slate-300 leading-relaxed max-w-2xl">
+              <p className="text-lg text-zinc-300 dark:text-zinc-600 leading-relaxed max-w-2xl">
                 {course.courseDescription}
               </p>
               <div className="flex flex-wrap items-center gap-6 text-sm">
-                <div className="flex items-center gap-1.5 text-yellow-400">
-                  <span className="font-bold text-lg">{course.rating}</span>
+                <div className="flex items-center gap-1.5 text-yellow-500">
+                  <span className="font-medium text-lg text-white dark:text-green-950">{course.rating}</span>
                   <div className="flex">
                     {[...Array(5)].map((_, i) => (
                       <Star key={i} className={`w-4 h-4 ${i < Math.floor(course.rating) ? 'fill-current' : ''}`} />
                     ))}
                   </div>
-                  <span className="text-slate-400 ml-1">{course.ratingsCount > 0 ? course.ratingsCount.toLocaleString() : 0} {t('ratings')}</span>
+                  <span className="text-zinc-400 ml-1">{course.ratingsCount > 0 ? course.ratingsCount.toLocaleString() : 0} {t('ratings')}</span>
                 </div>
-                <div className="flex items-center gap-2 text-slate-300">
+                <div className="flex items-center gap-2 text-zinc-300 dark:text-zinc-600">
                   <Users className="w-4 h-4" />
                   <span>{course.studentsCount.toLocaleString()} {t('studentsEnrolled')}</span>
                 </div>
-                <div className="flex items-center gap-2 text-slate-300">
+                <div className="flex items-center gap-2 text-zinc-300 dark:text-zinc-600">
                   <Clock className="w-4 h-4" />
                   <span>{t('lastUpdated')} {new Date(course.lastUpdated).toLocaleDateString((usePage().props as any).locale, { month: 'long', year: 'numeric' })}</span>
                 </div>
               </div>
               <div className="flex items-center gap-4 pt-4">
                 {!isEnrolled && (
-                  <button
-                    onClick={handleWishlistToggle}
-                    disabled={wishlistLoading}
-                    className={`p-2 rounded-full transition-colors cursor-pointer ${inWishlist ? 'bg-red-500/20 text-red-500' : 'bg-white/10 hover:bg-white/20 text-white'}`}
-                  >
+                  <button onClick={handleWishlistToggle} disabled={wishlistLoading} className={`p-2 rounded transition-colors cursor-pointer ${inWishlist ? 'bg-red-500/20 text-red-500' : 'bg-white/10 dark:bg-green-950/10 hover:bg-white/20 dark:hover:bg-green-950/20 text-white dark:text-green-950'}`}>
                     <Heart className={`w-6 h-6 ${inWishlist ? 'fill-current' : ''}`} />
                   </button>
                 )}
-                <button
-                  onClick={() => {
-                    if (navigator.share) {
-                      navigator.share({
-                        title: course.courseTitle,
-                        url: window.location.href
-                      });
-                    } else {
-                      navigator.clipboard.writeText(window.location.href);
-                      showToast(t('courseLinkCopied'), 'success');
-                    }
-                  }}
-                  className="p-2 rounded-full bg-white/10 hover:bg-white/20 transition-colors cursor-pointer"
-                >
+                <button onClick={() => { if (navigator.share) { navigator.share({ title: course.courseTitle, url: window.location.href }); } else { navigator.clipboard.writeText(window.location.href); showToast(t('courseLinkCopied'), 'success'); } }} className="p-2 rounded bg-white/10 dark:bg-green-950/10 hover:bg-white/20 dark:hover:bg-green-950/20 transition-colors cursor-pointer text-white dark:text-green-950">
                   <Share2 className="w-6 h-6" />
                 </button>
-                <button
-                  onClick={() => {
-                    if (isEnrolled) {
-                      router.visit(`/courses/${course.courseId}/discussions`);
-                    } else {
-                      showToast(t('enrollToDiscuss'), 'error');
-                    }
-                  }}
-                  className={`p-2 rounded-full transition-colors cursor-pointer ${isEnrolled ? 'bg-white/10 hover:bg-white/20' : 'bg-white/5 opacity-50 cursor-not-allowed'}`}
-                  title={isEnrolled ? t('discussions') : t('enrollToDiscuss')}
-                >
+                <button onClick={() => { if (isEnrolled) { router.visit(`/courses/${course.courseId}/discussions`); } else { showToast(t('enrollToDiscuss'), 'error'); } }} className={`p-2 rounded transition-colors cursor-pointer text-white dark:text-green-950 ${isEnrolled ? 'bg-white/10 dark:bg-green-950/10 hover:bg-white/20 dark:hover:bg-green-950/20' : 'bg-white/5 dark:bg-green-950/5 opacity-50 cursor-not-allowed'}`} title={isEnrolled ? t('discussions') : t('enrollToDiscuss')}>
                   <MessageSquare className="w-6 h-6" />
                 </button>
-                <button
-                  onClick={() => {
-                    if (isEnrolled) {
-                      router.visit(`/courses/${course.courseId}/reviews`)
-                    } else {
-                      showToast(t('enrollToReview'), 'error');
-                    }
-                  }}
-                  className={`p-2 rounded-full transition-colors cursor-pointer ${isEnrolled ? 'bg-white/10 hover:bg-white/20' : 'bg-white/5 opacity-50 cursor-not-allowed'}`}
-                  title={isEnrolled ? t('reviews') : t('enrollToReview')}
-                >
+                <button onClick={() => { if (isEnrolled) { router.visit(`/courses/${course.courseId}/reviews`) } else { showToast(t('enrollToReview'), 'error'); } }} className={`p-2 rounded transition-colors cursor-pointer text-white dark:text-green-950 ${isEnrolled ? 'bg-white/10 dark:bg-green-950/10 hover:bg-white/20 dark:hover:bg-green-950/20' : 'bg-white/5 dark:bg-green-950/5 opacity-50 cursor-not-allowed'}`} title={isEnrolled ? t('reviews') : t('enrollToReview')}>
                   <Star className="w-6 h-6" />
                 </button>
               </div>
@@ -190,40 +153,40 @@ export default function CourseDetail({ course, adminQrPath, isEnrolled, isInWish
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
           <div className="lg:col-span-2 space-y-12">
-            <div className="bg-white dark:bg-slate-800 rounded-2xl p-8 border border-slate-200 dark:border-slate-700">
-              <h2 className="text-2xl font-bold text-slate-900 dark:text-white mb-6">
+            <div className="bg-white dark:bg-zinc-900 rounded p-8 border border-green-950 dark:border-white">
+              <h2 className="text-2xl font-serif text-green-950 dark:text-white mb-6">
                 {t('whatYouWillLearn')}
               </h2>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {course.whatYouLearn?.map((item, i) => (
                   <div key={i} className="flex items-start gap-3">
-                    <CheckCircle className="w-5 h-5 text-green-500 flex-shrink-0 mt-0.5" />
-                    <span className="text-slate-700 dark:text-slate-300">{item}</span>
+                    <CheckCircle className="w-5 h-5 text-green-950 dark:text-white flex-shrink-0 mt-0.5" />
+                    <span className="text-zinc-700 dark:text-zinc-300">{item}</span>
                   </div>
                 ))}
               </div>
             </div>
             <div>
-              <h2 className="text-2xl font-bold text-slate-900 dark:text-white mb-6">
+              <h2 className="text-2xl font-serif text-green-950 dark:text-white mb-6">
                 {t('courseContent')}
               </h2>
               <div className="space-y-4">
                 {course.modules.map((module) => (
-                  <div key={module.moduleId} className="border border-slate-200 dark:border-slate-700 rounded-xl overflow-hidden">
-                    <div className="bg-slate-50 dark:bg-slate-900 p-4 flex justify-between items-center cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
+                  <div key={module.moduleId} className="border border-green-950 dark:border-white rounded overflow-hidden">
+                    <div className="bg-green-950 dark:bg-white p-4 flex justify-between items-center cursor-pointer hover:bg-green-900 dark:hover:bg-zinc-100 transition-colors border-b border-green-950 dark:border-white">
                       <div className="flex items-center gap-3">
-                        <span className="font-bold text-slate-900 dark:text-white">{module.moduleTitle}</span>
+                        <span className="font-medium text-white dark:text-green-950">{module.moduleTitle}</span>
                       </div>
-                      <span className="text-sm text-slate-500 dark:text-slate-400">{module.lessonCount} {t('lessons')} • {module.duration}{t('minutesAbbr')}</span>
+                      <span className="text-sm text-zinc-300 dark:text-zinc-600">{module.lessonCount} {t('lessons')} • {module.duration}{t('minutesAbbr')}</span>
                     </div>
-                    <div className="divide-y divide-slate-100 dark:divide-slate-800">
+                    <div className="divide-y divide-green-950 dark:divide-white">
                       {module.lessons.map((lesson) => (
-                        <div key={lesson.lessonId} className="p-4 pl-12 flex justify-between items-center bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors">
+                        <div key={lesson.lessonId} className="p-4 pl-12 flex justify-between items-center bg-white dark:bg-zinc-900 hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors">
                           <div className="flex items-center gap-3">
-                            <PlayCircle className="w-4 h-4 text-slate-400" />
-                            <span className="text-slate-700 dark:text-slate-300">{lesson.lessonTitle}</span>
+                            <PlayCircle className="w-4 h-4 text-zinc-400" />
+                            <span className="text-zinc-700 dark:text-zinc-300">{lesson.lessonTitle}</span>
                           </div>
-                          <span className="text-sm text-slate-400">{lesson.duration} {t('minutesShort')}</span>
+                          <span className="text-sm text-zinc-400">{lesson.duration} {t('minutesShort')}</span>
                         </div>
                       ))}
                     </div>
@@ -234,37 +197,34 @@ export default function CourseDetail({ course, adminQrPath, isEnrolled, isInWish
           </div>
           <div className="lg:col-span-1">
             <div className="sticky top-8 space-y-6">
-              <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-lg border border-slate-200 dark:border-slate-700 overflow-hidden transform lg:-translate-y-32">
-                <div className="aspect-video bg-zinc-100 dark:bg-zinc-800 relative overflow-hidden flex items-center justify-center">
+              <div className="bg-white dark:bg-zinc-900 rounded shadow-lg border border-green-950 dark:border-white overflow-hidden transform lg:-translate-y-32">
+                <div className="aspect-video bg-zinc-100 dark:bg-zinc-800 border-b border-green-950 dark:border-white relative overflow-hidden flex items-center justify-center">
                   {course.courseImage ? (
                     <img src={`/storage/${course.courseImage}`} alt={course.courseTitle} className="w-full h-full object-cover" />
                   ) : (
-                    <div className="bg-zinc-900 w-full h-full flex items-center justify-center grayscale">
-                      <PlayCircle className="w-16 h-16 text-white opacity-60" />
+                    <div className="bg-white dark:bg-zinc-900 w-full h-full flex items-center justify-center grayscale">
+                      <PlayCircle className="w-16 h-16 text-zinc-900 dark:text-white opacity-60" />
                     </div>
                   )}
                 </div>
                 <div className="p-6">
-                  <div className="text-3xl font-bold text-slate-900 dark:text-white mb-4">
+                  <div className="text-3xl font-serif text-green-950 dark:text-white mb-4">
                     {course.price === 0 ? t('free') : <>{t('currencySymbol')}{course.price.toFixed(2)}</>}
                   </div>
                   {isEnrolled ? (
-                    <div className="w-full py-4 bg-zinc-800 dark:bg-white text-white dark:text-black font-bold text-center rounded flex items-center justify-center gap-2">
+                    <div className="w-full py-4 bg-green-950 dark:bg-white text-white dark:text-green-950 font-medium text-center rounded flex items-center justify-center gap-2">
                       <CheckCircle className="w-5 h-5" />
                       {t('purchased')}
                     </div>
                   ) : (
-                    <button
-                      onClick={handleBuyNow}
-                      className="w-full py-4 bg-zinc-800 dark:bg-white text-white dark:text-black font-bold hover:bg-zinc-900 dark:hover:bg-zinc-100 transition-colors mb-4 cursor-pointer"
-                    >
+                    <button onClick={handleBuyNow} className="w-full py-4 bg-green-950 dark:bg-white text-white dark:text-green-950 font-medium hover:bg-white hover:text-green-950 hover:border-green-950 dark:hover:bg-green-950 dark:hover:text-white dark:hover:border-white border border-transparent transition-colors mb-4 cursor-pointer rounded">
                       {t('buyNow')}
                     </button>
                   )}
                 </div>
-                <div className="px-6 pb-6 pt-0 space-y-4 border-t border-slate-100 dark:border-slate-700 mt-4 pt-4">
-                  <h3 className="font-bold text-slate-900 dark:text-white">{t('thisCourseIncludes')}</h3>
-                  <ul className="space-y-3 text-sm text-slate-600 dark:text-slate-400">
+                <div className="px-6 pb-6 pt-0 space-y-4 border-t border-green-950 dark:border-white mt-4 pt-4">
+                  <h3 className="font-medium text-green-950 dark:text-white">{t('thisCourseIncludes')}</h3>
+                  <ul className="space-y-3 text-sm text-zinc-600 dark:text-zinc-400">
                     <li className="flex items-center gap-3">
                       <PlayCircle className="w-4 h-4" />
                       {course.videoDuration ?? 0} {t('onDemandVideo')}
@@ -288,12 +248,7 @@ export default function CourseDetail({ course, adminQrPath, isEnrolled, isInWish
           </div>
         </div>
       </div>
-      <PaymentModal
-        isOpen={showPaymentModal}
-        onClose={() => setShowPaymentModal(false)}
-        course={{ courseId: course.courseId, courseTitle: course.courseTitle, price: course.price }}
-        adminQrPath={adminQrPath}
-      />
+      <PaymentModal isOpen={showPaymentModal} onClose={() => setShowPaymentModal(false)} course={{ courseId: course.courseId, courseTitle: course.courseTitle, price: course.price }} adminQrPath={adminQrPath} />
     </Layout>
   )
 }

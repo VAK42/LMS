@@ -210,7 +210,7 @@ export default function PayoutManagement({ payouts, filters, stats, user }: Prop
           <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 py-8">
             <div className="flex items-center justify-between mb-8">
               <div>
-                <h1 className="text-4xl font-bold text-black dark:text-white mb-2">{t('payoutManagement')}</h1>
+                <h1 className="text-4xl text-black dark:text-white mb-2">{t('payoutManagement')}</h1>
                 <p className="text-zinc-600 dark:text-zinc-400">{t('managePayoutsSubtitle')}</p>
               </div>
               <button onClick={() => setShowCreateModal(true)} className="flex items-center gap-2 px-6 py-3 bg-black dark:bg-white text-white dark:text-black hover:bg-zinc-800 dark:hover:bg-zinc-200 cursor-pointer">
@@ -223,7 +223,7 @@ export default function PayoutManagement({ payouts, filters, stats, user }: Prop
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm font-medium text-zinc-600 dark:text-zinc-400">{t('pendingPayouts')}</p>
-                    <p className="text-3xl font-bold text-black dark:text-white mt-2">{t('currencySymbol')}{Number(stats.pendingPayouts || 0).toFixed(2)}</p>
+                    <p className="text-3xl text-black dark:text-white mt-2">{t('currencySymbol')}{Number(stats.pendingPayouts || 0).toFixed(2)}</p>
                   </div>
                   <div className="p-3 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg"><Clock className="w-6 h-6 text-yellow-600 dark:text-yellow-400" /></div>
                 </div>
@@ -232,7 +232,7 @@ export default function PayoutManagement({ payouts, filters, stats, user }: Prop
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm font-medium text-zinc-600 dark:text-zinc-400">{t('completedPayouts')}</p>
-                    <p className="text-3xl font-bold text-black dark:text-white mt-2">{t('currencySymbol')}{Number(stats.completedPayouts || 0).toFixed(2)}</p>
+                    <p className="text-3xl text-black dark:text-white mt-2">{t('currencySymbol')}{Number(stats.completedPayouts || 0).toFixed(2)}</p>
                   </div>
                   <div className="p-3 bg-green-50 dark:bg-green-900/20 rounded-lg"><CheckCircle className="w-6 h-6 text-green-600 dark:text-green-400" /></div>
                 </div>
@@ -241,7 +241,7 @@ export default function PayoutManagement({ payouts, filters, stats, user }: Prop
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm font-medium text-zinc-600 dark:text-zinc-400">{t('totalPayouts')}</p>
-                    <p className="text-3xl font-bold text-black dark:text-white mt-2">{stats.totalPayouts}</p>
+                    <p className="text-3xl text-black dark:text-white mt-2">{stats.totalPayouts}</p>
                   </div>
                   <div className="p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg"><Wallet className="w-6 h-6 text-blue-600 dark:text-blue-400" /></div>
                 </div>
@@ -279,7 +279,7 @@ export default function PayoutManagement({ payouts, filters, stats, user }: Prop
       {showCreateModal && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
           <div className="bg-white dark:bg-zinc-900 p-8 rounded-lg max-w-lg w-full mx-4">
-            <h2 className="text-2xl font-bold text-black dark:text-white mb-6">{t('createPayout')}</h2>
+            <h2 className="text-2xl text-black dark:text-white mb-6">{t('createPayout')}</h2>
             <div className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2">{t('selectInstructor')}</label>
@@ -293,7 +293,7 @@ export default function PayoutManagement({ payouts, filters, stats, user }: Prop
               {selectedInstructor && (
                 <div className="border border-green-200 dark:border-green-800 p-4 rounded">
                   <p className="text-sm text-green-700 dark:text-green-300">{t('payoutAmount')}</p>
-                  <p className="text-3xl font-bold text-green-600">{t('currencySymbol')}{selectedInstructor.balance.toFixed(2)}</p>
+                  <p className="text-3xl text-green-600">{t('currencySymbol')}{selectedInstructor.balance.toFixed(2)}</p>
                   <p className="text-xs text-green-600 dark:text-green-400 mt-1">{t('fullBalancePaidOut')}</p>
                 </div>
               )}
@@ -308,7 +308,7 @@ export default function PayoutManagement({ payouts, filters, stats, user }: Prop
       {showQrModal && selectedQr && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50" onClick={() => setShowQrModal(false)}>
           <div className="bg-white dark:bg-zinc-900 p-8 rounded-lg max-w-md w-full mx-4" onClick={e => e.stopPropagation()}>
-            <h2 className="text-xl font-bold text-black dark:text-white mb-4">{t('bankQrCode')}</h2>
+            <h2 className="text-xl text-black dark:text-white mb-4">{t('bankQrCode')}</h2>
             <img src={selectedQr} alt={t('bankQr')} className="w-full max-h-96 object-contain rounded" />
             <button onClick={() => setShowQrModal(false)} className="w-full mt-4 px-4 py-2 bg-black dark:bg-white text-white dark:text-black hover:bg-zinc-800 dark:hover:bg-zinc-200 cursor-pointer">{t('close')}</button>
           </div>
@@ -317,16 +317,16 @@ export default function PayoutManagement({ payouts, filters, stats, user }: Prop
       {processingPayout && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
           <div className="bg-white dark:bg-zinc-900 p-8 rounded-lg max-w-2xl w-full mx-4">
-            <h2 className="text-2xl font-bold text-black dark:text-white mb-6">{t('processPayout')}</h2>
+            <h2 className="text-2xl text-black dark:text-white mb-6">{t('processPayout')}</h2>
             <div className="grid grid-cols-2 gap-6">
               <div>
                 <div className="bg-zinc-100 dark:bg-zinc-800 p-4 rounded mb-4">
                   <p className="text-sm text-zinc-600 dark:text-zinc-400">{t('instructor')}</p>
-                  <p className="text-lg font-bold text-black dark:text-white">{processingPayout.instructor.userName}</p>
+                  <p className="text-lg text-black dark:text-white">{processingPayout.instructor.userName}</p>
                 </div>
                 <div className="bg-zinc-100 dark:bg-zinc-800 p-4 rounded mb-4">
                   <p className="text-sm text-zinc-600 dark:text-zinc-400">{t('amountToTransfer')}</p>
-                  <p className="text-3xl font-bold text-green-600">{t('currencySymbol')}{Number(processingPayout.amount).toFixed(2)}</p>
+                  <p className="text-3xl text-green-600">{t('currencySymbol')}{Number(processingPayout.amount).toFixed(2)}</p>
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2">{t('adminNotesOptional')}</label>

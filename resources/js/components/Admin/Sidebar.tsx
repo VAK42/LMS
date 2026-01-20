@@ -24,7 +24,7 @@ export default function AdminSidebar({ currentPath }: Props) {
   return (
     <div className="w-64 bg-white dark:bg-zinc-900 border-r border-zinc-200 dark:border-zinc-800 min-h-screen p-6">
       <div className="mb-8">
-        <h2 className="text-2xl font-bold text-black dark:text-white">{t('adminPanel')}</h2>
+        <h2 className="text-2xl text-black dark:text-white">{t('adminPanel')}</h2>
         <p className="text-sm text-zinc-600 dark:text-zinc-400">{t('lmsFullName')}</p>
       </div>
       <nav className="space-y-1">

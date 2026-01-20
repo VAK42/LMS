@@ -238,7 +238,7 @@ export default function BlogManagement({ blogs, instructors, filters, user }: Pr
           <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 py-8">
             <div className="flex items-center justify-between mb-8">
               <div>
-                <h1 className="text-4xl font-bold text-black dark:text-white mb-2">{t('blogManagement')}</h1>
+                <h1 className="text-4xl text-black dark:text-white mb-2">{t('blogManagement')}</h1>
                 <p className="text-zinc-600 dark:text-zinc-400">{t('manageBlogsSubtitle')}</p>
               </div>
               <button onClick={() => setIsCreateModalOpen(true)} className="flex items-center gap-2 px-6 py-3 bg-black dark:bg-white text-white dark:text-black font-medium hover:bg-zinc-800 dark:hover:bg-zinc-200 cursor-pointer">

@@ -11,7 +11,9 @@ class WishlistController extends Controller
     $wishlists = Wishlist::where('userId', $request->user()->userId)
       ->with('course')
       ->paginate(20);
-    return response()->json($wishlists);
+    return inertia('Learner/Wishlist', [
+      'wishlists' => $wishlists,
+    ]);
   }
   public function toggle(Request $request)
   {

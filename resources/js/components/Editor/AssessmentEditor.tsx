@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react'
-import { X, Plus, Trash2, Save } from 'lucide-react'
 import { useToast } from '../../contexts/ToastContext'
+import { X, Plus, Trash2, Save } from 'lucide-react'
+import { useState, useEffect } from 'react'
 import useTranslation from '../../hooks/useTranslation'
 interface Question {
   questionId?: number
@@ -116,10 +116,10 @@ export default function AssessmentEditor({ isOpen, onClose, courseId }: Props) {
   if (!isOpen) return null
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-      <div className="bg-white dark:bg-zinc-900 rounded-xl w-full max-w-3xl max-h-[90vh] overflow-hidden flex flex-col">
-        <div className="flex items-center justify-between p-6 border-b border-zinc-200 dark:border-zinc-800">
-          <h2 className="text-xl font-bold text-black dark:text-white">{t('essayAssessmentEditor')}</h2>
-          <button onClick={onClose} className="p-2 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-full cursor-pointer">
+      <div className="bg-white dark:bg-zinc-900 rounded border border-green-950 dark:border-white w-full max-w-3xl max-h-[90vh] overflow-hidden flex flex-col">
+        <div className="flex items-center justify-between p-6 border-b border-green-950 dark:border-white">
+          <h2 className="text-xl font-serif text-green-950 dark:text-white">{t('essayAssessmentEditor')}</h2>
+          <button onClick={onClose} className="p-2 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded cursor-pointer">
             <X className="w-5 h-5 text-zinc-500" />
           </button>
         </div>
@@ -130,22 +130,22 @@ export default function AssessmentEditor({ isOpen, onClose, courseId }: Props) {
             <>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1">{t('assessmentTitle')}</label>
-                  <input type="text" value={assessment.assessmentTitle} onChange={e => setAssessment({ ...assessment, assessmentTitle: e.target.value })} className="w-full px-3 py-2 rounded border border-zinc-300 dark:border-zinc-600 bg-white dark:bg-zinc-800 dark:text-white" />
+                  <label className="block text-sm text-green-950 dark:text-white mb-1">{t('assessmentTitle')}</label>
+                  <input type="text" value={assessment.assessmentTitle} onChange={e => setAssessment({ ...assessment, assessmentTitle: e.target.value })} className="w-full px-3 py-2 rounded border border-green-950 dark:border-white bg-white dark:bg-zinc-900 text-green-950 dark:text-white focus:outline-none focus:ring-1 focus:ring-green-950 dark:focus:ring-white" />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1">{t('passingScorePercent')}</label>
-                  <input type="number" min="0" max="100" value={assessment.passingScore} onChange={e => setAssessment({ ...assessment, passingScore: parseInt(e.target.value) || 0 })} className="w-full px-3 py-2 rounded border border-zinc-300 dark:border-zinc-600 bg-white dark:bg-zinc-800 dark:text-white" />
+                  <label className="block text-sm text-green-950 dark:text-white mb-1">{t('passingScorePercent')}</label>
+                  <input type="number" min="0" max="100" value={assessment.passingScore} onChange={e => setAssessment({ ...assessment, passingScore: parseInt(e.target.value) || 0 })} className="w-full px-3 py-2 rounded border border-green-950 dark:border-white bg-white dark:bg-zinc-900 text-green-950 dark:text-white focus:outline-none focus:ring-1 focus:ring-green-950 dark:focus:ring-white" />
                 </div>
               </div>
-              <hr className="border-zinc-200 dark:border-zinc-700" />
+              <hr className="border-green-950 dark:border-white" />
               <div>
-                <h3 className="text-lg font-bold text-black dark:text-white mb-4">{t('essayQuestions')} ({assessment.questions.length})</h3>
+                <h3 className="text-lg text-green-950 dark:text-white mb-4">{t('essayQuestions')} ({assessment.questions.length})</h3>
                 <div className="space-y-3">
                   {assessment.questions.map((q, idx) => (
-                    <div key={q.questionId || idx} className="p-4 bg-zinc-50 dark:bg-zinc-800 rounded-lg flex items-start justify-between gap-4">
+                    <div key={q.questionId || idx} className="p-4 bg-zinc-50 dark:bg-zinc-800 rounded border border-zinc-200 dark:border-zinc-700 flex items-start justify-between gap-4">
                       <div className="flex-1">
-                        <p className="font-medium text-black dark:text-white">{idx + 1}. {q.questionText}</p>
+                        <p className="font-medium text-green-950 dark:text-white">{idx + 1}. {q.questionText}</p>
                       </div>
                       <button onClick={() => handleDeleteQuestion(idx)} className="p-2 text-red-500 hover:bg-red-100 dark:hover:bg-red-900/30 rounded cursor-pointer">
                         <Trash2 className="w-4 h-4" />
@@ -154,13 +154,13 @@ export default function AssessmentEditor({ isOpen, onClose, courseId }: Props) {
                   ))}
                 </div>
               </div>
-              <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg space-y-4">
-                <h4 className="font-medium text-black dark:text-white">{t('addNewEssayQuestion')}</h4>
+              <div className="p-4 bg-zinc-50 dark:bg-zinc-800 rounded border border-green-950 dark:border-white space-y-4">
+                <h4 className="font-medium text-green-950 dark:text-white">{t('addNewEssayQuestion')}</h4>
                 <div>
-                  <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1">{t('question')}</label>
-                  <textarea value={newQuestion.questionText} onChange={e => setNewQuestion({ ...newQuestion, questionText: e.target.value })} className="w-full px-3 py-2 rounded border border-zinc-300 dark:border-zinc-600 bg-white dark:bg-zinc-800 dark:text-white" rows={3} placeholder={t('enterEssayQuestionPlaceholder')} />
+                  <label className="block text-sm text-green-950 dark:text-white mb-1">{t('question')}</label>
+                  <textarea value={newQuestion.questionText} onChange={e => setNewQuestion({ ...newQuestion, questionText: e.target.value })} className="w-full px-3 py-2 rounded border border-green-950 dark:border-white bg-white dark:bg-zinc-900 text-green-950 dark:text-white focus:outline-none focus:ring-1 focus:ring-green-950 dark:focus:ring-white" rows={3} placeholder={t('enterEssayQuestionPlaceholder')} />
                 </div>
-                <button onClick={handleAddQuestion} className="flex items-center gap-2 px-4 py-2 border border-green-600 text-green-600 rounded hover:bg-green-900 hover:text-white cursor-pointer">
+                <button onClick={handleAddQuestion} className="flex items-center gap-2 px-4 py-2 border border-green-950 dark:border-white text-green-950 dark:text-white rounded hover:bg-green-950 hover:text-white dark:hover:bg-white dark:hover:text-green-950 cursor-pointer transition-colors">
                   <Plus className="w-4 h-4" />
                   {t('addQuestion')}
                 </button>
@@ -168,8 +168,8 @@ export default function AssessmentEditor({ isOpen, onClose, courseId }: Props) {
             </>
           )}
         </div>
-        <div className="p-6 border-t border-zinc-200 dark:border-zinc-800">
-          <button onClick={handleSaveAssessment} disabled={saving} className="flex items-center gap-2 px-6 py-3 text-green-600 border border-green-600 rounded hover:bg-green-900 hover:text-white disabled:opacity-50 cursor-pointer">
+        <div className="p-6 border-t border-green-950 dark:border-white">
+          <button onClick={handleSaveAssessment} disabled={saving} className="flex items-center gap-2 px-6 py-3 bg-green-950 dark:bg-white text-white dark:text-green-950 border border-green-950 dark:border-white rounded hover:bg-white hover:text-green-950 dark:hover:bg-green-950 dark:hover:text-white dark:hover:border-green-950 disabled:opacity-50 cursor-pointer transition-colors">
             <Save className="w-4 h-4" />
             {saving ? t('saving') : t('saveAssessment')}
           </button>

@@ -68,7 +68,7 @@ export default function PaymentModal({ isOpen, onClose, course, adminQrPath }: P
     <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4">
       <div className="bg-white dark:bg-zinc-900 rounded-2xl max-w-md w-full overflow-hidden shadow-2xl">
         <div className="flex items-center justify-between p-6 border-b border-zinc-200 dark:border-zinc-800">
-          <h2 className="text-xl font-bold text-black dark:text-white">{t('completePayment')}</h2>
+          <h2 className="text-xl text-black dark:text-white">{t('completePayment')}</h2>
           <button onClick={handleClose} className="p-2 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-full cursor-pointer">
             <X className="w-5 h-5 text-zinc-500" />
           </button>
@@ -78,7 +78,7 @@ export default function PaymentModal({ isOpen, onClose, course, adminQrPath }: P
             <>
               <div className="text-center mb-6">
                 <p className="text-zinc-600 dark:text-zinc-400 mb-2">{t('scanQrToTransfer')}</p>
-                <p className="text-3xl font-bold text-black dark:text-white">{t('currencySymbol')}{course.price.toFixed(2)}</p>
+                <p className="text-3xl text-black dark:text-white">{t('currencySymbol')}{course.price.toFixed(2)}</p>
                 <p className="text-sm text-zinc-500 mt-1">{t('for')}: {course.courseTitle}</p>
               </div>
               <div className="bg-zinc-100 dark:bg-zinc-800 rounded-xl p-4 mb-6">
@@ -97,7 +97,7 @@ export default function PaymentModal({ isOpen, onClose, course, adminQrPath }: P
                   <strong>{t('important')}:</strong> {t('paymentInstruction')}
                 </p>
               </div>
-              <button onClick={handleConfirmPayment} className="w-full py-4 bg-black dark:bg-white text-white dark:text-black font-bold rounded-xl hover:bg-zinc-800 dark:hover:bg-zinc-200 transition-colors cursor-pointer flex items-center justify-center gap-2">
+              <button onClick={handleConfirmPayment} className="w-full py-4 bg-black dark:bg-white text-white dark:text-black rounded-xl hover:bg-zinc-800 dark:hover:bg-zinc-200 transition-colors cursor-pointer flex items-center justify-center gap-2">
                 <CheckCircle className="w-5 h-5" />
                 {t('iHaveTransferred')}
               </button>
@@ -115,12 +115,12 @@ export default function PaymentModal({ isOpen, onClose, course, adminQrPath }: P
               <div className="w-16 h-16 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center mx-auto mb-4">
                 <CheckCircle className="w-8 h-8 text-green-600" />
               </div>
-              <p className="text-xl font-bold text-black dark:text-white mb-2">{t('paymentSubmitted')}</p>
+              <p className="text-xl text-black dark:text-white mb-2">{t('paymentSubmitted')}</p>
               <p className="text-zinc-500 mb-6">{t('transactionId')}: #{transactionId}</p>
               <p className="text-sm text-zinc-600 dark:text-zinc-400 mb-6">
                 {t('paymentConfirmationText')}
               </p>
-              <button onClick={handleClose} className="w-full py-3 bg-black dark:bg-white text-white dark:text-black font-bold rounded-xl hover:bg-zinc-800 dark:hover:bg-zinc-200 transition-colors cursor-pointer">
+              <button onClick={handleClose} className="w-full py-3 bg-black dark:bg-white text-white dark:text-black rounded-xl hover:bg-zinc-800 dark:hover:bg-zinc-200 transition-colors cursor-pointer">
                 {t('goToDashboard')}
               </button>
             </div>

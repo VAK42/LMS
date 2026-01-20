@@ -209,7 +209,7 @@ export default function TransactionManagement({ transactions, filters, stats, us
         <div className="flex-1">
           <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 py-8">
             <div className="mb-8">
-              <h1 className="text-4xl font-bold text-black dark:text-white mb-2">{t('transactionManagement')}</h1>
+              <h1 className="text-4xl text-black dark:text-white mb-2">{t('transactionManagement')}</h1>
               <p className="text-zinc-600 dark:text-zinc-400">{t('viewTransactionsSubtitle')}</p>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
@@ -217,7 +217,7 @@ export default function TransactionManagement({ transactions, filters, stats, us
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm font-medium text-zinc-600 dark:text-zinc-400">{t('totalRevenue')}</p>
-                    <p className="text-3xl font-bold text-black dark:text-white mt-2">{t('currencySymbol')}{Number(stats.totalRevenue || 0).toFixed(2)}</p>
+                    <p className="text-3xl text-black dark:text-white mt-2">{t('currencySymbol')}{Number(stats.totalRevenue || 0).toFixed(2)}</p>
                   </div>
                   <div className="p-3 bg-green-50 dark:bg-green-900/20 rounded-lg">
                     <DollarSign className="w-6 h-6 text-green-600 dark:text-green-400" />
@@ -228,7 +228,7 @@ export default function TransactionManagement({ transactions, filters, stats, us
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm font-medium text-zinc-600 dark:text-zinc-400">{t('totalTransactions')}</p>
-                    <p className="text-3xl font-bold text-black dark:text-white mt-2">{stats.totalTransactions}</p>
+                    <p className="text-3xl text-black dark:text-white mt-2">{stats.totalTransactions}</p>
                   </div>
                   <div className="p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
                     <CreditCard className="w-6 h-6 text-blue-600 dark:text-blue-400" />
@@ -239,7 +239,7 @@ export default function TransactionManagement({ transactions, filters, stats, us
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm font-medium text-zinc-600 dark:text-zinc-400">{t('completed')}</p>
-                    <p className="text-3xl font-bold text-black dark:text-white mt-2">
+                    <p className="text-3xl text-black dark:text-white mt-2">
                       {stats.completedTransactions}
                     </p>
                   </div>

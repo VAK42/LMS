@@ -1,6 +1,6 @@
 import { X, Upload, FileText, Video, Loader2, Check } from 'lucide-react';
-import { useState, useEffect } from 'react';
 import { useToast } from '../../contexts/ToastContext';
+import { useState, useEffect } from 'react';
 import TiptapEditor from './TiptapEditor';
 import useTranslation from '../../hooks/useTranslation';
 interface Props {
@@ -129,53 +129,53 @@ export default function LessonContentEditor({ isOpen, onClose, lesson, onSaved }
   if (!isOpen) return null;
   return (
     <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4">
-      <div className="bg-white dark:bg-zinc-900 rounded-2xl max-w-3xl w-full max-h-[90vh] overflow-hidden shadow-2xl flex flex-col">
-        <div className="flex items-center justify-between p-6 border-b border-zinc-200 dark:border-zinc-800">
+      <div className="bg-white dark:bg-zinc-900 rounded border border-green-950 dark:border-white max-w-3xl w-full max-h-[90vh] overflow-hidden flex flex-col">
+        <div className="flex items-center justify-between p-6 border-b border-green-950 dark:border-white">
           <div>
-            <h2 className="text-xl font-bold text-black dark:text-white">{t('editLessonContent')}</h2>
+            <h2 className="text-xl font-serif text-green-950 dark:text-white">{t('editLessonContent')}</h2>
             <p className="text-sm text-zinc-500">{lesson.lessonTitle}</p>
           </div>
-          <button onClick={onClose} className="p-2 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-full cursor-pointer">
+          <button onClick={onClose} className="p-2 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded cursor-pointer">
             <X className="w-5 h-5 text-zinc-500" />
           </button>
         </div>
         <div className="flex-1 overflow-y-auto p-6">
           {loading ? (
             <div className="flex items-center justify-center py-12">
-              <Loader2 className="w-8 h-8 animate-spin text-blue-600" />
+              <Loader2 className="w-8 h-8 animate-spin text-green-950 dark:text-white" />
             </div>
           ) : lesson.contentType === 'text' ? (
             <div className="space-y-4">
-              <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300">{t('lessonContent')}</label>
+              <label className="block text-sm text-green-950 dark:text-white">{t('lessonContent')}</label>
               <TiptapEditor content={htmlContent} onChange={setHtmlContent} />
             </div>
           ) : (
             <div className="space-y-4">
               {currentContent?.path && (
-                <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg p-4">
+                <div className="bg-green-50 dark:bg-green-900/20 border border-green-950 dark:border-white rounded p-4">
                   <div className="flex items-center gap-3">
-                    <Check className="w-5 h-5 text-green-600" />
+                    <Check className="w-5 h-5 text-green-950 dark:text-white" />
                     <div>
-                      <p className="font-medium text-green-700 dark:text-green-300">{t('currentFile')}</p>
-                      <p className="text-sm text-green-600">{currentContent.filename}</p>
+                      <p className="font-medium text-green-950 dark:text-white">{t('currentFile')}</p>
+                      <p className="text-sm text-green-700 dark:text-green-400">{currentContent.filename}</p>
                     </div>
                   </div>
                 </div>
               )}
-              <div className="border-2 border-dashed border-zinc-300 dark:border-zinc-700 rounded-xl p-8 text-center">
+              <div className="border-2 border-dashed border-green-950 dark:border-white rounded p-8 text-center">
                 {lesson.contentType === 'video' ? (
                   <Video className="w-12 h-12 text-zinc-400 mx-auto mb-4" />
                 ) : (
                   <FileText className="w-12 h-12 text-zinc-400 mx-auto mb-4" />
                 )}
-                <p className="text-lg font-medium text-zinc-700 dark:text-zinc-300 mb-2">
+                <p className="text-lg font-medium text-green-950 dark:text-white mb-2">
                   {selectedFile ? selectedFile.name : t('uploadVideoOrPdf')}
                 </p>
                 <p className="text-sm text-zinc-500 mb-2">
                   {lesson.contentType === 'video' ? t('supportedFormatsVideo') : t('supportedFormatsPdf')}
                 </p>
                 {lesson.contentType === 'video' && videoDuration && (
-                  <p className="text-sm font-medium text-blue-600 mb-4">{t('videoLength', { duration: videoDuration })}</p>
+                  <p className="text-sm font-medium text-green-700 dark:text-green-400 mb-4">{t('videoLength', { duration: videoDuration })}</p>
                 )}
                 <input
                   type="file"
@@ -186,7 +186,7 @@ export default function LessonContentEditor({ isOpen, onClose, lesson, onSaved }
                 />
                 <label
                   htmlFor="fileUpload"
-                  className="inline-flex items-center gap-2 px-6 py-3 border border-green-600 text-green-600 rounded-lg hover:bg-green-900 hover:text-white cursor-pointer"
+                  className="inline-flex items-center gap-2 px-6 py-3 border border-green-950 dark:border-white text-green-950 dark:text-white rounded hover:bg-green-950 hover:text-white dark:hover:bg-white dark:hover:text-green-950 cursor-pointer transition-colors"
                 >
                   <Upload className="w-5 h-5" />
                   {t('chooseFile')}
@@ -195,14 +195,14 @@ export default function LessonContentEditor({ isOpen, onClose, lesson, onSaved }
             </div>
           )}
         </div>
-        <div className="flex gap-4 p-6 border-t border-zinc-200 dark:border-zinc-800">
-          <button onClick={onClose} className="flex-1 px-4 py-3 border border-zinc-300 dark:border-zinc-700 text-zinc-700 dark:text-zinc-300 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 cursor-pointer">{t('cancel')}</button>
+        <div className="flex gap-4 p-6 border-t border-green-950 dark:border-white">
+          <button onClick={onClose} className="flex-1 px-4 py-3 border border-green-950 dark:border-white text-green-950 dark:text-white rounded hover:bg-zinc-100 dark:hover:bg-zinc-800 cursor-pointer transition-colors">{t('cancel')}</button>
           {lesson.contentType === 'text' ? (
-            <button onClick={handleSaveText} disabled={saving || !htmlContent.trim()} className="flex-1 px-4 py-3 text-green-600 border-green-600 border rounded-lg hover:bg-green-900 hover:text-white disabled:opacity-50 cursor-pointer">
+            <button onClick={handleSaveText} disabled={saving || !htmlContent.trim()} className="flex-1 px-4 py-3 bg-green-950 dark:bg-white text-white dark:text-green-950 border border-green-950 dark:border-white rounded hover:bg-white hover:text-green-950 dark:hover:bg-green-950 dark:hover:text-white dark:hover:border-green-950 disabled:opacity-50 cursor-pointer transition-colors">
               {saving ? t('saving') : t('saveContent')}
             </button>
           ) : (
-            <button onClick={handleUploadFile} disabled={saving || !selectedFile} className="flex-1 px-4 py-3 text-green-600 border-green-600 border rounded-lg hover:bg-green-900 hover:text-white disabled:opacity-50 cursor-pointer">
+            <button onClick={handleUploadFile} disabled={saving || !selectedFile} className="flex-1 px-4 py-3 bg-green-950 dark:bg-white text-white dark:text-green-950 border border-green-950 dark:border-white rounded hover:bg-white hover:text-green-950 dark:hover:bg-green-950 dark:hover:text-white dark:hover:border-green-950 disabled:opacity-50 cursor-pointer transition-colors">
               {saving ? t('uploading') : t('uploadFile')}
             </button>
           )}

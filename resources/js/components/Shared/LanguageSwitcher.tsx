@@ -27,7 +27,7 @@ export default function LanguageSwitcher() {
     <div className="relative cursor-pointer">
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-zinc-700 dark:text-zinc-300 hover:text-black dark:hover:text-white transition-colors cursor-pointer"
+        className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-zinc-600 hover:text-green-950 dark:text-zinc-300 dark:hover:text-white transition-colors cursor-pointer rounded border border-transparent hover:border-green-950 dark:hover:border-white"
       >
         <Globe className="w-4 h-4" />
         <span className="uppercase">{locale}</span>
@@ -38,12 +38,12 @@ export default function LanguageSwitcher() {
             className="fixed inset-0 z-40"
             onClick={() => setIsOpen(false)}
           />
-          <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 shadow-lg z-50 py-1">
+          <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 shadow-lg z-50 py-1 rounded">
             {languages.map((lang) => (
               <button
                 key={lang.code}
                 onClick={() => handleLanguageChange(lang.code)}
-                className={`w-full text-left px-4 py-2 text-sm hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors cursor-pointer ${locale === lang.code ? 'font-bold text-black dark:text-white' : 'text-zinc-600 dark:text-zinc-400'}`}
+                className={`w-full text-left px-4 py-2 text-sm hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors cursor-pointer ${locale === lang.code ? 'font-medium text-green-950 dark:text-white' : 'text-zinc-600 dark:text-zinc-400'}`}
               >
                 {lang.label}
               </button>
